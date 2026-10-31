@@ -905,7 +905,7 @@
     
     
     <span class="ua-loader-orbit-bg ua-loader-orbit-bg-three" aria-hidden="true"></span>
-    <span class="ua-loader-version">v82</span>
+    <span class="ua-loader-version">v87</span>
     <svg class="ua-loader-flight-stage" viewBox="0 0 400 900" preserveAspectRatio="none" fill="none" aria-hidden="true" focusable="false"><path id="ua-loader-flight-path" d="M 370 105 C 325 155 292 230 226 202 C 165 176 174 99 111 127 C 48 153 28 230 78 282 C 128 333 218 292 286 332 C 354 372 378 437 312 481 C 246 525 155 445 89 486 C 23 526 35 611 104 648 C 173 685 250 590 321 623 C 392 656 375 737 312 779 C 249 821 179 746 121 780 C 63 814 53 850 28 885"/><path class="ua-loader-flight-trail" pathLength="1" d="M 370 105 C 325 155 292 230 226 202 C 165 176 174 99 111 127 C 48 153 28 230 78 282 C 128 333 218 292 286 332 C 354 372 378 437 312 481 C 246 525 155 445 89 486 C 23 526 35 611 104 648 C 173 685 250 590 321 623 C 392 656 375 737 312 779 C 249 821 179 746 121 780 C 63 814 53 850 28 885"/><g class="ua-loader-flight-aircraft"><animateMotion begin="0s" dur="12s" repeatCount="indefinite" rotate="auto" calcMode="linear"><mpath href="#ua-loader-flight-path"/></animateMotion><use href="#ua-airplane-symbol" x="-12" y="-12" width="24" height="24"/></g></svg>
     
     <div class="ua-loader-center">
@@ -1522,6 +1522,19 @@
       ${pwaInstallHelpOpen && !deferredPWAInstallPrompt ? pwaInstallHelpHTML() : ""}
     </div>`;
   }
+  async function refreshLoaderVersionLabel() {
+    try {
+      const response = await fetch("./service-worker.js?version-check=" + Date.now(), { cache: "no-store" });
+      if (!response.ok) return;
+      const source = await response.text();
+      const match = source.match(/const\s+CACHE_NAME\s*=\s*["']urlaubassistent-shell-v(\d+)["']/);
+      if (!match) return;
+      document.querySelectorAll(".ua-loader-version").forEach((label) => {
+        label.textContent = "v" + match[1];
+      });
+    } catch (_) {}
+  }
+
   function startLoaderFlightAnimation() {
     const stage = root.querySelector(".ua-loader-flight-stage");
     if (!stage) return;
@@ -1571,6 +1584,7 @@
     if (checking) {
       root.innerHTML = loadingHTML();
       lucide.createIcons();
+      refreshLoaderVersionLabel();
       startLoaderFlightAnimation();
       return;
     }
@@ -1896,8 +1910,7 @@
     html += '<h2 class="text-2xl font-bold tracking-tight md:text-4xl">' + esc(trip.name) + '</h2>';
     html += '<p class="mt-2 flex items-center gap-2 text-sm text-white/80 md:text-base">' + icon("map-pin", "h-4 w-4 shrink-0") + ' ' + esc(trip.destination || "Ziel noch nicht eingetragen") + '</p>';
     html += '<p class="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-white/70">' + icon("calendar-days", "h-4 w-4") + ' ' + shortDate(trip.startDate) + ' – ' + shortDate(trip.endDate) + '</p>';
-    html += '<div class="mt-5 flex flex-wrap gap-2"><button type="button" data-action="select-dashboard-trip" data-id="' + esc(trip.id) + '" class="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-100">' + icon("arrow-up-right", "h-4 w-4") + ' Reise öffnen</button>';
-    html += '<button type="button" data-action="navigate" data-page="trips" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15">' + icon("map", "h-4 w-4") + ' Alle Urlaube</button></div></div>';
+    html += '<div class="mt-5 flex flex-wrap gap-2"><button type="button" data-action="navigate" data-page="trips" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15">' + icon("map", "h-4 w-4") + ' Alle Urlaube</button></div></div>';
     html += '<div class="relative flex shrink-0 items-center gap-3 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 backdrop-blur-md sm:min-w-[155px] sm:flex-col sm:items-center sm:justify-center sm:gap-1 sm:py-5"><div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10">' + icon(tripInProgress ? "sun" : "calendar-clock", "h-6 w-6") + '</div><div class="text-center"><div class="text-lg font-bold leading-tight">' + countdownNumber + '</div><div class="mt-1 text-xs leading-5 text-white/70">' + countdownSub + '</div></div></div></div>';
     html += '<div class="relative z-10 mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3"><div class="rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md p-3.5"><div class="text-xs font-medium text-white/65">Bisher ausgegeben</div><div class="mt-1 truncate text-lg font-bold">' + money(totalsData.total) + '</div></div>';
     html += '<div class="rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md p-3.5"><div class="text-xs font-medium text-white/65">Restbudget</div><div class="mt-1 truncate text-lg font-bold">' + money(totalsData.remaining) + '</div></div>';
@@ -6447,8 +6460,11 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=86").catch(() => {});
+      refreshLoaderVersionLabel();
+      navigator.serviceWorker.register("./service-worker.js?v=87").catch(() => {});
     }, { once: true });
+  } else {
+    window.addEventListener("load", refreshLoaderVersionLabel, { once: true });
   }
 
   const params=new URLSearchParams(location.search);
