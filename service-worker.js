@@ -1,4 +1,4 @@
-const CACHE_NAME = 'urlaubassistent-shell-v76';
+const CACHE_NAME = 'urlaubassistent-shell-v77';
 const RUNTIME_CACHE_NAME = 'urlaubassistent-runtime-assets-v1';
 const APP_SHELL = [
   './',
