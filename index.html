@@ -1910,7 +1910,7 @@
     html += '<h2 class="text-2xl font-bold tracking-tight md:text-4xl">' + esc(trip.name) + '</h2>';
     html += '<p class="mt-2 flex items-center gap-2 text-sm text-white/80 md:text-base">' + icon("map-pin", "h-4 w-4 shrink-0") + ' ' + esc(trip.destination || "Ziel noch nicht eingetragen") + '</p>';
     html += '<p class="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-white/70">' + icon("calendar-days", "h-4 w-4") + ' ' + shortDate(trip.startDate) + ' – ' + shortDate(trip.endDate) + '</p>';
-    html += '<div class="mt-5 flex flex-wrap gap-2"><button type="button" data-action="navigate" data-page="trips" class="relative z-20 isolate inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white shadow-sm backdrop-blur-md transition hover:bg-white/15" style="-webkit-backdrop-filter:blur(12px) saturate(150%);backdrop-filter:blur(12px) saturate(150%);box-shadow:inset 0 1px 0 rgba(255,255,255,.12)">' + icon("map", "h-4 w-4") + ' Alle Urlaube</button></div></div>';
+    html += '<div class="mt-5 flex flex-wrap gap-2"><button type="button" data-action="navigate" data-page="trips" class="relative z-20 inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white backdrop-blur-md transition hover:bg-white/15">' + icon("map", "h-4 w-4") + ' Alle Urlaube</button></div></div>';
     html += '<div class="relative flex shrink-0 items-center gap-3 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 backdrop-blur-md sm:min-w-[155px] sm:flex-col sm:items-center sm:justify-center sm:gap-1 sm:py-5"><div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10">' + icon(tripInProgress ? "sun" : "calendar-clock", "h-6 w-6") + '</div><div class="text-center"><div class="text-lg font-bold leading-tight">' + countdownNumber + '</div><div class="mt-1 text-xs leading-5 text-white/70">' + countdownSub + '</div></div></div></div>';
     html += '<div class="relative z-10 mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3"><div class="rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md p-3.5"><div class="text-xs font-medium text-white/65">Bisher ausgegeben</div><div class="mt-1 truncate text-lg font-bold">' + money(totalsData.total) + '</div></div>';
     html += '<div class="rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md p-3.5"><div class="text-xs font-medium text-white/65">Restbudget</div><div class="mt-1 truncate text-lg font-bold">' + money(totalsData.remaining) + '</div></div>';
@@ -6461,7 +6461,7 @@
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
       refreshLoaderVersionLabel();
-      navigator.serviceWorker.register("./service-worker.js?v=91").catch(() => {});
+      navigator.serviceWorker.register("./service-worker.js?v=92").catch(() => {});
     }, { once: true });
   } else {
     window.addEventListener("load", refreshLoaderVersionLabel, { once: true });
