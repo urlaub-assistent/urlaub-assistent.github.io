@@ -2918,6 +2918,9 @@
     const packPercent = packlist.length ? Math.round(packDone/packlist.length*100) : 0;
     const todoPercent = todos.length ? Math.round(todoDone/todos.length*100) : 0;
     const people = Array.isArray(trip.people) ? trip.people : [];
+    const openPacking = packlist.filter(function(item){return !item.done;}).slice(0,4);
+    const openTasks = todos.filter(function(item){return !item.done;}).slice(0,4);
+    const recentRows = rows.slice().sort(function(a,b){return String(b.date||"").localeCompare(String(a.date||""));}).slice(0,4);
     const categoryTotals = {};
     rows.forEach(function(row){
       const category = String(row.category || "Sonstiges");
@@ -2925,6 +2928,14 @@
     });
     const categories = Object.entries(categoryTotals).sort(function(a,b){return b[1]-a[1];}).slice(0,3);
     const dateText = trip.startDate && trip.endDate ? shortDate(trip.startDate) + " – " + shortDate(trip.endDate) : "Reisedaten noch offen";
+    const listMarkup = function(items,field,emptyText) {
+      return items.length
+        ? '<ul class="mt-2 space-y-1.5">' + items.map(function(item){return '<li class="flex items-start gap-1.5 text-[11px] leading-4 text-slate-600"><span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400"></span><span class="min-w-0 break-words">' + esc(item[field] || item.name || item.title || "Eintrag") + '</span></li>';}).join("") + '</ul>'
+        : '<p class="mt-2 text-[11px] leading-4 text-slate-400">' + emptyText + '</p>';
+    };
+    const recentMarkup = recentRows.length
+      ? recentRows.map(function(item){return '<div class="flex items-center justify-between gap-3 border-b border-slate-100 py-2 last:border-0"><div class="min-w-0"><div class="truncate text-[11px] font-medium text-slate-700">' + esc(item.title || "Ausgabe") + '</div><div class="text-[10px] text-slate-400">' + esc(item.category || "Sonstiges") + (item.date ? " · " + esc(shortDate(item.date)) : "") + '</div></div><div class="shrink-0 text-xs font-bold text-slate-800">' + money(Number(item.amount)||0) + '</div></div>';}).join("")
+      : '<p class="py-2 text-[11px] text-slate-400">Noch keine Ausgaben erfasst.</p>';
 
     function progressCard(label,done,count,percent,color) {
       return '<div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">' +
@@ -2952,7 +2963,12 @@
       '<div class="mt-3 rounded-2xl border border-slate-200 p-3"><div class="flex items-center justify-between gap-3 text-xs"><span class="font-semibold text-slate-600">Budget genutzt</span><span class="font-bold text-slate-800">' + (budget > 0 ? Math.round(total/budget*100) + "%" : "Kein Budget gesetzt") + '</span></div><div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full ' + (remaining >= 0 ? "bg-emerald-400" : "bg-rose-400") + '" style="width:' + budgetPercent + '%"></div></div></div>' +
       '<div class="mt-3 grid grid-cols-2 gap-2">' + progressCard("Packliste",packDone,packlist.length,packPercent,"bg-slate-700") + progressCard("To-dos",todoDone,todos.length,todoPercent,"bg-emerald-500") + '</div>' +
       '<div class="mt-3 rounded-2xl border border-slate-200 px-3 py-2.5"><div class="flex items-center justify-between gap-2"><span class="text-xs font-bold text-slate-700">Größte Ausgabenkategorien</span><span class="text-[10px] text-slate-400">' + rows.length + ' Einträge</span></div>' + categoryMarkup + '</div>' +
-      '<div class="mt-3 flex items-center gap-2 text-[10px] text-slate-500">' + icon("users","h-3.5 w-3.5") + ' ' + people.length + ' ' + (people.length === 1 ? "Person" : "Personen") + ' im Urlaub</div>' +
+      '<div class="mt-3 grid grid-cols-2 gap-2">' +
+        '<div class="rounded-2xl border border-slate-200 p-3"><div class="text-xs font-bold text-slate-700">Noch einzupacken</div>' + listMarkup(openPacking,"text","Alles erledigt oder noch leer.") + '</div>' +
+        '<div class="rounded-2xl border border-slate-200 p-3"><div class="text-xs font-bold text-slate-700">Offene To-dos</div>' + listMarkup(openTasks,"text","Keine offenen Aufgaben.") + '</div>' +
+      '</div>' +
+      '<div class="mt-3 rounded-2xl border border-slate-200 px-3 py-2.5"><div class="text-xs font-bold text-slate-700">Letzte Ausgaben</div>' + recentMarkup + '</div>' +
+      '<div class="mt-3 flex items-start gap-2 text-[10px] leading-4 text-slate-500">' + icon("users","h-3.5 w-3.5 shrink-0") + '<span>' + (people.length ? esc(people.map(function(person){return person.name;}).filter(Boolean).join(", ")) : "Noch keine Mitreisenden eingetragen") + '</span></div>' +
     '</section>';
   }
 
