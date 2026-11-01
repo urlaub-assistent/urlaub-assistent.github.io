@@ -893,22 +893,23 @@
     }
 
 
-    /* The loader trail stays fully hidden until the aircraft actually takes off. */
+    /* Keep the route invisible before takeoff; once started, reveal the trail as it draws. */
     #ua-loader-flight-path { stroke: none !important; }
-    .ua-loader-flight-trail {
-      stroke-dasharray: 1 !important;
-      stroke-dashoffset: 1 !important;
-      opacity: 0 !important;
-      animation: none !important;
+    .ua-loader-flight-stage .ua-loader-flight-trail {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      opacity: 0;
+      animation: none;
+      filter: none !important;
     }
     .ua-loader-flight-stage.ua-flight-started .ua-loader-flight-trail {
-      animation: ua-loader-trail-draw 12s linear forwards !important;
+      animation: ua-loader-trail-draw 12s linear forwards;
     }
     @media (prefers-reduced-motion: reduce) {
       .ua-loader-flight-stage.ua-flight-started .ua-loader-flight-trail {
-        animation: none !important;
-        stroke-dashoffset: 0 !important;
-        opacity: .20 !important;
+        animation: none;
+        stroke-dashoffset: 0;
+        opacity: .20;
       }
     }
 
@@ -925,7 +926,7 @@
     
     
     <span class="ua-loader-orbit-bg ua-loader-orbit-bg-three" aria-hidden="true"></span>
-    <span class="ua-loader-version">v96</span>
+    <span class="ua-loader-version">v98</span>
     <svg class="ua-loader-flight-stage" viewBox="0 0 400 900" preserveAspectRatio="none" fill="none" aria-hidden="true" focusable="false"><path id="ua-loader-flight-path" d="M 370 105 C 325 155 292 230 226 202 C 165 176 174 99 111 127 C 48 153 28 230 78 282 C 128 333 218 292 286 332 C 354 372 378 437 312 481 C 246 525 155 445 89 486 C 23 526 35 611 104 648 C 173 685 250 590 321 623 C 392 656 375 737 312 779 C 249 821 179 746 121 780 C 63 814 53 850 28 885"/><path class="ua-loader-flight-trail" pathLength="1" d="M 370 105 C 325 155 292 230 226 202 C 165 176 174 99 111 127 C 48 153 28 230 78 282 C 128 333 218 292 286 332 C 354 372 378 437 312 481 C 246 525 155 445 89 486 C 23 526 35 611 104 648 C 173 685 250 590 321 623 C 392 656 375 737 312 779 C 249 821 179 746 121 780 C 63 814 53 850 28 885"/><g class="ua-loader-flight-aircraft"><animateMotion begin="indefinite" dur="12s" repeatCount="indefinite" rotate="auto" calcMode="linear"><mpath href="#ua-loader-flight-path"/></animateMotion><use href="#ua-airplane-symbol" x="-12" y="-12" width="24" height="24"/></g></svg>
     
     <div class="ua-loader-center">
@@ -1699,7 +1700,7 @@
   function loadingHTML() {
     return '<div class="ua-status-screen ua-loading-screen fixed inset-0 z-[200] flex min-h-screen items-center justify-center overflow-hidden px-6" role="status" aria-label="Urlaubassistent wird geladen">' +
       '<span class="ua-loader-orbit-bg ua-loader-orbit-bg-three" aria-hidden="true"></span>' +
-      '<span class="ua-loader-version">v96</span>' +
+      '<span class="ua-loader-version">v98</span>' +
       '<svg class="ua-loader-flight-stage" viewBox="0 0 400 900" preserveAspectRatio="none" fill="none" aria-hidden="true" focusable="false"><path id="ua-loader-flight-path" d="M 370 105 C 325 155 292 230 226 202 C 165 176 174 99 111 127 C 48 153 28 230 78 282 C 128 333 218 292 286 332 C 354 372 378 437 312 481 C 246 525 155 445 89 486 C 23 526 35 611 104 648 C 173 685 250 590 321 623 C 392 656 375 737 312 779 C 249 821 179 746 121 780 C 63 814 53 850 28 885"/><path class="ua-loader-flight-trail" pathLength="1" d="M 370 105 C 325 155 292 230 226 202 C 165 176 174 99 111 127 C 48 153 28 230 78 282 C 128 333 218 292 286 332 C 354 372 378 437 312 481 C 246 525 155 445 89 486 C 23 526 35 611 104 648 C 173 685 250 590 321 623 C 392 656 375 737 312 779 C 249 821 179 746 121 780 C 63 814 53 850 28 885"/><g class="ua-loader-flight-aircraft"><animateMotion begin="indefinite" dur="12s" repeatCount="indefinite" rotate="auto" calcMode="linear"><mpath href="#ua-loader-flight-path"/></animateMotion><use href="#ua-airplane-symbol" x="-12" y="-12" width="24" height="24"/></g></svg>' +
       '' +
       '<div class="ua-loader-center"><div class="ua-loader-icon-shell"><span class="ua-loader-orbit-ring" aria-hidden="true"></span><img src="./icon-192.png" alt="Urlaubassistent" width="88" height="88" class="ua-loader-logo" /></div>' +
@@ -2914,11 +2915,11 @@
   function aiTripOverviewHTML() {
     const trip = activeTrip();
     if (!trip) {
-      return '<section class="overflow-hidden rounded-[2rem] bg-gradient-to-br from-indigo-950 via-blue-900 to-cyan-800 p-6 text-white shadow-xl">' +
-        '<div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20">' + icon("map-pin","h-6 w-6") + '</div>' +
-        '<div class="mt-4 text-xs font-bold uppercase tracking-[.16em] text-cyan-100/80">Dein Reise-Dashboard</div>' +
-        '<h3 class="mt-1 text-2xl font-bold">Noch kein Urlaub ausgewählt</h3>' +
-        '<p class="mt-2 text-sm leading-6 text-white/75">Wähle zuerst eine Reise aus. Dann erscheinen hier dein Budget, deine Ausgaben und alle wichtigen Urlaubsinfos.</p></section>';
+      return '<section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">' +
+        '<div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">' + icon("map-pin","h-6 w-6") + '</div>' +
+        '<div class="mt-4 text-xs font-bold uppercase tracking-[.16em] text-slate-400">Dein Reise-Dashboard</div>' +
+        '<h3 class="mt-1 text-2xl font-bold text-slate-900">Noch kein Urlaub ausgewählt</h3>' +
+        '<p class="mt-2 text-sm leading-6 text-slate-500">Wähle zuerst eine Reise aus. Danach erscheinen hier dein Budget, deine Ausgaben und alle wichtigen Urlaubsinfos.</p></section>';
     }
 
     const expenses = Array.isArray(trip.expenses) ? trip.expenses : [];
@@ -2935,25 +2936,38 @@
     const packOpen = packlist.filter(function(item){return !item.done;}).slice(0,4);
     const todoOpen = todos.filter(function(item){return !item.done;}).slice(0,4);
     const people = Array.isArray(trip.people) ? trip.people : [];
-    const recent = rows.slice().sort(function(a,b){return String(b.date||"").localeCompare(String(a.date||""));}).slice(0,4);
+    const recent = rows.slice().sort(function(a,b){return String(b.date||"").localeCompare(String(a.date||""));}).slice(0,6);
     const categoryTotals = {};
     rows.forEach(function(row){
       const category = String(row.category||"Sonstiges");
       categoryTotals[category]=(categoryTotals[category]||0)+Math.max(0,Number(row.amount)||0);
     });
-    const categories = Object.entries(categoryTotals).sort(function(a,b){return b[1]-a[1];}).slice(0,4);
+    const categories = Object.entries(categoryTotals).sort(function(a,b){return b[1]-a[1];});
     const dateText = trip.startDate&&trip.endDate ? shortDate(trip.startDate)+" – "+shortDate(trip.endDate) : "Reisedaten noch offen";
+    const palette = [
+      {dot:"bg-blue-500",bar:"bg-blue-500",soft:"bg-blue-50",text:"text-blue-700"},
+      {dot:"bg-violet-500",bar:"bg-violet-500",soft:"bg-violet-50",text:"text-violet-700"},
+      {dot:"bg-emerald-500",bar:"bg-emerald-500",soft:"bg-emerald-50",text:"text-emerald-700"},
+      {dot:"bg-amber-500",bar:"bg-amber-500",soft:"bg-amber-50",text:"text-amber-700"},
+      {dot:"bg-cyan-500",bar:"bg-cyan-500",soft:"bg-cyan-50",text:"text-cyan-700"},
+      {dot:"bg-rose-500",bar:"bg-rose-500",soft:"bg-rose-50",text:"text-rose-700"}
+    ];
 
-    function statCard(label,value,sub,gradient,ico) {
-      return '<div class="min-w-0 rounded-2xl border border-white/20 bg-white/10 p-3 backdrop-blur-md">' +
-        '<div class="flex items-center gap-1.5 text-[10px] font-semibold text-white/65">' + icon(ico,"h-3.5 w-3.5") + label + '</div>' +
-        '<div class="mt-1 truncate text-lg font-extrabold tracking-tight text-white">' + value + '</div>' +
-        '<div class="mt-0.5 text-[10px] text-white/55">' + sub + '</div></div>';
+    function statCard(label,value,sub,ico,tone) {
+      const tones = {
+        blue:"bg-blue-50 text-blue-700",
+        violet:"bg-violet-50 text-violet-700",
+        emerald:"bg-emerald-50 text-emerald-700"
+      };
+      return '<div class="min-w-0 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm">' +
+        '<div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ' + tones[tone] + '">' + icon(ico,"h-4 w-4") + '</span><span class="truncate text-[11px] font-semibold text-slate-500">' + label + '</span></div>' +
+        '<div class="mt-2 truncate text-lg font-extrabold tracking-tight text-slate-900">' + value + '</div>' +
+        '<div class="mt-0.5 text-[10px] text-slate-400">' + sub + '</div></div>';
     }
-    function progressCard(label,done,count,percent,gradient,ico) {
-      return '<div class="rounded-2xl border border-slate-100 bg-white p-3.5 shadow-sm">' +
-        '<div class="flex items-center justify-between gap-2"><span class="flex items-center gap-1.5 text-xs font-bold text-slate-700">' + icon(ico,"h-4 w-4") + label + '</span><span class="text-xs font-extrabold text-slate-800">' + done + '/' + count + '</span></div>' +
-        '<div class="mt-3 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full ' + gradient + '" style="width:' + percent + '%"></div></div>' +
+    function progressCard(label,done,count,percent,color,ico) {
+      return '<div class="rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm">' +
+        '<div class="flex items-center justify-between gap-2"><span class="flex items-center gap-1.5 text-xs font-bold text-slate-700">' + icon(ico,"h-4 w-4 text-slate-500") + label + '</span><span class="text-xs font-extrabold text-slate-800">' + done + '/' + count + '</span></div>' +
+        '<div class="mt-3 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full ' + color + '" style="width:' + percent + '%"></div></div>' +
         '<div class="mt-1.5 text-[10px] font-medium text-slate-500">' + percent + '% erledigt</div></div>';
     }
     function shortList(items,field,empty,ico,color) {
@@ -2963,55 +2977,117 @@
       }).join("") + '</ul>';
     }
 
+    // Group all dated expenses by day for the spending curve.
+    const dailyTotals = {};
+    rows.forEach(function(row){
+      const day = String(row.date||"").slice(0,10);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return;
+      dailyTotals[day] = (dailyTotals[day]||0) + Math.max(0,Number(row.amount)||0);
+    });
+    const dailyEntries = Object.entries(dailyTotals).sort(function(a,b){return a[0].localeCompare(b[0]);}).slice(-12);
+    const chartW = 640, chartH = 238, plotL = 72, plotR = 615, plotT = 25, plotB = 174;
+    const chartMax = Math.max(1,...dailyEntries.map(function(entry){return entry[1];}));
+    const chartPoints = dailyEntries.map(function(entry,index){
+      const x = dailyEntries.length===1 ? (plotL+plotR)/2 : plotL + (plotR-plotL)*index/(dailyEntries.length-1);
+      const y = plotB - (entry[1]/chartMax)*(plotB-plotT);
+      return {x:x,y:y,date:entry[0],value:entry[1]};
+    });
+    function smoothCurve(points) {
+      if (!points.length) return "";
+      if (points.length===1) return "M "+points[0].x+" "+points[0].y;
+      let d = "M "+points[0].x+" "+points[0].y;
+      for(let i=0;i<points.length-1;i++){
+        const p0=points[i-1]||points[i], p1=points[i], p2=points[i+1], p3=points[i+2]||p2;
+        const cp1x=p1.x+(p2.x-p0.x)/6, cp1y=p1.y+(p2.y-p0.y)/6;
+        const cp2x=p2.x-(p3.x-p1.x)/6, cp2y=p2.y-(p3.y-p1.y)/6;
+        d += " C "+cp1x+" "+cp1y+", "+cp2x+" "+cp2y+", "+p2.x+" "+p2.y;
+      }
+      return d;
+    }
+    const curvePath = smoothCurve(chartPoints);
+    const areaPath = chartPoints.length
+      ? curvePath+" L "+chartPoints[chartPoints.length-1].x+" "+plotB+" L "+chartPoints[0].x+" "+plotB+" Z"
+      : "";
+    const gridValues = [chartMax,chartMax/2,0];
+    const gridMarkup = gridValues.map(function(value,index){
+      const y = plotT+(plotB-plotT)*index/2;
+      const label = new Intl.NumberFormat("de-DE",{maximumFractionDigits:0}).format(value)+" €";
+      return '<g><line x1="'+plotL+'" y1="'+y+'" x2="'+plotR+'" y2="'+y+'" stroke="#e2e8f0" stroke-dasharray="4 5"/><text x="'+(plotL-10)+'" y="'+(y+4)+'" text-anchor="end" font-size="11" fill="#94a3b8">'+esc(label)+'</text></g>';
+    }).join("");
+    const labelIndexes = chartPoints.map(function(point,index){return index;}).filter(function(index){
+      return index===0 || index===chartPoints.length-1 || index%(Math.max(1,Math.ceil(chartPoints.length/6)))===0;
+    });
+    const xLabels = labelIndexes.map(function(index){
+      const point=chartPoints[index];
+      return '<text x="'+point.x+'" y="205" text-anchor="middle" font-size="11" fill="#64748b">'+esc(shortDate(point.date))+'</text>';
+    }).join("");
+    const dotsMarkup = chartPoints.map(function(point){
+      return '<g><circle cx="'+point.x+'" cy="'+point.y+'" r="7" fill="#ffffff" stroke="#2563eb" stroke-width="3"/><circle cx="'+point.x+'" cy="'+point.y+'" r="2.3" fill="#2563eb"/></g>';
+    }).join("");
+    const chartMarkup = dailyEntries.length
+      ? '<svg viewBox="0 0 '+chartW+' '+chartH+'" role="img" aria-label="Kurvendiagramm der täglichen Urlaubsausgaben" class="block h-auto w-full overflow-visible">' +
+          gridMarkup +
+          '<path d="'+areaPath+'" fill="#dbeafe" opacity=".72"/>' +
+          '<path d="'+curvePath+'" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>' +
+          dotsMarkup + xLabels +
+        '</svg>'
+      : '<div class="flex min-h-40 flex-col items-center justify-center rounded-2xl bg-slate-50 px-5 text-center"><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">'+icon("chart-spline","h-5 w-5")+'</span><p class="mt-2 text-xs font-semibold text-slate-600">Noch keine datierten Ausgaben</p><p class="mt-1 text-[11px] text-slate-400">Sobald Ausgaben mit Datum eingetragen sind, erscheint hier dein täglicher Ausgabenverlauf.</p></div>';
+
     const categoryMarkup = categories.length ? categories.map(function(entry,index){
-      const colors = ["bg-indigo-500","bg-cyan-500","bg-violet-500","bg-emerald-500"];
+      const p = palette[index % palette.length];
       const share = total>0 ? Math.round(entry[1]/total*100) : 0;
-      return '<div class="py-2.5">' +
-        '<div class="flex items-center justify-between gap-2"><span class="truncate text-xs font-semibold text-slate-700">' + esc(entry[0]) + '</span><span class="shrink-0 text-xs font-bold text-slate-800">' + money(entry[1]) + '</span></div>' +
-        '<div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full ' + colors[index] + '" style="width:' + share + '%"></div></div></div>';
-    }).join("") : '<p class="py-3 text-xs text-slate-400">Noch keine Ausgaben erfasst.</p>';
+      return '<tr class="border-t border-slate-100">' +
+        '<td class="py-3 pr-2"><div class="flex items-center gap-2"><span class="h-2.5 w-2.5 shrink-0 rounded-full '+p.dot+'"></span><span class="text-xs font-semibold text-slate-700">'+esc(entry[0])+'</span></div></td>' +
+        '<td class="py-3 px-2 text-right text-xs font-bold tabular-nums text-slate-800">'+money(entry[1])+'</td>' +
+        '<td class="py-3 pl-2 text-right text-xs tabular-nums text-slate-500">'+share+'%</td>' +
+      '</tr>';
+    }).join("") : '<tr><td colspan="3" class="py-4 text-center text-xs text-slate-400">Noch keine Ausgaben erfasst.</td></tr>';
 
     const recentMarkup = recent.length ? recent.map(function(row){
-      return '<div class="flex items-center justify-between gap-3 border-b border-slate-100 py-2.5 last:border-0">' +
-        '<div class="flex min-w-0 items-center gap-2.5"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">' + icon("receipt","h-4 w-4") + '</span>' +
-        '<div class="min-w-0"><div class="truncate text-xs font-semibold text-slate-700">' + esc(row.title||"Ausgabe") + '</div><div class="text-[10px] text-slate-400">' + esc(row.category||"Sonstiges") + (row.date ? " · "+esc(shortDate(row.date)) : "") + '</div></div></div>' +
-        '<span class="shrink-0 text-xs font-bold text-slate-800">' + money(Number(row.amount)||0) + '</span></div>';
-    }).join("") : '<p class="py-3 text-xs text-slate-400">Noch keine Ausgaben erfasst.</p>';
+      const rowDate = row.date ? shortDate(row.date) : "–";
+      return '<tr class="border-t border-slate-100">' +
+        '<td class="py-3 pr-2 text-[10px] tabular-nums text-slate-500">'+esc(rowDate)+'</td>' +
+        '<td class="min-w-0 py-3 px-2"><div class="truncate text-xs font-semibold text-slate-700">'+esc(row.title||"Ausgabe")+'</div><div class="truncate text-[10px] text-slate-400">'+esc(row.category||"Sonstiges")+'</div></td>' +
+        '<td class="py-3 pl-2 text-right text-xs font-bold tabular-nums text-slate-800">'+money(Number(row.amount)||0)+'</td>' +
+      '</tr>';
+    }).join("") : '<tr><td colspan="3" class="py-4 text-center text-xs text-slate-400">Noch keine Ausgaben erfasst.</td></tr>';
 
     return '<div class="space-y-4">' +
-      '<section class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-indigo-950 via-blue-900 to-cyan-800 p-5 text-white shadow-xl">' +
-        '<div class="pointer-events-none absolute -right-10 -top-12 h-48 w-48 rounded-full border border-white/10"></div>' +
-        '<div class="pointer-events-none absolute -bottom-20 -left-14 h-48 w-48 rounded-full bg-cyan-400/10 blur-2xl"></div>' +
-        '<div class="relative z-10">' +
-          '<div class="flex items-center justify-between gap-3"><div class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.14em] text-cyan-100">' + icon("plane","h-3.5 w-3.5") + ' Dein ausgewählter Urlaub</div><span class="rounded-full bg-emerald-400/15 px-2.5 py-1 text-[10px] font-bold text-emerald-200">Aktiv</span></div>' +
-          '<h2 class="mt-4 break-words text-2xl font-extrabold tracking-tight">' + esc(trip.name) + '</h2>' +
-          '<div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/70"><span class="inline-flex items-center gap-1.5">' + icon("map-pin","h-3.5 w-3.5") + esc(trip.destination||"Ziel noch offen") + '</span><span class="inline-flex items-center gap-1.5">' + icon("calendar-days","h-3.5 w-3.5") + esc(dateText) + '</span></div>' +
-          '<div class="mt-5 grid grid-cols-3 gap-2">' +
-            statCard("Budget",budget>0?money(budget):"Offen","Geplant","from-indigo-500/30 to-blue-500/20","wallet") +
-            statCard("Ausgegeben",money(total),rows.length+" Einträge","from-cyan-500/30 to-blue-500/20","receipt") +
-            statCard("Übrig",budget>0?money(remaining):"–",remaining<0?"Budget überschritten":"Restbudget","from-emerald-500/30 to-teal-500/20","piggy-bank") +
-          '</div>' +
-          '<div class="mt-3 rounded-2xl border border-white/15 bg-white/10 p-3.5 backdrop-blur-md">' +
-            '<div class="flex items-center justify-between gap-3 text-xs"><span class="font-semibold text-white/80">Budget verwendet</span><span class="font-extrabold">' + (budget>0?Math.round(total/budget*100)+"%":"Noch kein Budget") + '</span></div>' +
-            '<div class="mt-2 h-2 overflow-hidden rounded-full bg-white/15"><div class="h-full rounded-full ' + (remaining>=0?"bg-gradient-to-r from-cyan-300 to-emerald-300":"bg-gradient-to-r from-rose-400 to-orange-300") + '" style="width:'+budgetPercent+'%"></div></div>' +
-          '</div>' +
+      '<section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">' +
+        '<div class="bg-slate-900 px-5 py-5 text-white">' +
+          '<div class="flex items-center justify-between gap-3"><div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.14em] text-white/80">'+icon("plane","h-3.5 w-3.5")+' Dein ausgewählter Urlaub</div><span class="rounded-full bg-emerald-400/15 px-2.5 py-1 text-[10px] font-bold text-emerald-200">Aktiv</span></div>' +
+          '<h2 class="mt-4 break-words text-2xl font-extrabold tracking-tight">'+esc(trip.name)+'</h2>' +
+          '<div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/70"><span class="inline-flex items-center gap-1.5">'+icon("map-pin","h-3.5 w-3.5")+esc(trip.destination||"Ziel noch offen")+'</span><span class="inline-flex items-center gap-1.5">'+icon("calendar-days","h-3.5 w-3.5")+esc(dateText)+'</span></div>' +
         '</div>' +
+        '<div class="grid grid-cols-3 gap-2 bg-slate-50 p-3 sm:gap-3 sm:p-4">' +
+          statCard("Budget",budget>0?money(budget):"Offen","Geplant","wallet","blue") +
+          statCard("Ausgegeben",money(total),rows.length+" Einträge","receipt","violet") +
+          statCard("Übrig",budget>0?money(remaining):"–",remaining<0?"Budget überschritten":"Restbudget","piggy-bank","emerald") +
+        '</div>' +
+        '<div class="px-4 pb-4 sm:px-5"><div class="flex items-center justify-between gap-3 text-xs"><span class="font-semibold text-slate-600">Budget verwendet</span><span class="font-extrabold tabular-nums text-slate-800">'+(budget>0?Math.round(total/budget*100)+"%":"Noch kein Budget")+'</span></div>' +
+          '<div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full '+(remaining>=0?"bg-emerald-500":"bg-rose-500")+'" style="width:'+budgetPercent+'%"></div></div></div>' +
       '</section>' +
-      '<section><div class="mb-2 flex items-center justify-between"><h3 class="text-sm font-extrabold text-slate-900">Dein Urlaubsfortschritt</h3><span class="text-[10px] font-medium text-slate-400">' + people.length + ' Mitreisende</span></div>' +
-        '<div class="grid grid-cols-2 gap-3">' +
-          progressCard("Packliste",packDone,packlist.length,packlist.length?Math.round(packDone/packlist.length*100):0,"bg-gradient-to-r from-blue-500 to-cyan-400","luggage") +
-          progressCard("To-dos",todoDone,todos.length,todos.length?Math.round(todoDone/todos.length*100):0,"bg-gradient-to-r from-emerald-500 to-teal-400","list-checks") +
-        '</div>' +
+      '<section class="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">' +
+        '<div class="flex items-center justify-between gap-3"><div><h3 class="text-sm font-extrabold text-slate-900">Ausgaben im Zeitverlauf</h3><p class="mt-0.5 text-[11px] text-slate-400">Tägliche Ausgaben · nach Buchungsdatum</p></div><span class="rounded-xl bg-blue-50 px-2.5 py-1.5 text-xs font-bold tabular-nums text-blue-700">'+money(total)+'</span></div>' +
+        '<div class="mt-3">'+chartMarkup+'</div>' +
+      '</section>' +
+      '<section class="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">' +
+        '<div class="mb-2 flex items-center justify-between gap-3"><div><h3 class="text-sm font-extrabold text-slate-900">Wofür wurde Geld ausgegeben?</h3><p class="mt-0.5 text-[11px] text-slate-400">Aufteilung nach Ausgabenkategorie</p></div>'+icon("chart-pie","h-5 w-5 text-slate-400")+'</div>' +
+        '<div class="overflow-x-auto"><table class="w-full border-collapse"><thead><tr class="text-left text-[10px] font-bold uppercase tracking-wider text-slate-400"><th class="py-2 pr-2">Kategorie</th><th class="px-2 py-2 text-right">Betrag</th><th class="py-2 pl-2 text-right">Anteil</th></tr></thead><tbody>'+categoryMarkup+'</tbody></table></div>' +
       '</section>' +
       '<section class="grid grid-cols-1 gap-3 sm:grid-cols-2">' +
-        '<div class="rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-4 shadow-sm"><div class="flex items-center gap-2 text-xs font-extrabold text-blue-900">' + icon("luggage","h-4 w-4") + ' Noch einzupacken</div>' + shortList(packOpen,"text","Alles erledigt oder noch keine Packliste.","check-circle-2","bg-blue-100 text-blue-700") + '</div>' +
-        '<div class="rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white p-4 shadow-sm"><div class="flex items-center gap-2 text-xs font-extrabold text-emerald-900">' + icon("list-checks","h-4 w-4") + ' Offene To-dos</div>' + shortList(todoOpen,"text","Keine offenen Aufgaben.","check-circle-2","bg-emerald-100 text-emerald-700") + '</div>' +
+        '<div class="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm"><div class="flex items-center gap-2 text-xs font-extrabold text-slate-800">'+icon("luggage","h-4 w-4 text-blue-600")+' Packliste</div>'+shortList(packOpen,"text","Alles erledigt oder noch keine Packliste.","check-circle-2","bg-blue-100 text-blue-700")+'<div class="mt-3 border-t border-slate-100 pt-2 text-[10px] font-semibold text-slate-400">'+packDone+' von '+packlist.length+' erledigt</div></div>' +
+        '<div class="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm"><div class="flex items-center gap-2 text-xs font-extrabold text-slate-800">'+icon("list-checks","h-4 w-4 text-emerald-600")+' Offene To-dos</div>'+shortList(todoOpen,"text","Keine offenen Aufgaben.","check-circle-2","bg-emerald-100 text-emerald-700")+'<div class="mt-3 border-t border-slate-100 pt-2 text-[10px] font-semibold text-slate-400">'+todoDone+' von '+todos.length+' erledigt</div></div>' +
       '</section>' +
-      '<section class="grid grid-cols-1 gap-3 sm:grid-cols-2">' +
-        '<div class="rounded-3xl border border-violet-100 bg-white p-4 shadow-sm"><div class="flex items-center gap-2 text-xs font-extrabold text-violet-900">' + icon("chart-pie","h-4 w-4") + ' Ausgaben nach Kategorie</div><div class="mt-2">' + categoryMarkup + '</div></div>' +
-        '<div class="rounded-3xl border border-cyan-100 bg-white p-4 shadow-sm"><div class="flex items-center gap-2 text-xs font-extrabold text-cyan-900">' + icon("receipt-text","h-4 w-4") + ' Letzte Ausgaben</div><div class="mt-2">' + recentMarkup + '</div></div>' +
+      '<section class="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">' +
+        '<div class="flex items-center justify-between gap-3"><div><h3 class="text-sm font-extrabold text-slate-900">Letzte Ausgaben</h3><p class="mt-0.5 text-[11px] text-slate-400">Die neuesten Buchungen deiner Reise</p></div>'+icon("receipt-text","h-5 w-5 text-slate-400")+'</div>' +
+        '<div class="mt-2 overflow-x-auto"><table class="w-full border-collapse"><thead><tr class="text-left text-[10px] font-bold uppercase tracking-wider text-slate-400"><th class="py-2 pr-2">Datum</th><th class="px-2 py-2">Eintrag</th><th class="py-2 pl-2 text-right">Betrag</th></tr></thead><tbody>'+recentMarkup+'</tbody></table></div>' +
       '</section>' +
-      '<div class="flex items-center gap-2 px-1 pb-1 text-[10px] text-slate-400">' + icon("users","h-3.5 w-3.5") + (people.length?esc(people.map(function(person){return person.name;}).filter(Boolean).join(", ")):"Noch keine Mitreisenden eingetragen") + '</div>' +
+      '<section class="grid grid-cols-2 gap-3">' +
+        progressCard("Packliste",packDone,packlist.length,packlist.length?Math.round(packDone/packlist.length*100):0,"bg-blue-500","luggage") +
+        progressCard("To-dos",todoDone,todos.length,todos.length?Math.round(todoDone/todos.length*100):0,"bg-emerald-500","list-checks") +
+      '</section>' +
+      '<div class="flex items-center gap-2 px-1 pb-1 text-[10px] text-slate-400">'+icon("users","h-3.5 w-3.5")+(people.length?esc(people.map(function(person){return person.name;}).filter(Boolean).join(", ")):"Noch keine Mitreisenden eingetragen")+'</div>' +
     '</div>';
   }
 
@@ -6621,7 +6697,7 @@
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
       refreshLoaderVersionLabel();
-      navigator.serviceWorker.register("./service-worker.js?v=97").catch(() => {});
+      navigator.serviceWorker.register("./service-worker.js?v=98").catch(() => {});
     }, { once: true });
   } else {
     window.addEventListener("load", refreshLoaderVersionLabel, { once: true });
