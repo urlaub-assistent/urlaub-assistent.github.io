@@ -1030,7 +1030,7 @@
   let aiMessages = [
     {
       role: "assistant",
-      content: "Hi! Ich bin dein Reise-KI-Assistent. Ich kann dir bei deinem Urlaub, Budget, Ausgaben, Packliste und Reiseplanung helfen."
+      content: "Hallo! Ich bin dein Urlaubsassistent. Ich kann deine gespeicherten Reisedaten zusammenfassen und Fragen zu Budget, Ausgaben, Packliste und To-dos beantworten."
     }
   ];
 
@@ -2724,13 +2724,16 @@
 
   function aiQuickPromptsHTML() {
     const prompts = [
-      "Finde 3 Reiseziele passend zu meinem Budget",
-      "Wie viel kann ich pro Tag noch ausgeben?",
-      "Wo können wir bei Ausgaben am meisten sparen?",
-      "Vergleiche meine bisherigen Urlaube"
+      "Fass meinen Urlaub zusammen",
+      "Wie viel Budget ist noch übrig?",
+      "Welche Kategorie kostet am meisten?",
+      "Was ist bei Packliste und To-dos noch offen?"
     ];
-    return `<div class="grid grid-cols-1 gap-2 sm:grid-cols-2">${prompts.map((prompt,i)=>`
-      <button type="button" data-action="ai-prompt" data-prompt="${esc(prompt)}" class="rounded-2xl border border-slate-200 bg-white/80 px-3 py-3 text-left text-xs font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-100/80 hover:text-slate-800">${icon(["map-pinned","chart-no-axes-combined","piggy-bank","calendar-check"][i],"h-4 w-4 text-slate-900")}<span class="ml-2 align-middle">${esc(prompt)}</span></button>`).join("")}</div>`;
+    const icons = ["clipboard-list","wallet-cards","chart-no-axes-combined","list-checks"];
+    return '<div class="grid grid-cols-1 gap-2 sm:grid-cols-2">' + prompts.map(function(prompt,index){
+      return '<button type="button" data-action="ai-prompt" data-prompt="' + esc(prompt) + '" class="rounded-2xl border border-slate-200 bg-white/85 px-3 py-3 text-left text-xs font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-100">' +
+        icon(icons[index],"h-4 w-4 text-slate-900") + '<span class="ml-2 align-middle">' + esc(prompt) + '</span></button>';
+    }).join("") + '</div>';
   }
 
   function aiMarkdownInline(value) {
@@ -2829,25 +2832,11 @@
 
   function aiFollowUpsFor(question) {
     const q = String(question || "").toLowerCase();
-    if (/(reiseziel|reiseziele|wohin|urlaubsideen|reiseideen|reisevorschlag|plane.*urlaub|urlaub.*plan)/i.test(q)) {
-      return [
-        "Vergleiche die Kosten der Ziele",
-        "Welches Ziel passt am besten zu 14 Tagen?",
-        "Erstelle einen konkreten Reiseplan"
-      ];
-    }
-    if (/(ausgab|kosten|budget|spar|teuer|geld|ausgegeben|vergleichen)/i.test(q)) {
-      return [
-        "Wie viel kann ich pro Tag noch ausgeben?",
-        "Welche Kategorie ist am teuersten?",
-        "Zeige mir 3 konkrete Spartipps"
-      ];
-    }
-    return [
-      "Passe den Vorschlag an mein Budget an",
-      "Mach mir einen Schritt-für-Schritt-Plan",
-      "Welche Angaben fehlen noch?"
-    ];
+    if (/(pack|koffer|einpack)/i.test(q)) return ["Welche To-dos sind noch offen?","Fass meinen Urlaub zusammen"];
+    if (/(budget|übrig|rest|tagessatz)/i.test(q)) return ["Welche Kategorie kostet am meisten?","Wie viel haben wir ausgegeben?"];
+    if (/(ausgab|kosten|kategor|geld)/i.test(q)) return ["Wie viel Budget ist noch übrig?","Fass meinen Urlaub zusammen"];
+    if (/(to.?do|aufgab|offen)/i.test(q)) return ["Was ist auf der Packliste noch offen?","Fass meinen Urlaub zusammen"];
+    return ["Wie viel Budget ist noch übrig?","Welche Kategorie kostet am meisten?","Was ist noch offen?"];
   }
 
   function aiFollowUpsHTML(followUps) {
@@ -2906,6 +2895,65 @@
         </a>`;
       }).join("")}</div>
     </div>`;
+  }
+
+  function aiTripOverviewHTML() {
+    const trip = activeTrip();
+    if (!trip) {
+      return '<section class="mb-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"><div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">' +
+        icon("map-pin","h-4 w-4") + ' Kein Urlaub ausgewählt</div><p class="mt-2 text-sm leading-6 text-slate-600">Wähle zuerst einen Urlaub aus. Danach zeigt dir diese Übersicht Budget, Ausgaben, Packliste und Aufgaben deiner Reise.</p></section>';
+    }
+
+    const expenses = Array.isArray(trip.expenses) ? trip.expenses : [];
+    const tolls = Array.isArray(trip.tolls) ? trip.tolls : [];
+    const rows = expenses.concat(tolls);
+    const total = rows.reduce(function(sum,row){ return sum + Math.max(0,Number(row.amount)||0); },0);
+    const budget = Math.max(0,Number(trip.budget)||0);
+    const remaining = budget-total;
+    const budgetPercent = budget > 0 ? Math.min(100,Math.max(0,total/budget*100)) : 0;
+    const packlist = Array.isArray(trip.packlist) ? trip.packlist : [];
+    const todos = Array.isArray(trip.todos) ? trip.todos : [];
+    const packDone = packlist.filter(function(item){return item.done;}).length;
+    const todoDone = todos.filter(function(item){return item.done;}).length;
+    const packPercent = packlist.length ? Math.round(packDone/packlist.length*100) : 0;
+    const todoPercent = todos.length ? Math.round(todoDone/todos.length*100) : 0;
+    const people = Array.isArray(trip.people) ? trip.people : [];
+    const categoryTotals = {};
+    rows.forEach(function(row){
+      const category = String(row.category || "Sonstiges");
+      categoryTotals[category] = (categoryTotals[category] || 0) + Math.max(0,Number(row.amount)||0);
+    });
+    const categories = Object.entries(categoryTotals).sort(function(a,b){return b[1]-a[1];}).slice(0,3);
+    const dateText = trip.startDate && trip.endDate ? shortDate(trip.startDate) + " – " + shortDate(trip.endDate) : "Reisedaten noch offen";
+
+    function progressCard(label,done,count,percent,color) {
+      return '<div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">' +
+        '<div class="flex items-center justify-between gap-2"><span class="text-xs font-semibold text-slate-600">' + label + '</span><span class="text-xs font-bold text-slate-800">' + done + '/' + count + '</span></div>' +
+        '<div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-200"><div class="h-full rounded-full ' + color + '" style="width:' + percent + '%"></div></div>' +
+        '<div class="mt-1 text-[10px] text-slate-500">' + percent + '% erledigt</div></div>';
+    }
+    const categoryMarkup = categories.length
+      ? categories.map(function(entry){
+          return '<div class="flex items-center justify-between gap-3 border-b border-slate-100 py-2 last:border-0"><span class="min-w-0 truncate text-xs font-medium text-slate-600">' + esc(entry[0]) + '</span><span class="shrink-0 text-xs font-bold text-slate-800">' + money(entry[1]) + '</span></div>';
+        }).join("")
+      : '<p class="py-2 text-xs text-slate-400">Noch keine Ausgaben eingetragen.</p>';
+
+    return '<section class="mb-4 overflow-hidden rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">' +
+      '<div class="flex items-start justify-between gap-3"><div class="min-w-0">' +
+        '<div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[.13em] text-slate-500">' + icon("map-pin","h-3.5 w-3.5") + ' Aktuell ausgewählter Urlaub</div>' +
+        '<h3 class="mt-1 truncate text-lg font-bold tracking-tight text-slate-900">' + esc(trip.name) + '</h3>' +
+        '<p class="mt-1 truncate text-xs text-slate-500">' + esc(trip.destination || "Ziel noch nicht eingetragen") + ' · ' + esc(dateText) + '</p>' +
+      '</div><span class="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700">Ausgewählt</span></div>' +
+      '<div class="mt-4 grid grid-cols-3 gap-2">' +
+        '<div class="min-w-0 rounded-2xl bg-slate-50 p-2.5"><div class="text-[10px] font-medium text-slate-500">Budget</div><div class="mt-1 truncate text-sm font-bold text-slate-900">' + (budget > 0 ? money(budget) : "Offen") + '</div></div>' +
+        '<div class="min-w-0 rounded-2xl bg-slate-50 p-2.5"><div class="text-[10px] font-medium text-slate-500">Ausgegeben</div><div class="mt-1 truncate text-sm font-bold text-slate-900">' + money(total) + '</div></div>' +
+        '<div class="min-w-0 rounded-2xl bg-slate-50 p-2.5"><div class="text-[10px] font-medium text-slate-500">Übrig</div><div class="mt-1 truncate text-sm font-bold ' + (remaining >= 0 ? "text-emerald-700" : "text-rose-700") + '">' + (budget > 0 ? money(remaining) : "–") + '</div></div>' +
+      '</div>' +
+      '<div class="mt-3 rounded-2xl border border-slate-200 p-3"><div class="flex items-center justify-between gap-3 text-xs"><span class="font-semibold text-slate-600">Budget genutzt</span><span class="font-bold text-slate-800">' + (budget > 0 ? Math.round(total/budget*100) + "%" : "Kein Budget gesetzt") + '</span></div><div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full ' + (remaining >= 0 ? "bg-emerald-400" : "bg-rose-400") + '" style="width:' + budgetPercent + '%"></div></div></div>' +
+      '<div class="mt-3 grid grid-cols-2 gap-2">' + progressCard("Packliste",packDone,packlist.length,packPercent,"bg-slate-700") + progressCard("To-dos",todoDone,todos.length,todoPercent,"bg-emerald-500") + '</div>' +
+      '<div class="mt-3 rounded-2xl border border-slate-200 px-3 py-2.5"><div class="flex items-center justify-between gap-2"><span class="text-xs font-bold text-slate-700">Größte Ausgabenkategorien</span><span class="text-[10px] text-slate-400">' + rows.length + ' Einträge</span></div>' + categoryMarkup + '</div>' +
+      '<div class="mt-3 flex items-center gap-2 text-[10px] text-slate-500">' + icon("users","h-3.5 w-3.5") + ' ' + people.length + ' ' + (people.length === 1 ? "Person" : "Personen") + ' im Urlaub</div>' +
+    '</section>';
   }
 
   function aiChatHTML() {
@@ -3155,11 +3203,8 @@
   }
 
   function aiInputToolsHTML() {
-    let preview="";
-    if(aiReceiptImageDataUrl)preview='<div class="mb-2 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-100/70 p-2"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-slate-900">'+icon("receipt-text","h-4 w-4")+'</span><div class="min-w-0 flex-1"><div class="truncate text-xs font-semibold text-slate-800">'+esc(aiReceiptImageName||"Kassenbonfoto bereit")+'</div><div class="text-[10px] text-slate-500">Wird zur Analyse an den KI-Dienst übertragen</div></div><button type="button" data-action="remove-ai-receipt" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-white" aria-label="Kassenbonfoto entfernen">'+icon("x","h-4 w-4")+'</button></div>';
-    return preview+'<div class="mb-2 flex gap-2 overflow-x-auto pb-1"><button type="button" data-action="ai-start-voice" aria-label="Ausgaben einsprechen" title="Ausgaben per Sprache eintragen" class="flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900 px-3 py-2 text-[11px] font-bold text-white shadow-sm transition hover:bg-slate-800">'+icon("mic","h-4 w-4")+(aiListening?"Sprache stoppen":"Ausgaben einsprechen")+'</button><button type="button" data-action="ai-receipt" '+(aiReceiptProcessing||aiLoading?"disabled":"")+' class="flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-bold text-slate-600 hover:border-slate-300 hover:text-slate-900 disabled:opacity-40">'+icon("camera","h-4 w-4")+'Kassenbon fotografieren</button><button type="button" data-action="ai-multiple-expenses" class="flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-bold text-slate-600 hover:border-slate-300 hover:text-slate-900">'+icon("list-checks","h-4 w-4")+'Mehrere Ausgaben</button><button type="button" data-action="ai-trip-manage" class="flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-bold text-slate-600 hover:border-slate-300 hover:text-slate-900">'+icon("calendar-check","h-4 w-4")+'Urlaub verwalten</button></div>' +
-    (aiReceiptProcessing?'<div class="mb-2 text-[10px] text-slate-900">Kassenbonfoto wird vorbereitet…</div>':'')+
-    '<div class="mb-2 text-center text-[9px] leading-4 text-slate-400">Vorgeschlagene Änderungen werden vor dem Speichern angezeigt. Kassenbonbilder werden zur Analyse an den KI-Dienst übertragen.</div><input id="ai-receipt-input" type="file" accept="image/*" capture="environment" class="hidden" aria-label="Kassenbonfoto auswählen" />';
+    return '<div class="mb-2 flex items-center gap-2 rounded-xl bg-slate-100 px-3 py-2 text-[10px] leading-4 text-slate-500">' +
+      icon("database","h-3.5 w-3.5 shrink-0") + 'Antworten werden direkt aus deinen gespeicherten Urlaubsdaten berechnet.</div>';
   }
 
   async function optimizeReceiptImage(file) {
@@ -3753,7 +3798,7 @@
   function defaultAIChatMessage() {
     return {
       role:"assistant",
-      content:"Hi! Ich bin dein Reise-KI-Assistent. Ich helfe dir bei Urlaub, Budget und Packliste. Du kannst mir Fragen stellen, per Mikrofon Ausgaben diktieren oder einen Kassenbon fotografieren. Änderungen speichere ich erst nach deiner Bestätigung."
+      content:"Hallo! Ich bin dein Urlaubsassistent. Ich werte deine gespeicherten Reisedaten direkt aus. Frag mich nach einer Zusammenfassung, Budget, Ausgaben, Packliste oder offenen To-dos."
     };
   }
 
