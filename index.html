@@ -892,6 +892,26 @@
       user-select: none;
     }
 
+
+    /* The loader trail stays fully hidden until the aircraft actually takes off. */
+    #ua-loader-flight-path { stroke: none !important; }
+    .ua-loader-flight-trail {
+      stroke-dasharray: 1 !important;
+      stroke-dashoffset: 1 !important;
+      opacity: 0 !important;
+      animation: none !important;
+    }
+    .ua-loader-flight-stage.ua-flight-started .ua-loader-flight-trail {
+      animation: ua-loader-trail-draw 12s linear forwards !important;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .ua-loader-flight-stage.ua-flight-started .ua-loader-flight-trail {
+        animation: none !important;
+        stroke-dashoffset: 0 !important;
+        opacity: .20 !important;
+      }
+    }
+
 </style>
 </head>
 <body class="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900">
@@ -905,7 +925,7 @@
     
     
     <span class="ua-loader-orbit-bg ua-loader-orbit-bg-three" aria-hidden="true"></span>
-    <span class="ua-loader-version">v95</span>
+    <span class="ua-loader-version">v96</span>
     <svg class="ua-loader-flight-stage" viewBox="0 0 400 900" preserveAspectRatio="none" fill="none" aria-hidden="true" focusable="false"><path id="ua-loader-flight-path" d="M 370 105 C 325 155 292 230 226 202 C 165 176 174 99 111 127 C 48 153 28 230 78 282 C 128 333 218 292 286 332 C 354 372 378 437 312 481 C 246 525 155 445 89 486 C 23 526 35 611 104 648 C 173 685 250 590 321 623 C 392 656 375 737 312 779 C 249 821 179 746 121 780 C 63 814 53 850 28 885"/><path class="ua-loader-flight-trail" pathLength="1" d="M 370 105 C 325 155 292 230 226 202 C 165 176 174 99 111 127 C 48 153 28 230 78 282 C 128 333 218 292 286 332 C 354 372 378 437 312 481 C 246 525 155 445 89 486 C 23 526 35 611 104 648 C 173 685 250 590 321 623 C 392 656 375 737 312 779 C 249 821 179 746 121 780 C 63 814 53 850 28 885"/><g class="ua-loader-flight-aircraft"><animateMotion begin="indefinite" dur="12s" repeatCount="indefinite" rotate="auto" calcMode="linear"><mpath href="#ua-loader-flight-path"/></animateMotion><use href="#ua-airplane-symbol" x="-12" y="-12" width="24" height="24"/></g></svg>
     
     <div class="ua-loader-center">
@@ -1539,16 +1559,10 @@
     const stage = root.querySelector(".ua-loader-flight-stage");
     if (!stage || stage.dataset.uaFlightStarted === "true") return;
     stage.dataset.uaFlightStarted = "true";
+    stage.classList.add("ua-flight-started");
     const motion = stage.querySelector("animateMotion");
     if (motion && typeof motion.beginElement === "function") {
       try { motion.beginElement(); } catch (_) {}
-    }
-    const trail = stage.querySelector(".ua-loader-flight-trail");
-    if (trail) {
-      trail.style.animation = "none";
-      trail.style.strokeDashoffset = "1";
-      void trail.getBoundingClientRect();
-      trail.style.animation = "ua-loader-trail-draw 12s linear forwards";
     }
   }
 
@@ -1685,7 +1699,7 @@
   function loadingHTML() {
     return '<div class="ua-status-screen ua-loading-screen fixed inset-0 z-[200] flex min-h-screen items-center justify-center overflow-hidden px-6" role="status" aria-label="Urlaubassistent wird geladen">' +
       '<span class="ua-loader-orbit-bg ua-loader-orbit-bg-three" aria-hidden="true"></span>' +
-      '<span class="ua-loader-version">v95</span>' +
+      '<span class="ua-loader-version">v96</span>' +
       '<svg class="ua-loader-flight-stage" viewBox="0 0 400 900" preserveAspectRatio="none" fill="none" aria-hidden="true" focusable="false"><path id="ua-loader-flight-path" d="M 370 105 C 325 155 292 230 226 202 C 165 176 174 99 111 127 C 48 153 28 230 78 282 C 128 333 218 292 286 332 C 354 372 378 437 312 481 C 246 525 155 445 89 486 C 23 526 35 611 104 648 C 173 685 250 590 321 623 C 392 656 375 737 312 779 C 249 821 179 746 121 780 C 63 814 53 850 28 885"/><path class="ua-loader-flight-trail" pathLength="1" d="M 370 105 C 325 155 292 230 226 202 C 165 176 174 99 111 127 C 48 153 28 230 78 282 C 128 333 218 292 286 332 C 354 372 378 437 312 481 C 246 525 155 445 89 486 C 23 526 35 611 104 648 C 173 685 250 590 321 623 C 392 656 375 737 312 779 C 249 821 179 746 121 780 C 63 814 53 850 28 885"/><g class="ua-loader-flight-aircraft"><animateMotion begin="indefinite" dur="12s" repeatCount="indefinite" rotate="auto" calcMode="linear"><mpath href="#ua-loader-flight-path"/></animateMotion><use href="#ua-airplane-symbol" x="-12" y="-12" width="24" height="24"/></g></svg>' +
       '' +
       '<div class="ua-loader-center"><div class="ua-loader-icon-shell"><span class="ua-loader-orbit-ring" aria-hidden="true"></span><img src="./icon-192.png" alt="Urlaubassistent" width="88" height="88" class="ua-loader-logo" /></div>' +
@@ -2900,131 +2914,156 @@
   function aiTripOverviewHTML() {
     const trip = activeTrip();
     if (!trip) {
-      return '<section class="mb-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"><div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">' +
-        icon("map-pin","h-4 w-4") + ' Kein Urlaub ausgewählt</div><p class="mt-2 text-sm leading-6 text-slate-600">Wähle zuerst einen Urlaub aus. Danach zeigt dir diese Übersicht Budget, Ausgaben, Packliste und Aufgaben deiner Reise.</p></section>';
+      return '<section class="overflow-hidden rounded-[2rem] bg-gradient-to-br from-indigo-950 via-blue-900 to-cyan-800 p-6 text-white shadow-xl">' +
+        '<div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20">' + icon("map-pin","h-6 w-6") + '</div>' +
+        '<div class="mt-4 text-xs font-bold uppercase tracking-[.16em] text-cyan-100/80">Dein Reise-Dashboard</div>' +
+        '<h3 class="mt-1 text-2xl font-bold">Noch kein Urlaub ausgewählt</h3>' +
+        '<p class="mt-2 text-sm leading-6 text-white/75">Wähle zuerst eine Reise aus. Dann erscheinen hier dein Budget, deine Ausgaben und alle wichtigen Urlaubsinfos.</p></section>';
     }
 
     const expenses = Array.isArray(trip.expenses) ? trip.expenses : [];
     const tolls = Array.isArray(trip.tolls) ? trip.tolls : [];
     const rows = expenses.concat(tolls);
-    const total = rows.reduce(function(sum,row){ return sum + Math.max(0,Number(row.amount)||0); },0);
+    const total = rows.reduce(function(sum,row){return sum+Math.max(0,Number(row.amount)||0);},0);
     const budget = Math.max(0,Number(trip.budget)||0);
     const remaining = budget-total;
-    const budgetPercent = budget > 0 ? Math.min(100,Math.max(0,total/budget*100)) : 0;
+    const budgetPercent = budget>0 ? Math.min(100,Math.max(0,total/budget*100)) : 0;
     const packlist = Array.isArray(trip.packlist) ? trip.packlist : [];
     const todos = Array.isArray(trip.todos) ? trip.todos : [];
     const packDone = packlist.filter(function(item){return item.done;}).length;
     const todoDone = todos.filter(function(item){return item.done;}).length;
-    const packPercent = packlist.length ? Math.round(packDone/packlist.length*100) : 0;
-    const todoPercent = todos.length ? Math.round(todoDone/todos.length*100) : 0;
+    const packOpen = packlist.filter(function(item){return !item.done;}).slice(0,4);
+    const todoOpen = todos.filter(function(item){return !item.done;}).slice(0,4);
     const people = Array.isArray(trip.people) ? trip.people : [];
-    const openPacking = packlist.filter(function(item){return !item.done;}).slice(0,4);
-    const openTasks = todos.filter(function(item){return !item.done;}).slice(0,4);
-    const recentRows = rows.slice().sort(function(a,b){return String(b.date||"").localeCompare(String(a.date||""));}).slice(0,4);
+    const recent = rows.slice().sort(function(a,b){return String(b.date||"").localeCompare(String(a.date||""));}).slice(0,4);
     const categoryTotals = {};
     rows.forEach(function(row){
-      const category = String(row.category || "Sonstiges");
-      categoryTotals[category] = (categoryTotals[category] || 0) + Math.max(0,Number(row.amount)||0);
+      const category = String(row.category||"Sonstiges");
+      categoryTotals[category]=(categoryTotals[category]||0)+Math.max(0,Number(row.amount)||0);
     });
-    const categories = Object.entries(categoryTotals).sort(function(a,b){return b[1]-a[1];}).slice(0,3);
-    const dateText = trip.startDate && trip.endDate ? shortDate(trip.startDate) + " – " + shortDate(trip.endDate) : "Reisedaten noch offen";
-    const listMarkup = function(items,field,emptyText) {
-      return items.length
-        ? '<ul class="mt-2 space-y-1.5">' + items.map(function(item){return '<li class="flex items-start gap-1.5 text-[11px] leading-4 text-slate-600"><span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400"></span><span class="min-w-0 break-words">' + esc(item[field] || item.name || item.title || "Eintrag") + '</span></li>';}).join("") + '</ul>'
-        : '<p class="mt-2 text-[11px] leading-4 text-slate-400">' + emptyText + '</p>';
-    };
-    const recentMarkup = recentRows.length
-      ? recentRows.map(function(item){return '<div class="flex items-center justify-between gap-3 border-b border-slate-100 py-2 last:border-0"><div class="min-w-0"><div class="truncate text-[11px] font-medium text-slate-700">' + esc(item.title || "Ausgabe") + '</div><div class="text-[10px] text-slate-400">' + esc(item.category || "Sonstiges") + (item.date ? " · " + esc(shortDate(item.date)) : "") + '</div></div><div class="shrink-0 text-xs font-bold text-slate-800">' + money(Number(item.amount)||0) + '</div></div>';}).join("")
-      : '<p class="py-2 text-[11px] text-slate-400">Noch keine Ausgaben erfasst.</p>';
+    const categories = Object.entries(categoryTotals).sort(function(a,b){return b[1]-a[1];}).slice(0,4);
+    const dateText = trip.startDate&&trip.endDate ? shortDate(trip.startDate)+" – "+shortDate(trip.endDate) : "Reisedaten noch offen";
 
-    function progressCard(label,done,count,percent,color) {
-      return '<div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">' +
-        '<div class="flex items-center justify-between gap-2"><span class="text-xs font-semibold text-slate-600">' + label + '</span><span class="text-xs font-bold text-slate-800">' + done + '/' + count + '</span></div>' +
-        '<div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-200"><div class="h-full rounded-full ' + color + '" style="width:' + percent + '%"></div></div>' +
-        '<div class="mt-1 text-[10px] text-slate-500">' + percent + '% erledigt</div></div>';
+    function statCard(label,value,sub,gradient,ico) {
+      return '<div class="min-w-0 rounded-2xl border border-white/20 bg-white/10 p-3 backdrop-blur-md">' +
+        '<div class="flex items-center gap-1.5 text-[10px] font-semibold text-white/65">' + icon(ico,"h-3.5 w-3.5") + label + '</div>' +
+        '<div class="mt-1 truncate text-lg font-extrabold tracking-tight text-white">' + value + '</div>' +
+        '<div class="mt-0.5 text-[10px] text-white/55">' + sub + '</div></div>';
     }
-    const categoryMarkup = categories.length
-      ? categories.map(function(entry){
-          return '<div class="flex items-center justify-between gap-3 border-b border-slate-100 py-2 last:border-0"><span class="min-w-0 truncate text-xs font-medium text-slate-600">' + esc(entry[0]) + '</span><span class="shrink-0 text-xs font-bold text-slate-800">' + money(entry[1]) + '</span></div>';
-        }).join("")
-      : '<p class="py-2 text-xs text-slate-400">Noch keine Ausgaben eingetragen.</p>';
+    function progressCard(label,done,count,percent,gradient,ico) {
+      return '<div class="rounded-2xl border border-slate-100 bg-white p-3.5 shadow-sm">' +
+        '<div class="flex items-center justify-between gap-2"><span class="flex items-center gap-1.5 text-xs font-bold text-slate-700">' + icon(ico,"h-4 w-4") + label + '</span><span class="text-xs font-extrabold text-slate-800">' + done + '/' + count + '</span></div>' +
+        '<div class="mt-3 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full ' + gradient + '" style="width:' + percent + '%"></div></div>' +
+        '<div class="mt-1.5 text-[10px] font-medium text-slate-500">' + percent + '% erledigt</div></div>';
+    }
+    function shortList(items,field,empty,ico,color) {
+      if (!items.length) return '<div class="mt-3 flex items-center gap-2 text-[11px] text-slate-400">' + icon(ico,"h-4 w-4") + empty + '</div>';
+      return '<ul class="mt-3 space-y-2">' + items.map(function(item){
+        return '<li class="flex items-start gap-2 text-xs leading-4 text-slate-600"><span class="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full ' + color + '">' + icon("check","h-2.5 w-2.5") + '</span><span class="min-w-0 break-words">' + esc(item[field]||item.name||item.title||"Eintrag") + '</span></li>';
+      }).join("") + '</ul>';
+    }
 
-    return '<section class="mb-4 overflow-hidden rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">' +
-      '<div class="flex items-start justify-between gap-3"><div class="min-w-0">' +
-        '<div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[.13em] text-slate-500">' + icon("map-pin","h-3.5 w-3.5") + ' Aktuell ausgewählter Urlaub</div>' +
-        '<h3 class="mt-1 truncate text-lg font-bold tracking-tight text-slate-900">' + esc(trip.name) + '</h3>' +
-        '<p class="mt-1 truncate text-xs text-slate-500">' + esc(trip.destination || "Ziel noch nicht eingetragen") + ' · ' + esc(dateText) + '</p>' +
-      '</div><span class="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700">Ausgewählt</span></div>' +
-      '<div class="mt-4 grid grid-cols-3 gap-2">' +
-        '<div class="min-w-0 rounded-2xl bg-slate-50 p-2.5"><div class="text-[10px] font-medium text-slate-500">Budget</div><div class="mt-1 truncate text-sm font-bold text-slate-900">' + (budget > 0 ? money(budget) : "Offen") + '</div></div>' +
-        '<div class="min-w-0 rounded-2xl bg-slate-50 p-2.5"><div class="text-[10px] font-medium text-slate-500">Ausgegeben</div><div class="mt-1 truncate text-sm font-bold text-slate-900">' + money(total) + '</div></div>' +
-        '<div class="min-w-0 rounded-2xl bg-slate-50 p-2.5"><div class="text-[10px] font-medium text-slate-500">Übrig</div><div class="mt-1 truncate text-sm font-bold ' + (remaining >= 0 ? "text-emerald-700" : "text-rose-700") + '">' + (budget > 0 ? money(remaining) : "–") + '</div></div>' +
-      '</div>' +
-      '<div class="mt-3 rounded-2xl border border-slate-200 p-3"><div class="flex items-center justify-between gap-3 text-xs"><span class="font-semibold text-slate-600">Budget genutzt</span><span class="font-bold text-slate-800">' + (budget > 0 ? Math.round(total/budget*100) + "%" : "Kein Budget gesetzt") + '</span></div><div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full ' + (remaining >= 0 ? "bg-emerald-400" : "bg-rose-400") + '" style="width:' + budgetPercent + '%"></div></div></div>' +
-      '<div class="mt-3 grid grid-cols-2 gap-2">' + progressCard("Packliste",packDone,packlist.length,packPercent,"bg-slate-700") + progressCard("To-dos",todoDone,todos.length,todoPercent,"bg-emerald-500") + '</div>' +
-      '<div class="mt-3 rounded-2xl border border-slate-200 px-3 py-2.5"><div class="flex items-center justify-between gap-2"><span class="text-xs font-bold text-slate-700">Größte Ausgabenkategorien</span><span class="text-[10px] text-slate-400">' + rows.length + ' Einträge</span></div>' + categoryMarkup + '</div>' +
-      '<div class="mt-3 grid grid-cols-2 gap-2">' +
-        '<div class="rounded-2xl border border-slate-200 p-3"><div class="text-xs font-bold text-slate-700">Noch einzupacken</div>' + listMarkup(openPacking,"text","Alles erledigt oder noch leer.") + '</div>' +
-        '<div class="rounded-2xl border border-slate-200 p-3"><div class="text-xs font-bold text-slate-700">Offene To-dos</div>' + listMarkup(openTasks,"text","Keine offenen Aufgaben.") + '</div>' +
-      '</div>' +
-      '<div class="mt-3 rounded-2xl border border-slate-200 px-3 py-2.5"><div class="text-xs font-bold text-slate-700">Letzte Ausgaben</div>' + recentMarkup + '</div>' +
-      '<div class="mt-3 flex items-start gap-2 text-[10px] leading-4 text-slate-500">' + icon("users","h-3.5 w-3.5 shrink-0") + '<span>' + (people.length ? esc(people.map(function(person){return person.name;}).filter(Boolean).join(", ")) : "Noch keine Mitreisenden eingetragen") + '</span></div>' +
-    '</section>';
+    const categoryMarkup = categories.length ? categories.map(function(entry,index){
+      const colors = ["bg-indigo-500","bg-cyan-500","bg-violet-500","bg-emerald-500"];
+      const share = total>0 ? Math.round(entry[1]/total*100) : 0;
+      return '<div class="py-2.5">' +
+        '<div class="flex items-center justify-between gap-2"><span class="truncate text-xs font-semibold text-slate-700">' + esc(entry[0]) + '</span><span class="shrink-0 text-xs font-bold text-slate-800">' + money(entry[1]) + '</span></div>' +
+        '<div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full ' + colors[index] + '" style="width:' + share + '%"></div></div></div>';
+    }).join("") : '<p class="py-3 text-xs text-slate-400">Noch keine Ausgaben erfasst.</p>';
+
+    const recentMarkup = recent.length ? recent.map(function(row){
+      return '<div class="flex items-center justify-between gap-3 border-b border-slate-100 py-2.5 last:border-0">' +
+        '<div class="flex min-w-0 items-center gap-2.5"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">' + icon("receipt","h-4 w-4") + '</span>' +
+        '<div class="min-w-0"><div class="truncate text-xs font-semibold text-slate-700">' + esc(row.title||"Ausgabe") + '</div><div class="text-[10px] text-slate-400">' + esc(row.category||"Sonstiges") + (row.date ? " · "+esc(shortDate(row.date)) : "") + '</div></div></div>' +
+        '<span class="shrink-0 text-xs font-bold text-slate-800">' + money(Number(row.amount)||0) + '</span></div>';
+    }).join("") : '<p class="py-3 text-xs text-slate-400">Noch keine Ausgaben erfasst.</p>';
+
+    return '<div class="space-y-4">' +
+      '<section class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-indigo-950 via-blue-900 to-cyan-800 p-5 text-white shadow-xl">' +
+        '<div class="pointer-events-none absolute -right-10 -top-12 h-48 w-48 rounded-full border border-white/10"></div>' +
+        '<div class="pointer-events-none absolute -bottom-20 -left-14 h-48 w-48 rounded-full bg-cyan-400/10 blur-2xl"></div>' +
+        '<div class="relative z-10">' +
+          '<div class="flex items-center justify-between gap-3"><div class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.14em] text-cyan-100">' + icon("plane","h-3.5 w-3.5") + ' Dein ausgewählter Urlaub</div><span class="rounded-full bg-emerald-400/15 px-2.5 py-1 text-[10px] font-bold text-emerald-200">Aktiv</span></div>' +
+          '<h2 class="mt-4 break-words text-2xl font-extrabold tracking-tight">' + esc(trip.name) + '</h2>' +
+          '<div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/70"><span class="inline-flex items-center gap-1.5">' + icon("map-pin","h-3.5 w-3.5") + esc(trip.destination||"Ziel noch offen") + '</span><span class="inline-flex items-center gap-1.5">' + icon("calendar-days","h-3.5 w-3.5") + esc(dateText) + '</span></div>' +
+          '<div class="mt-5 grid grid-cols-3 gap-2">' +
+            statCard("Budget",budget>0?money(budget):"Offen","Geplant","from-indigo-500/30 to-blue-500/20","wallet") +
+            statCard("Ausgegeben",money(total),rows.length+" Einträge","from-cyan-500/30 to-blue-500/20","receipt") +
+            statCard("Übrig",budget>0?money(remaining):"–",remaining<0?"Budget überschritten":"Restbudget","from-emerald-500/30 to-teal-500/20","piggy-bank") +
+          '</div>' +
+          '<div class="mt-3 rounded-2xl border border-white/15 bg-white/10 p-3.5 backdrop-blur-md">' +
+            '<div class="flex items-center justify-between gap-3 text-xs"><span class="font-semibold text-white/80">Budget verwendet</span><span class="font-extrabold">' + (budget>0?Math.round(total/budget*100)+"%":"Noch kein Budget") + '</span></div>' +
+            '<div class="mt-2 h-2 overflow-hidden rounded-full bg-white/15"><div class="h-full rounded-full ' + (remaining>=0?"bg-gradient-to-r from-cyan-300 to-emerald-300":"bg-gradient-to-r from-rose-400 to-orange-300") + '" style="width:'+budgetPercent+'%"></div></div>' +
+          '</div>' +
+        '</div>' +
+      '</section>' +
+      '<section><div class="mb-2 flex items-center justify-between"><h3 class="text-sm font-extrabold text-slate-900">Dein Urlaubsfortschritt</h3><span class="text-[10px] font-medium text-slate-400">' + people.length + ' Mitreisende</span></div>' +
+        '<div class="grid grid-cols-2 gap-3">' +
+          progressCard("Packliste",packDone,packlist.length,packlist.length?Math.round(packDone/packlist.length*100):0,"bg-gradient-to-r from-blue-500 to-cyan-400","luggage") +
+          progressCard("To-dos",todoDone,todos.length,todos.length?Math.round(todoDone/todos.length*100):0,"bg-gradient-to-r from-emerald-500 to-teal-400","list-checks") +
+        '</div>' +
+      '</section>' +
+      '<section class="grid grid-cols-1 gap-3 sm:grid-cols-2">' +
+        '<div class="rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-4 shadow-sm"><div class="flex items-center gap-2 text-xs font-extrabold text-blue-900">' + icon("luggage","h-4 w-4") + ' Noch einzupacken</div>' + shortList(packOpen,"text","Alles erledigt oder noch keine Packliste.","check-circle-2","bg-blue-100 text-blue-700") + '</div>' +
+        '<div class="rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white p-4 shadow-sm"><div class="flex items-center gap-2 text-xs font-extrabold text-emerald-900">' + icon("list-checks","h-4 w-4") + ' Offene To-dos</div>' + shortList(todoOpen,"text","Keine offenen Aufgaben.","check-circle-2","bg-emerald-100 text-emerald-700") + '</div>' +
+      '</section>' +
+      '<section class="grid grid-cols-1 gap-3 sm:grid-cols-2">' +
+        '<div class="rounded-3xl border border-violet-100 bg-white p-4 shadow-sm"><div class="flex items-center gap-2 text-xs font-extrabold text-violet-900">' + icon("chart-pie","h-4 w-4") + ' Ausgaben nach Kategorie</div><div class="mt-2">' + categoryMarkup + '</div></div>' +
+        '<div class="rounded-3xl border border-cyan-100 bg-white p-4 shadow-sm"><div class="flex items-center gap-2 text-xs font-extrabold text-cyan-900">' + icon("receipt-text","h-4 w-4") + ' Letzte Ausgaben</div><div class="mt-2">' + recentMarkup + '</div></div>' +
+      '</section>' +
+      '<div class="flex items-center gap-2 px-1 pb-1 text-[10px] text-slate-400">' + icon("users","h-3.5 w-3.5") + (people.length?esc(people.map(function(person){return person.name;}).filter(Boolean).join(", ")):"Noch keine Mitreisenden eingetragen") + '</div>' +
+    '</div>';
   }
 
   function aiChatHTML() {
     if (!aiOpen) {
-      return `<button type="button" data-action="toggle-ai" aria-label="Urlaubassistent KI öffnen" class="fixed bottom-[5.75rem] right-4 z-[90] flex h-14 w-14 items-center justify-center rounded-[1.25rem] border border-slate-200 bg-white/90 text-slate-900 shadow-[0_12px_32px_rgba(14,116,144,0.12),0_1px_0_rgba(255,255,255,0.95)_inset] backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white/90 active:scale-95 sm:bottom-24 sm:right-6">${icon("sparkles","h-6 w-6")}</button>`;
+      return '<button type="button" data-action="toggle-ai" aria-label="Urlaubs-Dashboard öffnen" class="fixed bottom-[5.75rem] right-4 z-[90] flex h-14 w-14 items-center justify-center rounded-[1.25rem] border border-slate-200 bg-white/90 text-slate-900 shadow-[0_12px_32px_rgba(14,116,144,0.12),0_1px_0_rgba(255,255,255,0.95)_inset] backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white/90 active:scale-95 sm:bottom-24 sm:right-6">' + icon("sparkles","h-6 w-6") + '</button>';
     }
-    const showFollowUpsIndex = aiMessages.length && aiMessages[aiMessages.length - 1].role === "assistant" ? aiMessages.length - 1 : -1;
-    const bubbles = aiMessages.map((m, messageIndex) => m.role === "user"
-      ? `<div class="flex justify-end"><div class="max-w-[88%] rounded-3xl rounded-br-lg bg-slate-900 px-4 py-3 text-sm leading-6 text-white shadow-sm">${esc(m.content).replace(/\n/g,"<br>")}</div></div>`
-      : `<div class="flex items-start gap-2"><div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white ring-1 ring-slate-200">${icon("sparkles","h-4 w-4")}</div><div class="max-w-[88%] min-w-0 rounded-3xl rounded-bl-lg bg-white px-4 py-3 text-sm leading-6 text-slate-700 ring-1 ring-slate-200 shadow-sm">${aiMarkdownHTML(m.content)}${aiSourcesHTML(m.sources, m.webSearchRequested)}${aiWebSearchNoticeHTML(m)}${m.actions && !m.actionsApplied ? aiActionPreviewHTML(m.actions,messageIndex) : ""}${messageIndex === showFollowUpsIndex ? aiFollowUpsHTML(m.followUps) : ""}</div></div>`
-    ).join("");
-    return `<div class="ua-modal-enter fixed inset-0 z-[120] bg-slate-950/18 backdrop-blur-[2px] sm:pointer-events-none">
-      <div class="pointer-events-auto absolute bottom-0 right-0 flex h-[82vh] w-full max-w-md flex-col overflow-hidden rounded-t-[2rem] bg-slate-50 shadow-2xl ring-1 ring-black/10 sm:bottom-24 sm:right-6 sm:h-[min(720px,82vh)] sm:rounded-[2rem]">
-        <div class="shrink-0 bg-slate-950 px-5 py-4 text-white">
-          <div class="flex items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-              <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/10">${icon("sparkles","h-5 w-5")}</div>
-              <div><div class="text-xs font-semibold uppercase tracking-[0.16em] text-white/55">Dein Reise-Dashboard</div><div class="text-lg font-bold tracking-tight">Urlaub im Blick</div></div>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <button type="button" data-action="toggle-ai-history" aria-label="Gespeicherte Chats öffnen" title="Gespeicherte Chats" class="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-white/85 transition hover:bg-white/12">${icon("messages-square","h-4.5 w-4.5")}</button>
-              <button type="button" data-action="new-ai-chat" aria-label="Neuen Chat beginnen" title="Neuer Chat" class="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-white/85 transition hover:bg-white/12">${icon("plus","h-4.5 w-4.5")}</button>
-              <button type="button" data-action="toggle-ai" aria-label="KI schließen" title="KI schließen" class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white/80 hover:bg-white/15">${icon("x","h-4.5 w-4.5")}</button>
-            </div>
-          </div>
-          <div class="mt-3 flex items-center gap-2 text-xs text-white/65"><span class="h-2 w-2 rounded-full bg-emerald-400"></span>${activeTrip() ? "Aktuell ausgewählt: " + esc(activeTrip().name) : "Noch kein Urlaub ausgewählt"}</div>
-        </div>
 
-        <div id="ai-chat-messages" class="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4 sm:px-5">
-          ${aiTripOverviewHTML()}
-          ${aiChatHistoryOpen ? aiSavedChatsHTML() : ""}
-          <div class="${aiChatHistoryOpen ? "hidden" : ""}">
-          ${aiMessages.length===1 ? `<div class="mb-3">${aiQuickPromptsHTML()}</div>` : ""}
-          ${bubbles}
-          ${aiLoading ? `<div class="flex items-start gap-2"><div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white ring-1 ring-slate-200">${icon("sparkles","h-4 w-4")}</div><div class="ai-thinking-card flex min-w-0 flex-1 items-center gap-3 rounded-3xl rounded-bl-lg px-4 py-3"><div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-slate-900/5 text-slate-900">${icon("sparkles","h-5 w-5")}</div><div class="min-w-0 flex-1"><div id="ai-thinking-label" class="ai-thinking-text text-sm font-bold tracking-tight">${esc(aiThinkingStatus)}</div><div class="mt-1 text-[11px] leading-4 text-slate-500">Ich bereite deine Antwort vor</div><div class="mt-2 flex items-center gap-1.5"><span class="ai-thinking-dot"></span><span class="ai-thinking-dot"></span><span class="ai-thinking-dot"></span></div></div></div></div>` : ""}
-          ${aiError ? `<div class="rounded-2xl bg-rose-50 px-4 py-3 text-xs leading-5 text-rose-700 ring-1 ring-rose-100">${esc(aiError)}</div>` : ""}
-          <div class="ai-chat-disclaimer">Die Antworten beruhen auf den gespeicherten Daten dieses Urlaubs. Prüfe wichtige Buchungs- und Zahlungsentscheidungen selbst.</div>
-          </div>
-        </div>
+    const trip = activeTrip();
+    const bubbles = aiMessages.map(function(message,index){
+      if (message.role === "user") {
+        return '<div class="flex justify-end"><div class="max-w-[88%] rounded-3xl rounded-br-lg bg-gradient-to-r from-indigo-600 to-blue-600 px-4 py-3 text-sm leading-6 text-white shadow-md">' + esc(message.content).replace(/\n/g,"<br>") + '</div></div>';
+      }
+      return '<div class="flex items-start gap-2.5"><div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-cyan-500 text-white shadow-md">' + icon("sparkles","h-4 w-4") + '</div><div class="max-w-[90%] min-w-0 rounded-3xl rounded-tl-lg border border-slate-100 bg-white px-4 py-3 text-sm leading-6 text-slate-700 shadow-sm">' + aiMarkdownHTML(message.content) + (index===aiMessages.length-1?aiFollowUpsHTML(message.followUps):"") + '</div></div>';
+    }).join("");
 
-        <div class="shrink-0 border-t border-slate-200 bg-white/92 p-3 backdrop-blur-xl sm:p-4">
-          ${aiInputToolsHTML()}
-          <div class="flex items-end gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-2 shadow-inner focus-within:border-slate-300 focus-within:ring-4 focus-within:ring-slate-100">
-            <div class="min-w-0 flex-1">
-              <div class="px-2 pb-1 text-[10px] font-bold text-slate-500">Frage zu diesem Urlaub</div>
-              <textarea id="ai-input" rows="1" placeholder="Z. B. Wie viel Budget ist noch übrig?" class="max-h-28 min-h-[44px] w-full resize-none border-0 bg-transparent px-2 py-1 text-sm text-slate-900 outline-none placeholder:text-slate-400">${esc(aiInput)}</textarea>
-            </div>
-            <button type="button" data-action="send-ai" ${aiLoading?"disabled":""} aria-label="Nachricht senden" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white transition hover:bg-slate-800 disabled:opacity-40">${icon("arrow-up","h-5 w-5")}</button>
-          </div>
-          <div class="mt-2 text-center text-[10px] leading-4 text-slate-400">Antworten aus deinen Reisedaten · ohne externe KI-API</div>
-          <div id="ai-chat-save-status" class="mt-1 text-center text-[10px] leading-4 font-semibold ${aiChatSaveStatus.includes("fehlgeschlagen") ? "text-amber-600" : aiChatSaveStatus.includes("gespeichert") || aiChatSaveStatus.includes("Gespeichert") ? "text-emerald-600" : "text-slate-500"}">${esc(aiChatSaveStatus)}</div>
-          <div class="mt-1 text-center text-[9px] leading-4 text-slate-400">Dein Chat-Verlauf wird pro Urlaub gespeichert und mit deinem Konto synchronisiert.</div>
-        </div>
-      </div>
-    </div>`;
+    return '<div class="fixed inset-0 z-[120] flex h-[100dvh] min-h-screen w-full flex-col overflow-hidden bg-gradient-to-br from-slate-50 via-white to-blue-50 text-slate-900">' +
+      '<header class="relative shrink-0 overflow-hidden bg-gradient-to-r from-slate-950 via-indigo-950 to-blue-900 px-5 pb-5 pt-[max(1rem,env(safe-area-inset-top))] text-white shadow-lg">' +
+        '<div class="pointer-events-none absolute -right-12 -top-16 h-56 w-56 rounded-full border border-white/10"></div>' +
+        '<div class="relative z-10 flex items-center justify-between gap-3">' +
+          '<div class="flex min-w-0 items-center gap-3"><div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10 shadow-inner">' + icon("sparkles","h-6 w-6 text-cyan-200") + '</div>' +
+            '<div class="min-w-0"><div class="text-[10px] font-bold uppercase tracking-[.18em] text-cyan-200/80">Dein Urlaubsassistent</div><h1 class="truncate text-xl font-extrabold tracking-tight">Reise-Dashboard</h1></div></div>' +
+          '<button type="button" data-action="toggle-ai" aria-label="Dashboard schließen" title="Schließen" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-white transition hover:bg-white/20">' + icon("x","h-5 w-5") + '</button>' +
+        '</div>' +
+        '<div class="relative z-10 mt-3 flex items-center gap-2 text-xs text-white/70"><span class="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,.8)]"></span><span class="truncate">' + (trip?"Aktuell ausgewählt: "+esc(trip.name):"Noch kein Urlaub ausgewählt") + '</span></div>' +
+      '</header>' +
+      '<main class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6">' +
+        '<div class="mx-auto w-full max-w-4xl space-y-4">' +
+          aiTripOverviewHTML() +
+          '<section class="overflow-hidden rounded-3xl border border-indigo-100 bg-white/90 shadow-sm">' +
+            '<div class="flex items-center gap-3 border-b border-slate-100 bg-gradient-to-r from-indigo-50 via-blue-50 to-cyan-50 px-4 py-3">' +
+              '<div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-cyan-500 text-white shadow-sm">' + icon("message-circle","h-5 w-5") + '</div>' +
+              '<div><h2 class="text-sm font-extrabold text-slate-900">Frag deinen Urlaubsassistenten</h2><p class="text-[10px] text-slate-500">Kurze Antworten direkt aus deinen Reisedaten</p></div>' +
+            '</div>' +
+            '<div class="space-y-3 p-3 sm:p-4">' +
+              (aiMessages.length===1?aiQuickPromptsHTML():"") +
+              bubbles +
+              (aiLoading?'<div class="flex items-center gap-2 rounded-2xl bg-blue-50 px-3 py-3 text-xs font-semibold text-blue-800">' + icon("loader-circle","h-4 w-4 animate-spin") + ' Ich werte deine Urlaubsdaten aus …</div>':"") +
+              (aiError?'<div class="rounded-2xl bg-rose-50 px-3 py-2.5 text-xs text-rose-700">' + esc(aiError) + '</div>':"") +
+              '<div class="flex items-center gap-1.5 text-[10px] text-slate-400">' + icon("database","h-3.5 w-3.5") + ' Eigene Datenauswertung · keine externe KI-API</div>' +
+            '</div>' +
+          '</section>' +
+        '</div>' +
+      '</main>' +
+      '<footer class="shrink-0 border-t border-slate-200/80 bg-white/95 px-4 pb-[max(.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-8px_28px_rgba(15,23,42,.06)] backdrop-blur-xl sm:px-6">' +
+        '<div class="mx-auto flex w-full max-w-4xl items-end gap-2 rounded-2xl border border-indigo-100 bg-slate-50 p-2 shadow-inner focus-within:border-indigo-300 focus-within:ring-4 focus-within:ring-indigo-100">' +
+          '<textarea id="ai-input" rows="1" placeholder="Frage zu deinem ausgewählten Urlaub …" class="max-h-28 min-h-[46px] min-w-0 flex-1 resize-none border-0 bg-transparent px-3 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400">' + esc(aiInput) + '</textarea>' +
+          '<button type="button" data-action="send-ai" ' + (aiLoading?"disabled":"") + ' aria-label="Frage senden" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-blue-600 text-white shadow-md transition hover:brightness-110 disabled:opacity-40">' + icon("arrow-up","h-5 w-5") + '</button>' +
+        '</div>' +
+        '<div class="mx-auto mt-1.5 max-w-4xl text-center text-[9px] leading-4 text-slate-400">Deine Fragen werden anhand der gespeicherten Daten von ' + (trip?esc(trip.name):"deinem Urlaub") + ' beantwortet.</div>' +
+      '</footer>' +
+    '</div>';
   }
 
   function aiQuestionNeedsWebSearch(input) {
@@ -6582,7 +6621,7 @@
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
       refreshLoaderVersionLabel();
-      navigator.serviceWorker.register("./service-worker.js?v=95").catch(() => {});
+      navigator.serviceWorker.register("./service-worker.js?v=96").catch(() => {});
     }, { once: true });
   } else {
     window.addEventListener("load", refreshLoaderVersionLabel, { once: true });
