@@ -3017,7 +3017,7 @@
 
   function aiChatHTML() {
     if (!aiOpen) {
-      return '<button type="button" data-action="toggle-ai" aria-label="Urlaubs-Dashboard öffnen" class="fixed bottom-[5.75rem] right-4 z-[90] flex h-14 w-14 items-center justify-center rounded-[1.25rem] border border-slate-200 bg-white/90 text-slate-900 shadow-[0_12px_32px_rgba(14,116,144,0.12),0_1px_0_rgba(255,255,255,0.95)_inset] backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white/90 active:scale-95 sm:bottom-24 sm:right-6">' + icon("sparkles","h-6 w-6") + '</button>';
+      return '<button type="button" data-action="toggle-ai" aria-label="Urlaubs-Dashboard öffnen" class="fixed bottom-[5.75rem] right-4 z-[90] flex h-14 w-14 items-center justify-center rounded-[1.25rem] border border-white/75 bg-white/55 text-slate-900 shadow-[0_12px_32px_rgba(14,116,144,0.14),0_1px_0_rgba(255,255,255,0.92)_inset] backdrop-blur-2xl backdrop-saturate-150 transition hover:-translate-y-0.5 hover:bg-white/65 active:scale-95 sm:bottom-24 sm:right-6" style="-webkit-backdrop-filter:blur(22px) saturate(165%);backdrop-filter:blur(22px) saturate(165%);box-shadow:inset 0 1px 0 rgba(255,255,255,.78),0 12px 32px rgba(14,116,144,.14)">' + icon("sparkles","h-6 w-6") + '</button>';
     }
 
     const trip = activeTrip();
@@ -6621,7 +6621,7 @@
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
       refreshLoaderVersionLabel();
-      navigator.serviceWorker.register("./service-worker.js?v=96").catch(() => {});
+      navigator.serviceWorker.register("./service-worker.js?v=97").catch(() => {});
     }, { once: true });
   } else {
     window.addEventListener("load", refreshLoaderVersionLabel, { once: true });
