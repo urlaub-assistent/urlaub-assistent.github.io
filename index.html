@@ -893,24 +893,18 @@
     }
 
 
-    /* Keep the route invisible before takeoff; once started, reveal the trail as it draws. */
+    /* The silver aircraft trail is hidden until JavaScript starts its synchronized animation. */
     #ua-loader-flight-path { stroke: none !important; }
     .ua-loader-flight-stage .ua-loader-flight-trail {
+      stroke: rgba(226,232,240,.72) !important;
+      stroke-width: 1.45 !important;
+      stroke-linecap: round !important;
+      stroke-linejoin: round !important;
       stroke-dasharray: 1;
       stroke-dashoffset: 1;
       opacity: 0;
       animation: none;
       filter: none !important;
-    }
-    .ua-loader-flight-stage.ua-flight-started .ua-loader-flight-trail {
-      animation: ua-loader-trail-draw 12s linear forwards;
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .ua-loader-flight-stage.ua-flight-started .ua-loader-flight-trail {
-        animation: none;
-        stroke-dashoffset: 0;
-        opacity: .20;
-      }
     }
 
 </style>
@@ -926,7 +920,7 @@
     
     
     <span class="ua-loader-orbit-bg ua-loader-orbit-bg-three" aria-hidden="true"></span>
-    <span class="ua-loader-version">v98</span>
+    <span class="ua-loader-version">v99</span>
     <svg class="ua-loader-flight-stage" viewBox="0 0 400 900" preserveAspectRatio="none" fill="none" aria-hidden="true" focusable="false"><path id="ua-loader-flight-path" d="M 370 105 C 325 155 292 230 226 202 C 165 176 174 99 111 127 C 48 153 28 230 78 282 C 128 333 218 292 286 332 C 354 372 378 437 312 481 C 246 525 155 445 89 486 C 23 526 35 611 104 648 C 173 685 250 590 321 623 C 392 656 375 737 312 779 C 249 821 179 746 121 780 C 63 814 53 850 28 885"/><path class="ua-loader-flight-trail" pathLength="1" d="M 370 105 C 325 155 292 230 226 202 C 165 176 174 99 111 127 C 48 153 28 230 78 282 C 128 333 218 292 286 332 C 354 372 378 437 312 481 C 246 525 155 445 89 486 C 23 526 35 611 104 648 C 173 685 250 590 321 623 C 392 656 375 737 312 779 C 249 821 179 746 121 780 C 63 814 53 850 28 885"/><g class="ua-loader-flight-aircraft"><animateMotion begin="indefinite" dur="12s" repeatCount="indefinite" rotate="auto" calcMode="linear"><mpath href="#ua-loader-flight-path"/></animateMotion><use href="#ua-airplane-symbol" x="-12" y="-12" width="24" height="24"/></g></svg>
     
     <div class="ua-loader-center">
@@ -1560,7 +1554,31 @@
     const stage = root.querySelector(".ua-loader-flight-stage");
     if (!stage || stage.dataset.uaFlightStarted === "true") return;
     stage.dataset.uaFlightStarted = "true";
-    stage.classList.add("ua-flight-started");
+
+    const trail = stage.querySelector(".ua-loader-flight-trail");
+    if (trail) {
+      trail.style.strokeDasharray = "1";
+      trail.style.strokeDashoffset = "1";
+      trail.style.opacity = "0";
+      try {
+        if (typeof trail.animate === "function") {
+          trail.animate(
+            [
+              { strokeDashoffset: "1", opacity: 0.02 },
+              { strokeDashoffset: "0", opacity: 0.78 }
+            ],
+            { duration: 12000, easing: "linear", fill: "forwards" }
+          );
+        } else {
+          trail.style.animation = "none";
+          void trail.getBoundingClientRect();
+          trail.style.animation = "ua-loader-trail-draw 12s linear forwards";
+        }
+      } catch (_) {
+        trail.style.animation = "ua-loader-trail-draw 12s linear forwards";
+      }
+    }
+
     const motion = stage.querySelector("animateMotion");
     if (motion && typeof motion.beginElement === "function") {
       try { motion.beginElement(); } catch (_) {}
@@ -2959,10 +2977,10 @@
         violet:"bg-violet-50 text-violet-700",
         emerald:"bg-emerald-50 text-emerald-700"
       };
-      return '<div class="min-w-0 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm">' +
-        '<div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ' + tones[tone] + '">' + icon(ico,"h-4 w-4") + '</span><span class="truncate text-[11px] font-semibold text-slate-500">' + label + '</span></div>' +
-        '<div class="mt-2 truncate text-lg font-extrabold tracking-tight text-slate-900">' + value + '</div>' +
-        '<div class="mt-0.5 text-[10px] text-slate-400">' + sub + '</div></div>';
+      return '<div class="min-w-0 rounded-2xl border border-white/50 bg-white/[.24] p-3.5 shadow-sm backdrop-blur-2xl" style="-webkit-backdrop-filter:blur(28px) saturate(185%);backdrop-filter:blur(28px) saturate(185%);box-shadow:inset 0 1px 0 rgba(255,255,255,.62),0 10px 24px rgba(2,6,23,.16)">' +
+        '<div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ' + tones[tone] + '">' + icon(ico,"h-4 w-4") + '</span><span class="truncate text-[11px] font-semibold text-white/85">' + label + '</span></div>' +
+        '<div class="mt-2 truncate text-lg font-extrabold tracking-tight text-white">' + value + '</div>' +
+        '<div class="mt-0.5 text-[10px] text-white/70">' + sub + '</div></div>';
     }
     function progressCard(label,done,count,percent,color,ico) {
       return '<div class="rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm">' +
@@ -3054,18 +3072,18 @@
 
     return '<div class="space-y-4">' +
       '<section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">' +
-        '<div class="bg-slate-900 px-5 py-5 text-white">' +
+        '<div class="bg-[#0b1830] px-5 py-5 text-white">' +
           '<div class="flex items-center justify-between gap-3"><div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.14em] text-white/80">'+icon("plane","h-3.5 w-3.5")+' Dein ausgewählter Urlaub</div><span class="rounded-full bg-emerald-400/15 px-2.5 py-1 text-[10px] font-bold text-emerald-200">Aktiv</span></div>' +
           '<h2 class="mt-4 break-words text-2xl font-extrabold tracking-tight">'+esc(trip.name)+'</h2>' +
           '<div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/70"><span class="inline-flex items-center gap-1.5">'+icon("map-pin","h-3.5 w-3.5")+esc(trip.destination||"Ziel noch offen")+'</span><span class="inline-flex items-center gap-1.5">'+icon("calendar-days","h-3.5 w-3.5")+esc(dateText)+'</span></div>' +
         '</div>' +
-        '<div class="grid grid-cols-3 gap-2 bg-slate-50 p-3 sm:gap-3 sm:p-4">' +
+        '<div class="grid grid-cols-3 gap-2 bg-[#0b1830] p-3 sm:gap-3 sm:p-4">' +
           statCard("Budget",budget>0?money(budget):"Offen","Geplant","wallet","blue") +
           statCard("Ausgegeben",money(total),rows.length+" Einträge","receipt","violet") +
           statCard("Übrig",budget>0?money(remaining):"–",remaining<0?"Budget überschritten":"Restbudget","piggy-bank","emerald") +
         '</div>' +
-        '<div class="px-4 pb-4 sm:px-5"><div class="flex items-center justify-between gap-3 text-xs"><span class="font-semibold text-slate-600">Budget verwendet</span><span class="font-extrabold tabular-nums text-slate-800">'+(budget>0?Math.round(total/budget*100)+"%":"Noch kein Budget")+'</span></div>' +
-          '<div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full '+(remaining>=0?"bg-emerald-500":"bg-rose-500")+'" style="width:'+budgetPercent+'%"></div></div></div>' +
+        '<div class="bg-[#0b1830] px-4 pb-4 sm:px-5"><div class="flex items-center justify-between gap-3 text-xs"><span class="font-semibold text-white/80">Budget verwendet</span><span class="font-extrabold tabular-nums text-white">'+(budget>0?Math.round(total/budget*100)+"%":"Noch kein Budget")+'</span></div>' +
+          '<div class="mt-2 h-2 overflow-hidden rounded-full bg-white/15"><div class="h-full rounded-full '+(remaining>=0?"bg-emerald-400":"bg-rose-400")+'" style="width:'+budgetPercent+'%"></div></div></div>' +
       '</section>' +
       '<section class="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">' +
         '<div class="flex items-center justify-between gap-3"><div><h3 class="text-sm font-extrabold text-slate-900">Ausgaben im Zeitverlauf</h3><p class="mt-0.5 text-[11px] text-slate-400">Tägliche Ausgaben · nach Buchungsdatum</p></div><span class="rounded-xl bg-blue-50 px-2.5 py-1.5 text-xs font-bold tabular-nums text-blue-700">'+money(total)+'</span></div>' +
@@ -6697,7 +6715,7 @@
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
       refreshLoaderVersionLabel();
-      navigator.serviceWorker.register("./service-worker.js?v=98").catch(() => {});
+      navigator.serviceWorker.register("./service-worker.js?v=99").catch(() => {});
     }, { once: true });
   } else {
     window.addEventListener("load", refreshLoaderVersionLabel, { once: true });
