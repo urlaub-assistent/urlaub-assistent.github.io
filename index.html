@@ -916,24 +916,6 @@
     }
 
 
-    .ua-app-version {
-      position: fixed;
-      right: max(12px, env(safe-area-inset-right));
-      bottom: calc(4.7rem + env(safe-area-inset-bottom));
-      z-index: 80;
-      padding: 6px 9px;
-      border: 1px solid rgba(148,163,184,.30);
-      border-radius: 999px;
-      background: rgba(15,23,42,.76);
-      color: rgba(248,250,252,.90);
-      font: 800 10px/1 system-ui, sans-serif;
-      letter-spacing: .08em;
-      text-shadow: 0 1px 4px rgba(0,0,0,.2);
-      -webkit-backdrop-filter: blur(12px);
-      backdrop-filter: blur(12px);
-      pointer-events: none;
-      user-select: none;
-    }
 
 </style>
 </head>
@@ -948,7 +930,7 @@
     
     
     <span class="ua-loader-orbit-bg ua-loader-orbit-bg-three" aria-hidden="true"></span>
-    <span class="ua-loader-version">v103</span>
+    <span class="ua-loader-version">v104</span>
     <svg class="ua-loader-flight-stage" viewBox="0 0 400 900" preserveAspectRatio="none" fill="none" aria-hidden="true" focusable="false"><path id="ua-loader-flight-path" d="M 370 105 C 325 155 292 230 226 202 C 165 176 174 99 111 127 C 48 153 28 230 78 282 C 128 333 218 292 286 332 C 354 372 378 437 312 481 C 246 525 155 445 89 486 C 23 526 35 611 104 648 C 173 685 250 590 321 623 C 392 656 375 737 312 779 C 249 821 179 746 121 780 C 63 814 53 850 28 885"/><path class="ua-loader-flight-trail" pathLength="1" d="M 370 105 C 325 155 292 230 226 202 C 165 176 174 99 111 127 C 48 153 28 230 78 282 C 128 333 218 292 286 332 C 354 372 378 437 312 481 C 246 525 155 445 89 486 C 23 526 35 611 104 648 C 173 685 250 590 321 623 C 392 656 375 737 312 779 C 249 821 179 746 121 780 C 63 814 53 850 28 885"/><g class="ua-loader-flight-aircraft"><animateMotion begin="indefinite" dur="12s" repeatCount="indefinite" rotate="auto" calcMode="linear"><mpath href="#ua-loader-flight-path"/></animateMotion><use href="#ua-airplane-symbol" x="-12" y="-12" width="24" height="24"/></g></svg>
     
     <div class="ua-loader-center">
@@ -960,8 +942,6 @@
     </div>
   </div>
 </div>
-<div id="ua-app-version" class="ua-app-version" aria-label="App-Version v103">v103</div>
-
 <script>
 (() => {
   "use strict";
@@ -1000,7 +980,7 @@
     "toggle-family-auto-share", "share-trip-family", "delete-family", "edit-family-name", "save-family-name",
     "remove-family-member", "leave-family", "revoke-family-invite", "unshare-family-trip-member",
     "send-ai", "ai-followup", "ai-multiple-expenses", "ai-trip-manage", "ai-receipt", "ai-start-voice",
-    "approve-ai-actions", "new-ai-chat", "open-ai-saved-chat", "save-username", "save-settings-password", "open-settings", "toggle-ai-history", "toggle-ai-web-search",
+    "approve-ai-actions", "new-ai-chat", "open-ai-saved-chat", "save-username", "save-settings-password", "open-settings", "toggle-ai-history",
     "toggle-reminders", "toggle-passport-reminder", "toggle-departure-reminder", "toggle-packing-reminder", "enable-notifications", "test-reminder",
     "show-delete-account", "delete-account", "account-reset", "confirm-delete"
   ]);
@@ -1066,7 +1046,6 @@
   let aiReceiptProcessing = false;
   let aiSpeechRecognition = null;
   let aiListening = false;
-  let aiSpeakingMessageIndex = -1;
   let aiActionsApplying = false;
   let deferredPWAInstallPrompt = null;
   let pwaInstallHelpOpen = false;
@@ -1076,7 +1055,7 @@
   let aiMessages = [
     {
       role: "assistant",
-      content: "Hallo! Ich bin dein Urlaubsassistent. Ich kann deine Reisedaten berücksichtigen, Reiseideen entwickeln, Fragen frei beantworten und dir bei der Planung helfen. Du kannst mir eine Frage diktieren oder dir meine Antworten vorlesen lassen."
+      content: "Hallo! Ich bin dein Urlaubsassistent. Ich lese die Daten deines ausgewählten Urlaubs und beantworte Fragen zu Budget, Ausgaben, Reisedaten, Mitreisenden, Packliste und To-dos. Fragen außerhalb dieser Bereiche lehne ich ehrlich ab."
     }
   ];
 
@@ -1575,7 +1554,7 @@
       const source = await response.text();
       const match = source.match(/const\s+CACHE_NAME\s*=\s*["']urlaubassistent-shell-v(\d+)["']/);
       if (!match) return;
-      document.querySelectorAll(".ua-loader-version, #ua-app-version").forEach((label) => {
+      document.querySelectorAll(".ua-loader-version").forEach((label) => {
         label.textContent = "v" + match[1];
       });
     } catch (_) {}
@@ -1749,7 +1728,7 @@
   function loadingHTML() {
     return '<div class="ua-status-screen ua-loading-screen fixed inset-0 z-[200] flex min-h-screen items-center justify-center overflow-hidden px-6" role="status" aria-label="Urlaubassistent wird geladen">' +
       '<span class="ua-loader-orbit-bg ua-loader-orbit-bg-three" aria-hidden="true"></span>' +
-      '<span class="ua-loader-version">v103</span>' +
+      '<span class="ua-loader-version">v104</span>' +
       '<svg class="ua-loader-flight-stage" viewBox="0 0 400 900" preserveAspectRatio="none" fill="none" aria-hidden="true" focusable="false"><path id="ua-loader-flight-path" d="M 370 105 C 325 155 292 230 226 202 C 165 176 174 99 111 127 C 48 153 28 230 78 282 C 128 333 218 292 286 332 C 354 372 378 437 312 481 C 246 525 155 445 89 486 C 23 526 35 611 104 648 C 173 685 250 590 321 623 C 392 656 375 737 312 779 C 249 821 179 746 121 780 C 63 814 53 850 28 885"/><path class="ua-loader-flight-trail" pathLength="1" d="M 370 105 C 325 155 292 230 226 202 C 165 176 174 99 111 127 C 48 153 28 230 78 282 C 128 333 218 292 286 332 C 354 372 378 437 312 481 C 246 525 155 445 89 486 C 23 526 35 611 104 648 C 173 685 250 590 321 623 C 392 656 375 737 312 779 C 249 821 179 746 121 780 C 63 814 53 850 28 885"/><g class="ua-loader-flight-aircraft"><animateMotion begin="indefinite" dur="12s" repeatCount="indefinite" rotate="auto" calcMode="linear"><mpath href="#ua-loader-flight-path"/></animateMotion><use href="#ua-airplane-symbol" x="-12" y="-12" width="24" height="24"/></g></svg>' +
       '' +
       '<div class="ua-loader-center"><div class="ua-loader-icon-shell"><span class="ua-loader-orbit-ring" aria-hidden="true"></span><img src="./icon-192.png" alt="Urlaubassistent" width="88" height="88" class="ua-loader-logo" /></div>' +
@@ -3150,13 +3129,8 @@
       if (message.role === "user") {
         return '<div class="flex justify-end"><div class="max-w-[88%] rounded-3xl rounded-br-lg bg-gradient-to-r from-indigo-600 to-blue-600 px-4 py-3 text-sm leading-6 text-white shadow-md">' + esc(message.content).replace(/\n/g,"<br>") + '</div></div>';
       }
-      const speaking = aiSpeakingMessageIndex === index;
       return '<div class="flex items-start gap-2.5"><div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-cyan-500 text-white shadow-md">' + icon("sparkles","h-4 w-4") + '</div><div class="max-w-[90%] min-w-0 rounded-3xl rounded-tl-lg border border-slate-100 bg-white px-4 py-3 text-sm leading-6 text-slate-700 shadow-sm">' +
         aiMarkdownHTML(message.content) +
-        aiActionPreviewHTML(message.actions,index) +
-        aiWebSearchNoticeHTML(message) +
-        aiSourcesHTML(message.sources,message.webSearchRequested) +
-        '<div class="mt-3 flex justify-end"><button type="button" data-action="ai-speak" data-message-index="' + index + '" aria-label="' + (speaking?"Vorlesen stoppen":"Antwort vorlesen") + '" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold text-slate-600 transition hover:bg-slate-100">' + icon(speaking?"square":"volume-2","h-3.5 w-3.5") + (speaking?"Stoppen":"Vorlesen") + '</button></div>' +
         (index===aiMessages.length-1?aiFollowUpsHTML(message.followUps):"") + '</div></div>';
     }).join("");
 
@@ -3176,14 +3150,14 @@
           '<section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">' +
             '<div class="flex items-center gap-3 border-b border-slate-100 bg-slate-50 px-4 py-3">' +
               '<div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm">' + icon("message-circle","h-5 w-5") + '</div>' +
-              '<div><h2 class="text-sm font-extrabold text-slate-900">Frag deinen Urlaubsassistenten</h2><p class="text-[10px] text-slate-500">Natürlich formulierte KI-Antworten mit deinen Reisedaten</p></div>' +
+              '<div><h2 class="text-sm font-extrabold text-slate-900">Frag deinen Urlaubsassistenten</h2><p class="text-[10px] text-slate-500">Antworten direkt aus deinen gespeicherten Urlaubsdaten</p></div>' +
             '</div>' +
             '<div class="space-y-3 p-3 sm:p-4">' +
               (aiMessages.length===1?aiQuickPromptsHTML():"") +
               bubbles +
               (aiLoading?'<div class="flex items-center gap-2 rounded-2xl bg-blue-50 px-3 py-3 text-xs font-semibold text-blue-800">' + icon("loader-circle","h-4 w-4 animate-spin") + ' Ich werte deine Urlaubsdaten aus …</div>':"") +
               (aiError?'<div class="rounded-2xl bg-rose-50 px-3 py-2.5 text-xs text-rose-700">' + esc(aiError) + '</div>':"") +
-              '<div class="flex items-center gap-1.5 text-[10px] text-slate-400">' + icon("sparkles","h-3.5 w-3.5") + ' ' + (session?.user?.id ? "KI-Modell · mit deinem Reise-Kontext" : "Demo-Modus · lokale Beispielantworten") + '</div>' +
+              '<div class="flex items-center gap-1.5 text-[10px] text-slate-400">' + icon("database","h-3.5 w-3.5") + ' Eigener Reise-Assistent · ohne externe KI-API</div>' +
             '</div>' +
           '</section>' +
         '</div>' +
@@ -3194,7 +3168,7 @@
           '<button type="button" data-action="ai-start-voice" ' + (aiLoading?"disabled":"") + ' aria-label="' + (aiListening?"Sprachaufnahme beenden":"Frage sprechen") + '" title="' + (aiListening?"Sprachaufnahme beenden":"Frage sprechen") + '" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 ' + (aiListening?"bg-rose-50 text-rose-600":"bg-white text-slate-700") + ' shadow-sm transition hover:bg-slate-100 disabled:opacity-40">' + icon(aiListening?"mic-off":"mic","h-5 w-5") + '</button>' +
           '<button type="button" data-action="send-ai" ' + (aiLoading?"disabled":"") + ' aria-label="Frage senden" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white shadow-md transition hover:brightness-110 disabled:opacity-40">' + icon("arrow-up","h-5 w-5") + '</button>' +
         '</div>' +
-        '<div class="mx-auto mt-1.5 max-w-4xl text-center text-[9px] leading-4 text-slate-400">Sprachaufnahme und Vorlesen nutzen die Sprachfunktionen deines Browsers. ' + (trip?"Reisekontext: "+esc(trip.name):"") + '</div>' +
+        '<div class="mx-auto mt-1.5 max-w-4xl text-center text-[9px] leading-4 text-slate-400">Du kannst deine Frage auch über das Mikrofon diktieren. ' + (trip?"Reisekontext: "+esc(trip.name):"") + '</div>' +
       '</footer>' +
     '</div>';
   }
@@ -3262,121 +3236,207 @@
   }
 
   function localTripAssistantReply(question) {
+    const rawQuestion = String(question || "").trim();
+    const q = rawQuestion.toLocaleLowerCase("de-DE").replace(/[?!.,;:]+$/g, "");
     const trip = activeTrip();
-    const q = String(question || "").toLocaleLowerCase("de-DE");
+
+    const politeScope = "Das kann ich dir leider nicht zuverlässig beantworten, weil ich nur die Informationen aus deinen gespeicherten Urlaubsdaten verwende. Live-Wetter, aktuelle Hotel- oder Flugpreise und allgemeines Wissen kann ich hier nicht prüfen. Bei Budget, Ausgaben, Reisedaten, Mitreisenden, Packliste und To-dos helfe ich dir aber gern.";
+    if (!q) return "Schreib mir einfach eine Frage zu deinem ausgewählten Urlaub. Ich schaue dann in die gespeicherten Reisedaten.";
+
+    if (/^(hi|hallo|hey|moin|servus|guten morgen|guten tag|guten abend|na)\b/i.test(q)) {
+      return "Hallo! Schön, dass du da bist. Ich habe die gespeicherten Daten deines Urlaubs im Blick. Was möchtest du wissen?";
+    }
+    if (/(was kannst du|wobei kannst du|wie kannst du helfen|wofür bist du da|was weißt du|hilfe|hilf mir)/i.test(q)) {
+      return "Ich bin dein persönlicher Urlaubsassistent. Ich kann die Daten deiner Reise auswerten und dir zum Beispiel sagen, wie viel Budget noch übrig ist, welche Ausgaben am höchsten sind, wer mitreist und was auf deiner Packliste oder bei den To-dos noch offen ist. Auf Live-Informationen oder Fragen außerhalb dieser Reisedaten habe ich keinen Zugriff.";
+    }
+    if (/(wetter|temperatur|regnet|sonnenschein|vorhersage|hotelpreis|flugpreis|flugverbindung|öffnungszeit|einreisebestimmung|wechselkurs|live.?preis|aktuelle.?preise|nachrichten|heute.*geöffnet)/i.test(q)) {
+      return politeScope;
+    }
+
     if (!trip) {
-      const names = trips.slice(0,5).map(function(item){return item.name;}).filter(Boolean);
-      return "Du hast gerade keinen Urlaub ausgewählt. Lege zuerst eine Reise an oder wähle eine bestehende aus. " +
-        (names.length ? "Vorhandene Reisen: " + names.join(", ") + "." : "");
+      const names = trips.slice(0,5).map(item => item?.name).filter(Boolean);
+      return "Ich kann dir gern helfen. Wähle zuerst einen Urlaub aus, damit ich weiß, welche gespeicherten Reisedaten ich für meine Antwort verwenden soll." +
+        (names.length ? "\n\nVorhandene Urlaube: " + names.join(", ") + "." : "");
     }
 
     const expenses = Array.isArray(trip.expenses) ? trip.expenses : [];
     const tolls = Array.isArray(trip.tolls) ? trip.tolls : [];
     const rows = expenses.concat(tolls);
-    const total = rows.reduce(function(sum,row){return sum+Math.max(0,Number(row.amount)||0);},0);
+    const amountOf = row => Math.max(0, Number(row?.amount) || 0);
+    const total = rows.reduce((sum,row) => sum + amountOf(row),0);
     const budget = Math.max(0,Number(trip.budget)||0);
     const remaining = budget-total;
-    const percent = budget > 0 ? Math.round(total/budget*100) : null;
-    const categoryTotals = {};
-    rows.forEach(function(row){
-      const name = String(row.category || "Sonstiges");
-      categoryTotals[name] = (categoryTotals[name]||0) + Math.max(0,Number(row.amount)||0);
-    });
-    const categories = Object.entries(categoryTotals).sort(function(a,b){return b[1]-a[1];});
+    const usedPercent = budget>0 ? Math.round(total/budget*100) : null;
     const packlist = Array.isArray(trip.packlist) ? trip.packlist : [];
     const todos = Array.isArray(trip.todos) ? trip.todos : [];
-    const openPacking = packlist.filter(function(item){return !item.done;});
-    const openTodos = todos.filter(function(item){return !item.done;});
+    const openPacking = packlist.filter(item => !item.done);
+    const openTodos = todos.filter(item => !item.done);
     const people = Array.isArray(trip.people) ? trip.people : [];
-    const dateRange = trip.startDate && trip.endDate ? shortDate(trip.startDate) + " bis " + shortDate(trip.endDate) : "noch nicht vollständig festgelegt";
-    const categoryText = categories.length
-      ? categories.slice(0,5).map(function(entry){return "- " + entry[0] + ": " + money(entry[1]);}).join("\n")
-      : "Noch keine Ausgaben erfasst.";
+    const categoriesByAmount = {};
+    rows.forEach(row => {
+      const category = String(row.category || "Sonstiges");
+      categoriesByAmount[category] = (categoriesByAmount[category] || 0) + amountOf(row);
+    });
+    const categories = Object.entries(categoriesByAmount).sort((a,b) => b[1]-a[1]);
+    const recent = rows.slice().sort((a,b) => String(b.date||"").localeCompare(String(a.date||"")));
+    const dateRange = trip.startDate && trip.endDate
+      ? shortDate(trip.startDate) + " bis " + shortDate(trip.endDate)
+      : "noch nicht vollständig eingetragen";
 
-    let remainingDays = 0;
-    function dateValue(value) {
+    function utcDate(value) {
       const parts = String(value||"").split("-").map(Number);
-      return parts.length===3 && parts.every(Number.isFinite) ? Date.UTC(parts[0],parts[1]-1,parts[2]) : NaN;
+      return parts.length===3 && parts.every(Number.isFinite)
+        ? Date.UTC(parts[0],parts[1]-1,parts[2]) : NaN;
     }
-    const today = dateValue(iso());
-    const startDate = dateValue(trip.startDate);
-    const endDate = dateValue(trip.endDate);
-    if (Number.isFinite(today) && Number.isFinite(startDate) && Number.isFinite(endDate) && endDate >= today && endDate >= startDate) {
-      remainingDays = Math.floor((endDate-Math.max(today,startDate))/86400000)+1;
+    const dayMs = 86400000;
+    const today = utcDate(iso());
+    const startDate = utcDate(trip.startDate);
+    const endDate = utcDate(trip.endDate);
+    const durationDays = Number.isFinite(startDate) && Number.isFinite(endDate) && endDate>=startDate
+      ? Math.floor((endDate-startDate)/dayMs)+1 : null;
+    const daysUntilStart = Number.isFinite(today) && Number.isFinite(startDate)
+      ? Math.ceil((startDate-today)/dayMs) : null;
+    const remainingTripDays = Number.isFinite(today) && Number.isFinite(startDate) && Number.isFinite(endDate) && endDate>=startDate
+      ? (today<startDate ? durationDays : today<=endDate ? Math.floor((endDate-today)/dayMs)+1 : 0)
+      : 0;
+
+    const asksForSummary = /(zusammenfass|fass.*zusammen|überblick|übersicht|status|reisestand|stand.*urlaub|wie läuft.*urlaub)/i.test(q);
+    const asksForPackAndTodos = /(packlist|koffer|einpack|gepäck|packen)/i.test(q) && /(to.?do|aufgab|offen|checklist)/i.test(q);
+    const asksForPacking = /(packlist|koffer|einpack|gepäck|packen)/i.test(q);
+    const asksForTodos = /(to.?do|aufgab|erledigt|offen|checklist|vorbereit)/i.test(q);
+    const asksForPeople = /(person|mitreis|teilnehmer|wer fährt|wer reist|wie viele.*(leute|personen|menschen))/i.test(q);
+    const asksForDestination = /(wohin|welches ziel|reiseziel|destination|wo fahren|wo geht.*hin|wo.*urlaub)/i.test(q);
+    const asksForDates = /(wann|welches datum|welcher zeitraum|reisezeit|wie lange|wie viele tage|wie lang|ab wann|bis wann|wie weit.*(urlaub|reise)|wie lange noch)/i.test(q);
+    const asksForBudget = /(budget|übrig|restbetrag|restbudget|noch.*ausgeben|pro tag|täglich|tagessatz|pro person|je person)/i.test(q);
+    const asksForSpecificBiggestExpense = /(teuerste ausgabe|größte ausgabe|einzelposten|einzelne ausgabe|welche ausgabe.*teuerste)/i.test(q);
+    const asksForCategories = /(kategor|teuer|höchste|größte|am meisten|meiste.*geld|kostet.*meisten)/i.test(q);
+    const asksForSpending = /(ausgab|kosten|ausgegeben|bezahlt|buchung|transaktion|geld|maut|gebühr)/i.test(q);
+    const asksForHistory = /(früher|frühere|letzte reise|vorherige|vergangene urlaub|andere urlaub|urlaube vergleichen|vergleich.*urlaub)/i.test(q);
+
+    if (asksForSummary) {
+      const completedPacking = packlist.length-openPacking.length;
+      const completedTodos = todos.length-openTodos.length;
+      const parts = [
+        "Hier ist der aktuelle Stand für **" + trip.name + "**.",
+        "**Reiseziel:** " + (trip.destination || "Noch nicht eingetragen"),
+        "**Zeitraum:** " + dateRange,
+        "**Mitreisende:** " + (people.length ? people.map(person=>person.name).filter(Boolean).join(", ") : "Noch keine eingetragen"),
+        "**Budget:** " + (budget>0 ? money(budget) : "Noch nicht festgelegt"),
+        "**Ausgaben:** " + money(total) + (rows.length ? " in " + rows.length + " Einträgen" : " – bisher noch keine Einträge"),
+        "**Restbudget:** " + (budget>0 ? money(remaining) : "Nicht berechenbar, da kein Budget hinterlegt"),
+        "**Packliste:** " + completedPacking + " von " + packlist.length + " erledigt",
+        "**To-dos:** " + completedTodos + " von " + todos.length + " erledigt"
+      ];
+      return parts.join("\n") + "\n\n" + (openTodos.length || openPacking.length
+        ? "Es gibt noch ein paar offene Punkte. Ich kann dir zeigen, womit du am besten weitermachst."
+        : "Sieht gut aus – aktuell ist in deinen Listen nichts mehr offen.");
     }
 
-    if (/(zusammenfass|fass.*zusammen|überblick|übersicht|status|reisestand|stand.*urlaub)/i.test(q)) {
-      return "## " + trip.name + "\n" +
-        "**Ziel:** " + (trip.destination || "Noch nicht eingetragen") + "\n" +
-        "**Zeitraum:** " + dateRange + "\n" +
-        "**Budget:** " + (budget > 0 ? money(budget) : "Noch nicht festgelegt") + "\n" +
-        "**Bisher ausgegeben:** " + money(total) + "\n" +
-        "**Noch übrig:** " + (budget > 0 ? money(remaining) : "Kein Budget hinterlegt") + "\n" +
-        "**Packliste:** " + packlist.filter(function(item){return item.done;}).length + " von " + packlist.length + " erledigt\n" +
-        "**To-dos:** " + todos.filter(function(item){return item.done;}).length + " von " + todos.length + " erledigt\n" +
-        "**Mitreisende:** " + people.length;
+    if (asksForPackAndTodos || (/(was ist noch offen|was fehlt noch|was muss ich noch machen)/i.test(q) && (openPacking.length || openTodos.length))) {
+      const packingText = openPacking.length
+        ? openPacking.slice(0,10).map(item => "• " + String(item.text||item.name||"Eintrag")).join("\n")
+        : "Alles auf der Packliste ist erledigt.";
+      const todoText = openTodos.length
+        ? openTodos.slice(0,10).map(item => "• " + String(item.text||item.title||"Aufgabe")).join("\n")
+        : "Alle To-dos sind erledigt.";
+      return "Ich habe deine offenen Punkte durchgesehen. Das steht noch an:\n\n**Packliste**\n" + packingText + "\n\n**To-dos**\n" + todoText;
     }
 
-    if (/(budget|übrig|restbetrag|noch.*ausgeben|pro tag|täglich|tagessatz)/i.test(q)) {
-      if (budget <= 0) return "Für **" + trip.name + "** ist noch kein Budget eingetragen. Sobald du ein Budget festlegst, kann ich dir Restbetrag und Tagesrichtwert berechnen.";
-      let answer = "Für **" + trip.name + "** sind **" + money(budget) + "** eingeplant.\n\n" +
-        "- Ausgegeben: **" + money(total) + "**\n" +
-        "- Übrig: **" + money(remaining) + "**\n" +
-        "- Budget genutzt: **" + percent + "%**";
-      if (remaining < 0) answer += "\n\nDu liegst aktuell **" + money(Math.abs(remaining)) + " über dem Budget**.";
-      else if (remainingDays > 0) answer += "\n\nBei " + remainingDays + " verbleibenden Reisetagen wären das ungefähr **" + money(remaining/remainingDays) + " pro Tag**.";
+    if (asksForPacking) {
+      if (!packlist.length) return "Für **" + trip.name + "** hast du noch keine Packliste angelegt. Sobald du etwas einträgst, kann ich dir jederzeit sagen, was noch fehlt.";
+      if (!openPacking.length) return "Sehr gut – deine Packliste für **" + trip.name + "** ist vollständig abgehakt. Du musst laut deiner Liste nichts mehr einpacken.";
+      return "Ich habe deine Packliste geprüft. **" + openPacking.length + " " + (openPacking.length===1?"Punkt ist":"Punkte sind") + " noch offen:**\n\n" +
+        openPacking.slice(0,12).map(item => "• " + String(item.text||item.name||"Eintrag")).join("\n") +
+        "\n\nDie bereits abgehakten Dinge habe ich weggelassen.";
+    }
+
+    if (asksForTodos) {
+      if (!todos.length) return "Für **" + trip.name + "** sind noch keine To-dos gespeichert. Wenn du Aufgaben einträgst, kann ich dir den offenen Stand anzeigen.";
+      if (!openTodos.length) return "Prima – alle " + todos.length + " To-dos für **" + trip.name + "** sind erledigt. In deiner Aufgabenliste ist nichts mehr offen.";
+      return "Ich habe deine Aufgabenliste angesehen. **Noch offen sind " + openTodos.length + " " + (openTodos.length===1?"Aufgabe":"Aufgaben") + ":**\n\n" +
+        openTodos.slice(0,12).map(item => "• " + String(item.text||item.title||"Aufgabe")).join("\n");
+    }
+
+    if (asksForPeople) {
+      if (!people.length) return "In **" + trip.name + "** sind bisher keine Mitreisenden eingetragen.";
+      const names = people.map(person=>person.name).filter(Boolean);
+      return "Laut deinem Urlaub **" + trip.name + "** reisen " + names.length + " " + (names.length===1?"Person":"Personen") + " mit: **" + names.join(", ") + "**.";
+    }
+
+    if (asksForDestination) {
+      return trip.destination
+        ? "Für **" + trip.name + "** ist **" + trip.destination + "** als Reiseziel gespeichert."
+        : "Für **" + trip.name + "** ist noch kein Reiseziel eingetragen. Sobald du es ergänzt, kann ich es dir hier anzeigen.";
+    }
+
+    if (asksForDates) {
+      if (!trip.startDate || !trip.endDate) return "Die Reisedaten für **" + trip.name + "** sind noch nicht vollständig gespeichert. Ich sehe aktuell: " + dateRange + ".";
+      let timing = "";
+      if (daysUntilStart !== null && daysUntilStart > 0) timing = "Bis zur Abreise sind es noch **" + daysUntilStart + " Tage**.";
+      else if (daysUntilStart !== null && daysUntilStart === 0) timing = "Deine Reise beginnt heute – gute Reise!";
+      else if (remainingTripDays > 0) timing = "Deine Reise läuft gerade; laut Zeitraum sind noch **" + remainingTripDays + " Tage** übrig.";
+      else timing = "Der gespeicherte Reisezeitraum ist bereits vorbei.";
+      return "Dein Urlaub **" + trip.name + "** ist vom **" + dateRange + "** geplant. Das sind **" + durationDays + " Tage**. " + timing;
+    }
+
+    if (asksForBudget) {
+      if (budget<=0) {
+        return total>0
+          ? "Für **" + trip.name + "** ist noch kein festes Budget hinterlegt. Bisher sind **" + money(total) + "** in deinen Ausgaben gespeichert. Ein Restbudget kann ich deshalb noch nicht berechnen."
+          : "Für **" + trip.name + "** ist noch kein Budget eingetragen und es sind auch noch keine Ausgaben gespeichert. Sobald du ein Budget festlegst, kann ich den Restbetrag und einen Tagesrichtwert berechnen.";
+      }
+      let answer = "Für **" + trip.name + "** hast du **" + money(budget) + "** eingeplant. Davon sind bisher **" + money(total) + "** ausgegeben – es bleiben **" + money(remaining) + "**.";
+      answer += " Das entspricht **" + usedPercent + "%** deines Budgets.";
+      if (remaining<0) {
+        answer += "\n\nDu liegst damit **" + money(Math.abs(remaining)) + " über deinem geplanten Budget**. Vielleicht lohnt es sich, die nächsten Ausgaben etwas genauer im Blick zu behalten.";
+      } else if (remainingTripDays>0 && /(pro tag|täglich|tagessatz)/i.test(q)) {
+        answer += "\n\nBei noch " + remainingTripDays + " Reisetagen könntest du im Schnitt etwa **" + money(remaining/remainingTripDays) + " pro Tag** ausgeben.";
+      } else if (/(pro person|je person)/i.test(q) && people.length) {
+        answer += "\n\nAuf " + people.length + " Mitreisende verteilt sind das ungefähr **" + money(remaining/people.length) + " Restbudget pro Person**.";
+      } else if (remaining>=0) {
+        answer += "\n\nDu hast also noch etwas Spielraum. Wenn du möchtest, zeige ich dir auch, wofür bisher am meisten Geld draufgegangen ist.";
+      }
       return answer;
     }
 
-    if (/(kategor|teuer|höchste|größte|am meisten|meiste.*geld|kostet.*meisten)/i.test(q)) {
-      if (!categories.length) return "Für **" + trip.name + "** sind noch keine Ausgaben erfasst. Sobald du etwas einträgst, kann ich dir die teuersten Kategorien zeigen.";
-      return "Die größten Ausgabenkategorien für **" + trip.name + "** sind:\n\n" + categoryText;
+    if (asksForSpecificBiggestExpense) {
+      if (!rows.length) return "Bisher ist in **" + trip.name + "** noch keine Ausgabe gespeichert. Sobald du etwas einträgst, kann ich den größten Einzelposten erkennen.";
+      const biggest = rows.slice().sort((a,b)=>amountOf(b)-amountOf(a))[0];
+      return "Der größte einzelne Eintrag ist **" + String(biggest.title||"Ausgabe") + "** mit **" + money(amountOf(biggest)) + "**. Er ist unter **" + String(biggest.category||"Sonstiges") + "** gespeichert.";
     }
 
-    if (/(packlist|koffer|einpack|gepäck|packen)/i.test(q) && /(to.?do|aufgab|aufgabe|offen)/i.test(q)) {
-      return "**Noch einzupacken**\n" +
-        (openPacking.length ? openPacking.slice(0,8).map(function(item){return "- " + String(item.text||item.name||"Eintrag");}).join("\n") : "- Alles erledigt oder noch keine Packliste angelegt.") +
-        "\n\n**Offene To-dos**\n" +
-        (openTodos.length ? openTodos.slice(0,8).map(function(item){return "- " + String(item.text||item.title||"Aufgabe");}).join("\n") : "- Keine offenen Aufgaben.");
+    if (asksForCategories) {
+      if (!categories.length) return "Bisher sind für **" + trip.name + "** noch keine Ausgaben gespeichert. Sobald Einträge da sind, kann ich dir die größten Kostenbereiche zeigen.";
+      const top = categories.slice(0,5).map((entry,index) => (index+1) + ". **" + entry[0] + "** – " + money(entry[1])).join("\n");
+      return "Ich habe die Ausgaben nach Kategorien sortiert. Am meisten ist bisher hier angefallen:\n\n" + top;
     }
 
-    if (/(packlist|koffer|einpack|gepäck|packen)/i.test(q)) {
-      if (!openPacking.length) return packlist.length ? "Super! Deine Packliste für **" + trip.name + "** ist vollständig erledigt." : "Für **" + trip.name + "** hast du noch keine Packlistenpunkte angelegt.";
-      return "Auf deiner Packliste für **" + trip.name + "** sind noch " + openPacking.length + " Punkte offen:\n\n" +
-        openPacking.slice(0,12).map(function(item){return "- " + String(item.text||item.name||"Eintrag");}).join("\n");
+    if (asksForSpending) {
+      if (!rows.length) return "Für **" + trip.name + "** sind aktuell noch keine Ausgaben oder Gebühren eingetragen.";
+      const latest = recent.slice(0,6).map(row => "• " + String(row.title||"Ausgabe") + " – " + money(amountOf(row)) + " (" + String(row.category||"Sonstiges") + ")").join("\n");
+      return "In **" + trip.name + "** sind bisher **" + money(total) + "** in " + rows.length + " Einträgen gespeichert.\n\n" +
+        (categories.length ? "Die größte Kategorie ist **" + categories[0][0] + "** mit **" + money(categories[0][1]) + "**.\n\n" : "") +
+        "**Neueste Einträge**\n" + latest;
     }
 
-    if (/(to.?do|aufgab|erledigt|offen|checkliste)/i.test(q)) {
-      if (!openTodos.length) return todos.length ? "Alle To-dos für **" + trip.name + "** sind erledigt." : "Für **" + trip.name + "** sind noch keine To-dos angelegt.";
-      return "Diese Aufgaben sind für **" + trip.name + "** noch offen:\n\n" +
-        openTodos.slice(0,12).map(function(item){return "- " + String(item.text||item.title||"Aufgabe");}).join("\n");
+    if (asksForHistory) {
+      const pastTrips = trips.filter(item => item && item.id!==trip.id && item.endDate && item.endDate<iso())
+        .sort((a,b)=>String(b.endDate).localeCompare(String(a.endDate))).slice(0,5);
+      if (!pastTrips.length) return "Ich finde in deinen gespeicherten Daten noch keinen abgeschlossenen früheren Urlaub zum Vergleichen.";
+      const summaries = pastTrips.map(item => {
+        const savedRows = [...(item.expenses||[]),...(item.tolls||[])];
+        const spent = savedRows.reduce((sum,row)=>sum+amountOf(row),0);
+        return "• **" + item.name + "**" + (item.destination?" ("+item.destination+")":"") + ": " + money(spent) + " ausgegeben";
+      }).join("\n");
+      return "Ich habe deine früheren Reisen gefunden. Hier ist der gespeicherte Vergleich:\n\n" + summaries;
     }
 
-    if (/(ausgab|kosten|ausgegeben|bezahlt|buchung|transaktion|geld)/i.test(q)) {
-      if (!rows.length) return "Für **" + trip.name + "** sind noch keine Ausgaben oder Gebühren eingetragen.";
-      const recent = rows.slice().sort(function(a,b){return String(b.date||"").localeCompare(String(a.date||""));}).slice(0,6);
-      return "Für **" + trip.name + "** sind bisher **" + money(total) + "** in " + rows.length + " Einträgen erfasst.\n\n" +
-        "**Größte Kategorien**\n" + categoryText + "\n\n**Letzte Einträge**\n" +
-        recent.map(function(item){return "- " + String(item.title||"Ausgabe") + ": " + money(Number(item.amount)||0) + " (" + (item.category||"Sonstiges") + ")";}).join("\n");
-    }
-
-    if (/(person|mitreis|teilnehmer|wer fährt|wer reist)/i.test(q)) {
-      return people.length
-        ? "Für **" + trip.name + "** sind " + people.length + " Personen eingetragen: " + people.map(function(item){return item.name;}).filter(Boolean).join(", ") + "."
-        : "Für **" + trip.name + "** sind noch keine Mitreisenden eingetragen.";
-    }
-
-    return "Ich kann die gespeicherten Daten von **" + trip.name + "** direkt auswerten. Frag mich zum Beispiel:\n\n" +
-      "- „Fass meinen Urlaub zusammen“\n" +
-      "- „Wie viel Budget ist noch übrig?“\n" +
-      "- „Welche Kategorie kostet am meisten?“\n" +
-      "- „Was ist auf meiner Packliste noch offen?“";
+    return "Das kann ich aus den gespeicherten Daten deines Urlaubs gerade nicht sicher beantworten. Ich möchte dir nichts ausdenken. Frag mich gern nach deinem Budget, deinen Ausgaben, dem Reisezeitraum, den Mitreisenden, der Packliste oder den offenen To-dos.";
   }
 
-  async function sendAIMessage(textOverride = "") {
+    async function sendAIMessage(textOverride = "") {
     const input = String(textOverride || aiInput || "").trim();
     if (!input || aiLoading) return;
-    stopAISpeechOutput();
     aiInput = "";
     aiError = "";
     aiChatHistoryOpen = false;
@@ -3384,55 +3444,16 @@
     aiLoading = true;
     render();
     try {
-      let answer;
-      if (session?.user?.id) {
-        const { data, error } = await supabase.functions.invoke("urlaubassistent-ai", {
-          body: {
-            messages: aiMessages.slice(-12).map(message => ({
-              role: message.role === "user" ? "user" : "assistant",
-              content: String(message.content || "").slice(0, 6000)
-            })),
-            context: aiContext(),
-            webSearchEnabled: aiWebSearchEnabled
-          }
-        });
-        if (error) {
-          let serverMessage = "";
-          try {
-            const response = error.context;
-            if (response instanceof Response) {
-              const payload = await response.clone().json();
-              serverMessage = String(payload?.error || payload?.message || "");
-            }
-          } catch {}
-          throw new Error(serverMessage || error.message || "Die KI konnte gerade nicht erreicht werden.");
-        }
-        if (data?.error) throw new Error(String(data.error));
-        const reply = String(data?.reply || "").trim();
-        if (!reply) throw new Error("Die KI hat keine Antwort zurückgegeben.");
-        answer = {
-          role: "assistant",
-          content: reply,
-          actions: data.actions || null,
-          sources: Array.isArray(data.sources) ? data.sources : [],
-          webSearchRequested: data.webSearchRequested === true,
-          webSearchEligible: data.webSearchEligible === true,
-          webSearchBlockedReason: String(data.webSearchBlockedReason || ""),
-          followUps: aiFollowUpsFor(input)
-        };
-      } else {
-        // The public demo has no authenticated session; keep it local and clearly labelled.
-        answer = {
-          role: "assistant",
-          content: localTripAssistantReply(input),
-          followUps: aiFollowUpsFor(input)
-        };
-      }
-      aiMessages = [...aiMessages, answer];
+      const reply = localTripAssistantReply(input);
+      aiMessages = [...aiMessages, {
+        role:"assistant",
+        content:reply,
+        followUps:aiFollowUpsFor(input)
+      }];
       await saveAIChatHistory();
     } catch (error) {
-      console.error("KI-Antwort fehlgeschlagen:", error);
-      aiError = error?.message || "Die Reise-KI ist gerade nicht erreichbar. Bitte versuche es erneut.";
+      console.error("Lokale Urlaubsauswertung fehlgeschlagen:",error);
+      aiError = "Deine Urlaubsdaten konnten gerade nicht ausgewertet werden. Bitte versuche es erneut.";
     } finally {
       aiLoading = false;
       render();
@@ -3442,7 +3463,6 @@
       },0);
     }
   }
-
   function normalizeAIActionProposal(value) {
     if (!value || typeof value !== "object" || Array.isArray(value)) return null;
     const text = (v, max) => typeof v === "string" ? v.trim().slice(0, max || 160) : "";
@@ -3529,61 +3549,6 @@
       recognition.onend=()=>{if(aiListening){aiListening=false;render();}};
       aiSpeechRecognition=recognition;aiListening=true;aiError="";render();recognition.start();
     }catch{aiListening=false;aiError="Das Mikrofon konnte nicht gestartet werden. Prüfe die Browser-Berechtigung.";render();}
-  }
-
-  function stopAISpeechOutput() {
-    try {
-      if (window.speechSynthesis) window.speechSynthesis.cancel();
-    } catch (_) {}
-    aiSpeakingMessageIndex = -1;
-  }
-
-  function speakAIMessage(messageIndex) {
-    const message = aiMessages[messageIndex];
-    if (!message || message.role !== "assistant") return;
-    if (!("speechSynthesis" in window) || typeof window.SpeechSynthesisUtterance !== "function") {
-      aiError = "Dein Browser unterstützt das Vorlesen leider nicht. Du kannst die Antwort weiterhin lesen.";
-      render();
-      return;
-    }
-    if (aiSpeakingMessageIndex === messageIndex) {
-      stopAISpeechOutput();
-      render();
-      return;
-    }
-    stopAISpeechOutput();
-    const plainText = String(message.content || "")
-      .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, "$1")
-      .replace(/https?:\/\/\S+/g, "")
-      .replace(/<[^>]*>/g, " ")
-      .replace(/^\s{0,3}#{1,6}\s+/gm, "")
-      .replace(/\*\*(.*?)\*\*/g, "$1")
-      .replace(/__(.*?)__/g, "$1")
-      .replace(/[*_>#]/g, " ")
-      .replace(/[-•]\s+/g, ". ")
-      .replace(/\s+/g, " ")
-      .trim();
-    if (!plainText) return;
-    const utterance = new SpeechSynthesisUtterance(plainText);
-    utterance.lang = "de-DE";
-    utterance.rate = 1;
-    utterance.pitch = 1;
-    const voices = window.speechSynthesis.getVoices();
-    utterance.voice = voices.find(voice => /^de[-_]/i.test(voice.lang)) || null;
-    aiSpeakingMessageIndex = messageIndex;
-    utterance.onend = () => {
-      if (aiSpeakingMessageIndex === messageIndex) {
-        aiSpeakingMessageIndex = -1;
-        render();
-      }
-    };
-    utterance.onerror = () => {
-      aiSpeakingMessageIndex = -1;
-      aiError = "Die Sprachausgabe wurde unterbrochen. Versuche es bitte erneut.";
-      render();
-    };
-    render();
-    window.speechSynthesis.speak(utterance);
   }
 
   async function applyAIActions(messageIndex) {
@@ -4141,7 +4106,7 @@
   function defaultAIChatMessage() {
     return {
       role:"assistant",
-      content:"Hallo! Ich bin dein Urlaubsassistent. Ich kann mit deinen Reisedaten planen, Fragen frei beantworten und dir Reiseideen geben. Du kannst mir auch Fragen diktieren und Antworten vorlesen lassen."
+      content:"Hallo! Ich bin dein Urlaubsassistent. Ich lese die Daten deines ausgewählten Urlaubs und beantworte Fragen zu Budget, Ausgaben, Reisedaten, Mitreisenden, Packliste und To-dos. Fragen außerhalb dieser Bereiche lehne ich ehrlich ab."
     };
   }
 
@@ -6468,13 +6433,11 @@
         render();
         return;
       }
-      if(action==="toggle-ai"){const wasOpen=aiOpen;aiOpen=!aiOpen;if(wasOpen)stopAISpeechOutput();aiError="";if(aiOpen)loadAIChatHistory();render();return;}
+      if(action==="toggle-ai"){aiOpen=!aiOpen;aiError="";if(aiOpen)loadAIChatHistory();render();return;}
       if(action==="toggle-ai-history"){aiChatHistoryOpen=!aiChatHistoryOpen;aiError="";if(aiChatHistoryOpen)await loadAISavedChats();render();return;}
       if(action==="new-ai-chat"){await startNewAIChat();return;}
       if(action==="back-to-ai-chat"){aiChatHistoryOpen=false;render();return;}
       if(action==="open-ai-saved-chat"){await openAISavedChat(el.dataset.chatId);return;}
-      if(action==="toggle-ai-web-search"){aiWebSearchEnabled=!aiWebSearchEnabled;localStorage.setItem(K.aiWebSearchEnabled,String(aiWebSearchEnabled));render();return;}
-      if(action==="ai-speak"){speakAIMessage(Number(el.dataset.messageIndex));return;}
       if(action==="ai-start-voice"){startAISpeechInput();return;}
       if(action==="ai-receipt"){if(activeTrip()?.role==="viewer"){aiError="Du hast in diesem geteilten Urlaub nur Leserechte.";render();return;}document.getElementById("ai-receipt-input")?.click();return;}
       if(action==="remove-ai-receipt"){aiReceiptImageDataUrl="";aiReceiptImageName="";render();return;}
@@ -6854,7 +6817,7 @@
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
       refreshLoaderVersionLabel();
-      navigator.serviceWorker.register("./service-worker.js?v=103").catch(() => {});
+      navigator.serviceWorker.register("./service-worker.js?v=104").catch(() => {});
     }, { once: true });
   } else {
     window.addEventListener("load", refreshLoaderVersionLabel, { once: true });
