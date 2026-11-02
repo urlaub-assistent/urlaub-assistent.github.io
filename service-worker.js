@@ -1,3 +1,4 @@
+// Bei jedem veröffentlichten Update vNN erhöhen und die service-worker.js?v=NN-Angabe in index.html mitziehen.
 const CACHE_NAME = 'urlaubassistent-shell-v104';
 const RUNTIME_CACHE_NAME = 'urlaubassistent-runtime-assets-v1';
 const APP_SHELL = [
