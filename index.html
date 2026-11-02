@@ -877,7 +877,7 @@
     }
 
 
-    /* Current GitHub release marker, quietly anchored to the lower-left of the splash. */
+    /* Current GitHub release marker, anchored to the lower-right of the splash. */
     .ua-loader-version {
       position: absolute;
       display: block;
@@ -915,6 +915,26 @@
       filter: none !important;
     }
 
+
+    .ua-app-version {
+      position: fixed;
+      right: max(12px, env(safe-area-inset-right));
+      bottom: max(12px, env(safe-area-inset-bottom));
+      z-index: 80;
+      padding: 6px 9px;
+      border: 1px solid rgba(148,163,184,.30);
+      border-radius: 999px;
+      background: rgba(15,23,42,.76);
+      color: rgba(248,250,252,.90);
+      font: 800 10px/1 system-ui, sans-serif;
+      letter-spacing: .08em;
+      text-shadow: 0 1px 4px rgba(0,0,0,.2);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      pointer-events: none;
+      user-select: none;
+    }
+
 </style>
 </head>
 <body class="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900">
@@ -928,7 +948,7 @@
     
     
     <span class="ua-loader-orbit-bg ua-loader-orbit-bg-three" aria-hidden="true"></span>
-    <span class="ua-loader-version">v101</span>
+    <span class="ua-loader-version">v102</span>
     <svg class="ua-loader-flight-stage" viewBox="0 0 400 900" preserveAspectRatio="none" fill="none" aria-hidden="true" focusable="false"><path id="ua-loader-flight-path" d="M 370 105 C 325 155 292 230 226 202 C 165 176 174 99 111 127 C 48 153 28 230 78 282 C 128 333 218 292 286 332 C 354 372 378 437 312 481 C 246 525 155 445 89 486 C 23 526 35 611 104 648 C 173 685 250 590 321 623 C 392 656 375 737 312 779 C 249 821 179 746 121 780 C 63 814 53 850 28 885"/><path class="ua-loader-flight-trail" pathLength="1" d="M 370 105 C 325 155 292 230 226 202 C 165 176 174 99 111 127 C 48 153 28 230 78 282 C 128 333 218 292 286 332 C 354 372 378 437 312 481 C 246 525 155 445 89 486 C 23 526 35 611 104 648 C 173 685 250 590 321 623 C 392 656 375 737 312 779 C 249 821 179 746 121 780 C 63 814 53 850 28 885"/><g class="ua-loader-flight-aircraft"><animateMotion begin="indefinite" dur="12s" repeatCount="indefinite" rotate="auto" calcMode="linear"><mpath href="#ua-loader-flight-path"/></animateMotion><use href="#ua-airplane-symbol" x="-12" y="-12" width="24" height="24"/></g></svg>
     
     <div class="ua-loader-center">
@@ -940,6 +960,8 @@
     </div>
   </div>
 </div>
+<div id="ua-app-version" class="ua-app-version" aria-label="App-Version v102">v102</div>
+
 <script>
 (() => {
   "use strict";
@@ -1044,6 +1066,7 @@
   let aiReceiptProcessing = false;
   let aiSpeechRecognition = null;
   let aiListening = false;
+  let aiSpeakingMessageIndex = -1;
   let aiActionsApplying = false;
   let deferredPWAInstallPrompt = null;
   let pwaInstallHelpOpen = false;
@@ -1053,7 +1076,7 @@
   let aiMessages = [
     {
       role: "assistant",
-      content: "Hallo! Ich bin dein Urlaubsassistent. Ich kann deine gespeicherten Reisedaten zusammenfassen und Fragen zu Budget, Ausgaben, Packliste und To-dos beantworten."
+      content: "Hallo! Ich bin dein Urlaubsassistent. Ich kann deine Reisedaten berücksichtigen, Reiseideen entwickeln, Fragen frei beantworten und dir bei der Planung helfen. Du kannst mir eine Frage diktieren oder dir meine Antworten vorlesen lassen."
     }
   ];
 
@@ -1552,7 +1575,7 @@
       const source = await response.text();
       const match = source.match(/const\s+CACHE_NAME\s*=\s*["']urlaubassistent-shell-v(\d+)["']/);
       if (!match) return;
-      document.querySelectorAll(".ua-loader-version").forEach((label) => {
+      document.querySelectorAll(".ua-loader-version, #ua-app-version").forEach((label) => {
         label.textContent = "v" + match[1];
       });
     } catch (_) {}
@@ -1726,7 +1749,7 @@
   function loadingHTML() {
     return '<div class="ua-status-screen ua-loading-screen fixed inset-0 z-[200] flex min-h-screen items-center justify-center overflow-hidden px-6" role="status" aria-label="Urlaubassistent wird geladen">' +
       '<span class="ua-loader-orbit-bg ua-loader-orbit-bg-three" aria-hidden="true"></span>' +
-      '<span class="ua-loader-version">v101</span>' +
+      '<span class="ua-loader-version">v102</span>' +
       '<svg class="ua-loader-flight-stage" viewBox="0 0 400 900" preserveAspectRatio="none" fill="none" aria-hidden="true" focusable="false"><path id="ua-loader-flight-path" d="M 370 105 C 325 155 292 230 226 202 C 165 176 174 99 111 127 C 48 153 28 230 78 282 C 128 333 218 292 286 332 C 354 372 378 437 312 481 C 246 525 155 445 89 486 C 23 526 35 611 104 648 C 173 685 250 590 321 623 C 392 656 375 737 312 779 C 249 821 179 746 121 780 C 63 814 53 850 28 885"/><path class="ua-loader-flight-trail" pathLength="1" d="M 370 105 C 325 155 292 230 226 202 C 165 176 174 99 111 127 C 48 153 28 230 78 282 C 128 333 218 292 286 332 C 354 372 378 437 312 481 C 246 525 155 445 89 486 C 23 526 35 611 104 648 C 173 685 250 590 321 623 C 392 656 375 737 312 779 C 249 821 179 746 121 780 C 63 814 53 850 28 885"/><g class="ua-loader-flight-aircraft"><animateMotion begin="indefinite" dur="12s" repeatCount="indefinite" rotate="auto" calcMode="linear"><mpath href="#ua-loader-flight-path"/></animateMotion><use href="#ua-airplane-symbol" x="-12" y="-12" width="24" height="24"/></g></svg>' +
       '' +
       '<div class="ua-loader-center"><div class="ua-loader-icon-shell"><span class="ua-loader-orbit-ring" aria-hidden="true"></span><img src="./icon-192.png" alt="Urlaubassistent" width="88" height="88" class="ua-loader-logo" /></div>' +
@@ -3127,7 +3150,14 @@
       if (message.role === "user") {
         return '<div class="flex justify-end"><div class="max-w-[88%] rounded-3xl rounded-br-lg bg-gradient-to-r from-indigo-600 to-blue-600 px-4 py-3 text-sm leading-6 text-white shadow-md">' + esc(message.content).replace(/\n/g,"<br>") + '</div></div>';
       }
-      return '<div class="flex items-start gap-2.5"><div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-cyan-500 text-white shadow-md">' + icon("sparkles","h-4 w-4") + '</div><div class="max-w-[90%] min-w-0 rounded-3xl rounded-tl-lg border border-slate-100 bg-white px-4 py-3 text-sm leading-6 text-slate-700 shadow-sm">' + aiMarkdownHTML(message.content) + (index===aiMessages.length-1?aiFollowUpsHTML(message.followUps):"") + '</div></div>';
+      const speaking = aiSpeakingMessageIndex === index;
+      return '<div class="flex items-start gap-2.5"><div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-cyan-500 text-white shadow-md">' + icon("sparkles","h-4 w-4") + '</div><div class="max-w-[90%] min-w-0 rounded-3xl rounded-tl-lg border border-slate-100 bg-white px-4 py-3 text-sm leading-6 text-slate-700 shadow-sm">' +
+        aiMarkdownHTML(message.content) +
+        aiActionPreviewHTML(message.actions,index) +
+        aiWebSearchNoticeHTML(message) +
+        aiSourcesHTML(message.sources,message.webSearchRequested) +
+        '<div class="mt-3 flex justify-end"><button type="button" data-action="ai-speak" data-message-index="' + index + '" aria-label="' + (speaking?"Vorlesen stoppen":"Antwort vorlesen") + '" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold text-slate-600 transition hover:bg-slate-100">' + icon(speaking?"square":"volume-2","h-3.5 w-3.5") + (speaking?"Stoppen":"Vorlesen") + '</button></div>' +
+        (index===aiMessages.length-1?aiFollowUpsHTML(message.followUps):"") + '</div></div>';
     }).join("");
 
     return '<div class="fixed inset-0 z-[120] flex h-[100dvh] min-h-screen w-full flex-col overflow-hidden bg-[#f8fafc] text-slate-900">' +
@@ -3146,24 +3176,25 @@
           '<section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">' +
             '<div class="flex items-center gap-3 border-b border-slate-100 bg-slate-50 px-4 py-3">' +
               '<div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm">' + icon("message-circle","h-5 w-5") + '</div>' +
-              '<div><h2 class="text-sm font-extrabold text-slate-900">Frag deinen Urlaubsassistenten</h2><p class="text-[10px] text-slate-500">Kurze Antworten direkt aus deinen Reisedaten</p></div>' +
+              '<div><h2 class="text-sm font-extrabold text-slate-900">Frag deinen Urlaubsassistenten</h2><p class="text-[10px] text-slate-500">Natürlich formulierte KI-Antworten mit deinen Reisedaten</p></div>' +
             '</div>' +
             '<div class="space-y-3 p-3 sm:p-4">' +
               (aiMessages.length===1?aiQuickPromptsHTML():"") +
               bubbles +
               (aiLoading?'<div class="flex items-center gap-2 rounded-2xl bg-blue-50 px-3 py-3 text-xs font-semibold text-blue-800">' + icon("loader-circle","h-4 w-4 animate-spin") + ' Ich werte deine Urlaubsdaten aus …</div>':"") +
               (aiError?'<div class="rounded-2xl bg-rose-50 px-3 py-2.5 text-xs text-rose-700">' + esc(aiError) + '</div>':"") +
-              '<div class="flex items-center gap-1.5 text-[10px] text-slate-400">' + icon("database","h-3.5 w-3.5") + ' Eigene Datenauswertung · keine externe KI-API</div>' +
+              '<div class="flex items-center gap-1.5 text-[10px] text-slate-400">' + icon("sparkles","h-3.5 w-3.5") + ' ' + (session?.user?.id ? "KI-Modell · mit deinem Reise-Kontext" : "Demo-Modus · lokale Beispielantworten") + '</div>' +
             '</div>' +
           '</section>' +
         '</div>' +
       '</main>' +
       '<footer class="shrink-0 border-t border-slate-200/80 bg-white/95 px-4 pb-[max(.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-8px_28px_rgba(15,23,42,.06)] backdrop-blur-xl sm:px-6">' +
         '<div class="mx-auto flex w-full max-w-4xl items-end gap-2 rounded-2xl border border-indigo-100 bg-slate-50 p-2 shadow-inner focus-within:border-indigo-300 focus-within:ring-4 focus-within:ring-indigo-100">' +
-          '<textarea id="ai-input" rows="1" placeholder="Frage zu deinem ausgewählten Urlaub …" class="max-h-28 min-h-[46px] min-w-0 flex-1 resize-none border-0 bg-transparent px-3 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400">' + esc(aiInput) + '</textarea>' +
+          '<textarea id="ai-input" rows="1" placeholder="Frage stellen oder Mikrofon nutzen …" class="max-h-28 min-h-[46px] min-w-0 flex-1 resize-none border-0 bg-transparent px-3 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400">' + esc(aiInput) + '</textarea>' +
+          '<button type="button" data-action="ai-start-voice" ' + (aiLoading?"disabled":"") + ' aria-label="' + (aiListening?"Sprachaufnahme beenden":"Frage sprechen") + '" title="' + (aiListening?"Sprachaufnahme beenden":"Frage sprechen") + '" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 ' + (aiListening?"bg-rose-50 text-rose-600":"bg-white text-slate-700") + ' shadow-sm transition hover:bg-slate-100 disabled:opacity-40">' + icon(aiListening?"mic-off":"mic","h-5 w-5") + '</button>' +
           '<button type="button" data-action="send-ai" ' + (aiLoading?"disabled":"") + ' aria-label="Frage senden" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white shadow-md transition hover:brightness-110 disabled:opacity-40">' + icon("arrow-up","h-5 w-5") + '</button>' +
         '</div>' +
-        '<div class="mx-auto mt-1.5 max-w-4xl text-center text-[9px] leading-4 text-slate-400">Deine Fragen werden anhand der gespeicherten Daten von ' + (trip?esc(trip.name):"deinem Urlaub") + ' beantwortet.</div>' +
+        '<div class="mx-auto mt-1.5 max-w-4xl text-center text-[9px] leading-4 text-slate-400">Sprachaufnahme und Vorlesen nutzen die Sprachfunktionen deines Browsers. ' + (trip?"Reisekontext: "+esc(trip.name):"") + '</div>' +
       '</footer>' +
     '</div>';
   }
@@ -3345,6 +3376,7 @@
   async function sendAIMessage(textOverride = "") {
     const input = String(textOverride || aiInput || "").trim();
     if (!input || aiLoading) return;
+    stopAISpeechOutput();
     aiInput = "";
     aiError = "";
     aiChatHistoryOpen = false;
@@ -3352,12 +3384,55 @@
     aiLoading = true;
     render();
     try {
-      const reply = localTripAssistantReply(input);
-      aiMessages = [...aiMessages, {role:"assistant",content:reply,followUps:aiFollowUpsFor(input)}];
+      let answer;
+      if (session?.user?.id) {
+        const { data, error } = await supabase.functions.invoke("urlaubassistent-ai", {
+          body: {
+            messages: aiMessages.slice(-12).map(message => ({
+              role: message.role === "user" ? "user" : "assistant",
+              content: String(message.content || "").slice(0, 6000)
+            })),
+            context: aiContext(),
+            webSearchEnabled: aiWebSearchEnabled
+          }
+        });
+        if (error) {
+          let serverMessage = "";
+          try {
+            const response = error.context;
+            if (response instanceof Response) {
+              const payload = await response.clone().json();
+              serverMessage = String(payload?.error || payload?.message || "");
+            }
+          } catch {}
+          throw new Error(serverMessage || error.message || "Die KI konnte gerade nicht erreicht werden.");
+        }
+        if (data?.error) throw new Error(String(data.error));
+        const reply = String(data?.reply || "").trim();
+        if (!reply) throw new Error("Die KI hat keine Antwort zurückgegeben.");
+        answer = {
+          role: "assistant",
+          content: reply,
+          actions: data.actions || null,
+          sources: Array.isArray(data.sources) ? data.sources : [],
+          webSearchRequested: data.webSearchRequested === true,
+          webSearchEligible: data.webSearchEligible === true,
+          webSearchBlockedReason: String(data.webSearchBlockedReason || ""),
+          followUps: aiFollowUpsFor(input)
+        };
+      } else {
+        // The public demo has no authenticated session; keep it local and clearly labelled.
+        answer = {
+          role: "assistant",
+          content: localTripAssistantReply(input),
+          followUps: aiFollowUpsFor(input)
+        };
+      }
+      aiMessages = [...aiMessages, answer];
       await saveAIChatHistory();
     } catch (error) {
-      console.error("Lokale Urlaubsauswertung fehlgeschlagen:",error);
-      aiError = "Die Urlaubsdaten konnten gerade nicht ausgewertet werden. Bitte versuche es erneut.";
+      console.error("KI-Antwort fehlgeschlagen:", error);
+      aiError = error?.message || "Die Reise-KI ist gerade nicht erreichbar. Bitte versuche es erneut.";
     } finally {
       aiLoading = false;
       render();
@@ -3454,6 +3529,61 @@
       recognition.onend=()=>{if(aiListening){aiListening=false;render();}};
       aiSpeechRecognition=recognition;aiListening=true;aiError="";render();recognition.start();
     }catch{aiListening=false;aiError="Das Mikrofon konnte nicht gestartet werden. Prüfe die Browser-Berechtigung.";render();}
+  }
+
+  function stopAISpeechOutput() {
+    try {
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+    } catch (_) {}
+    aiSpeakingMessageIndex = -1;
+  }
+
+  function speakAIMessage(messageIndex) {
+    const message = aiMessages[messageIndex];
+    if (!message || message.role !== "assistant") return;
+    if (!("speechSynthesis" in window) || typeof window.SpeechSynthesisUtterance !== "function") {
+      aiError = "Dein Browser unterstützt das Vorlesen leider nicht. Du kannst die Antwort weiterhin lesen.";
+      render();
+      return;
+    }
+    if (aiSpeakingMessageIndex === messageIndex) {
+      stopAISpeechOutput();
+      render();
+      return;
+    }
+    stopAISpeechOutput();
+    const plainText = String(message.content || "")
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, "$1")
+      .replace(/https?:\/\/\S+/g, "")
+      .replace(/<[^>]*>/g, " ")
+      .replace(/^\s{0,3}#{1,6}\s+/gm, "")
+      .replace(/\*\*(.*?)\*\*/g, "$1")
+      .replace(/__(.*?)__/g, "$1")
+      .replace(/[*_>#]/g, " ")
+      .replace(/[-•]\s+/g, ". ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!plainText) return;
+    const utterance = new SpeechSynthesisUtterance(plainText);
+    utterance.lang = "de-DE";
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    const voices = window.speechSynthesis.getVoices();
+    utterance.voice = voices.find(voice => /^de[-_]/i.test(voice.lang)) || null;
+    aiSpeakingMessageIndex = messageIndex;
+    utterance.onend = () => {
+      if (aiSpeakingMessageIndex === messageIndex) {
+        aiSpeakingMessageIndex = -1;
+        render();
+      }
+    };
+    utterance.onerror = () => {
+      aiSpeakingMessageIndex = -1;
+      aiError = "Die Sprachausgabe wurde unterbrochen. Versuche es bitte erneut.";
+      render();
+    };
+    render();
+    window.speechSynthesis.speak(utterance);
   }
 
   async function applyAIActions(messageIndex) {
@@ -4011,7 +4141,7 @@
   function defaultAIChatMessage() {
     return {
       role:"assistant",
-      content:"Hallo! Ich bin dein Urlaubsassistent. Ich werte deine gespeicherten Reisedaten direkt aus. Frag mich nach einer Zusammenfassung, Budget, Ausgaben, Packliste oder offenen To-dos."
+      content:"Hallo! Ich bin dein Urlaubsassistent. Ich kann mit deinen Reisedaten planen, Fragen frei beantworten und dir Reiseideen geben. Du kannst mir auch Fragen diktieren und Antworten vorlesen lassen."
     };
   }
 
@@ -6338,12 +6468,13 @@
         render();
         return;
       }
-      if(action==="toggle-ai"){aiOpen=!aiOpen;aiError="";if(aiOpen)loadAIChatHistory();render();return;}
+      if(action==="toggle-ai"){const wasOpen=aiOpen;aiOpen=!aiOpen;if(wasOpen)stopAISpeechOutput();aiError="";if(aiOpen)loadAIChatHistory();render();return;}
       if(action==="toggle-ai-history"){aiChatHistoryOpen=!aiChatHistoryOpen;aiError="";if(aiChatHistoryOpen)await loadAISavedChats();render();return;}
       if(action==="new-ai-chat"){await startNewAIChat();return;}
       if(action==="back-to-ai-chat"){aiChatHistoryOpen=false;render();return;}
       if(action==="open-ai-saved-chat"){await openAISavedChat(el.dataset.chatId);return;}
       if(action==="toggle-ai-web-search"){aiWebSearchEnabled=!aiWebSearchEnabled;localStorage.setItem(K.aiWebSearchEnabled,String(aiWebSearchEnabled));render();return;}
+      if(action==="ai-speak"){speakAIMessage(Number(el.dataset.messageIndex));return;}
       if(action==="ai-start-voice"){startAISpeechInput();return;}
       if(action==="ai-receipt"){if(activeTrip()?.role==="viewer"){aiError="Du hast in diesem geteilten Urlaub nur Leserechte.";render();return;}document.getElementById("ai-receipt-input")?.click();return;}
       if(action==="remove-ai-receipt"){aiReceiptImageDataUrl="";aiReceiptImageName="";render();return;}
@@ -6723,7 +6854,7 @@
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
       refreshLoaderVersionLabel();
-      navigator.serviceWorker.register("./service-worker.js?v=101").catch(() => {});
+      navigator.serviceWorker.register("./service-worker.js?v=102").catch(() => {});
     }, { once: true });
   } else {
     window.addEventListener("load", refreshLoaderVersionLabel, { once: true });
