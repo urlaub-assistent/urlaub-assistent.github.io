@@ -411,6 +411,15 @@
     .guest-pill{padding:8px 12px}
     @media(max-width:820px){.layout.sidebar-open .sidebar{background:#fff}.sidebar-backdrop{background:rgba(21,39,62,.24)}.topbar{background:rgba(255,255,255,.96)}}
 
+
+    .image-bubble { border:0; background:transparent; padding:0; overflow:hidden; }
+    .image-bubble img { display:block; width:min(100%,560px); height:auto; border-radius:16px; border:1px solid #dce5ef; box-shadow:0 12px 30px rgba(23,54,93,.10); background:#fff; }
+    .image-tools { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .image-download { display:inline-flex; align-items:center; gap:7px; border:1px solid #d8e2ee; background:#fff; color:#24466f; padding:8px 11px; border-radius:11px; text-decoration:none; font-weight:700; font-size:11px; box-shadow:0 4px 12px rgba(23,54,93,.05); }
+    .image-download:hover { background:#f0f4f9; }
+    .image-download svg { width:14px; height:14px; }
+    .image-note { margin-top:7px; color:#7789a0; font-size:10px; line-height:1.5; }
+
   </style>
 </head>
 <body>
@@ -840,11 +849,38 @@
         const meta = document.createElement("div");
         meta.className = "message-meta";
         meta.textContent = message.role === "user" ? "Du" : "LiveOS";
-        const bubble = document.createElement("div");
-        bubble.className = "bubble";
-        bubble.textContent = message.content;
-        wrap.appendChild(meta);
-        wrap.appendChild(bubble);
+        if (message.image_data) {
+          const imageBubble = document.createElement("div");
+          imageBubble.className = "image-bubble";
+          const image = document.createElement("img");
+          image.src = message.image_data;
+          image.alt = message.image_alt || "Von LiveOS erstelltes Bild";
+          image.loading = "lazy";
+          imageBubble.appendChild(image);
+          const tools = document.createElement("div");
+          tools.className = "image-tools";
+          const download = document.createElement("a");
+          download.className = "image-download";
+          download.href = message.image_data;
+          download.download = message.image_file || "liveos-bild.png";
+          download.innerHTML = '<i data-lucide="download"></i><span>Bild herunterladen</span>';
+          tools.appendChild(download);
+          imageBubble.appendChild(tools);
+          if (message.content) {
+            const note = document.createElement("div");
+            note.className = "image-note";
+            note.textContent = message.content;
+            imageBubble.appendChild(note);
+          }
+          wrap.appendChild(meta);
+          wrap.appendChild(imageBubble);
+        } else {
+          const bubble = document.createElement("div");
+          bubble.className = "bubble";
+          bubble.textContent = message.content;
+          wrap.appendChild(meta);
+          wrap.appendChild(bubble);
+        }
         row.appendChild(avatar);
         row.appendChild(wrap);
         messagesEl.appendChild(row);
@@ -862,7 +898,7 @@
             '<div class="suggestions">' +
             '<button class="suggestion" data-prompt="Hallo LiveOS!">Sag Hallo</button>' +
             '<button class="suggestion" data-prompt="Wer bist du?">Wer bist du?</button>' +
-            '<button class="suggestion" data-prompt="Was kannst du schon?">Was kannst du?</button></div>';
+            '<button class="suggestion" data-prompt="Generiere mir ein weißes Bild, auf dem BEN in dunkelblauer Schrift steht.">Bild mit BEN erstellen</button><button class="suggestion" data-prompt="Was kannst du schon?">Was kannst du?</button></div>';
           messagesEl.appendChild(welcome);
           icons();
           return;
@@ -916,6 +952,116 @@
         const parts = results.map(function (item) { return item.title + (item.description ? " – " + item.description : "") + "\n\n" + item.extract + "\n\nQuelle: " + item.url; });
         return "Ich habe dazu im Internet nachgeschlagen:\n\n" + parts.join("\n\n---\n\n") + "\n\nHinweis: Meine aktuelle Websuche nutzt Wikipedia. Prüfe besonders aktuelle oder wichtige Angaben zusätzlich anhand einer offiziellen Quelle.";
       }
+      function parseImageRequest(input) {
+        const raw = String(input || "").trim();
+        const t = normalize(raw);
+        const asksForImage = /\b(bild|grafik|poster|wallpaper|hintergrund|bilddatei)\b/.test(t) &&
+          /\b(generier|erstell|mach|erzeug|zeichn|gestalt|design)\w*/.test(t);
+        if (!asksForImage) return null;
+
+        let text = "";
+        const patterns = [
+          /\bwo\s+(.+?)\s+(?:darauf\s+)?(?:drauf)?steht\b/i,
+          /\bmit\s+(?:dem\s+)?(?:schriftzug|text)\s+["'„]?(.+?)["'“]?(?:\s+(?:in|auf|mit)\s+.+)?$/i,
+          /\btext\s*:\s*["'„]?(.+?)["'“]?$/i,
+          /\bschreib(?:e)?\s+["'„]?(.+?)["'“]?\s+(?:auf|in)\s+(?:das|ein)\s+(?:bild|poster|grafik)\b/i
+        ];
+        for (const pattern of patterns) {
+          const match = raw.match(pattern);
+          if (match && match[1]) { text = match[1].trim().replace(/^["'„]|["'“]$/g, ""); break; }
+        }
+        if (!text) {
+          const afterImage = raw.match(/\b(?:bild|poster|grafik)\s+(?:mit|von)\s+(.+)$/i);
+          if (afterImage) text = afterImage[1].trim().replace(/[.!?]+$/g, "");
+        }
+
+        const colors = [
+          ["dunkelblau", "#17365d"], ["navy", "#17365d"], ["blau", "#2d5f94"],
+          ["schwarz", "#101820"], ["weiß", "#ffffff"], ["weiss", "#ffffff"],
+          ["rot", "#b73542"], ["grün", "#28785b"], ["gruen", "#28785b"],
+          ["rosa", "#d46a92"], ["pink", "#d34d8c"], ["beige", "#e9dfcf"],
+          ["gelb", "#e5b52f"], ["orange", "#d97732"], ["lila", "#7653a6"]
+        ];
+        let background = "#ffffff";
+        let foreground = "#17365d";
+        for (const pair of colors) {
+          if (t.includes(pair[0] + "er hintergrund") || t.includes(pair[0] + "es bild") || t.includes("hintergrund " + pair[0])) {
+            background = pair[1]; break;
+          }
+        }
+        for (const pair of colors) {
+          if (t.includes(pair[0] + "e schrift") || t.includes("schrift " + pair[0]) || t.includes("text " + pair[0])) {
+            foreground = pair[1]; break;
+          }
+        }
+        if (foreground === background) foreground = background === "#ffffff" ? "#17365d" : "#ffffff";
+        const aspect = /querformat|16\s*:\s*9|landscape/i.test(raw) ? "landscape" :
+          /hochformat|9\s*:\s*16|portrait/i.test(raw) ? "portrait" : "square";
+        const fileBase = (text || "liveos-grafik").toLocaleLowerCase("de-DE")
+          .normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0,40) || "liveos-grafik";
+        return { text, background, foreground, aspect, file: "liveos-" + fileBase + ".png" };
+      }
+
+      function createDesignedImage(spec) {
+        if (!spec || !spec.text) return null;
+        const canvas = document.createElement("canvas");
+        const dimensions = spec.aspect === "landscape" ? [1600, 900] : spec.aspect === "portrait" ? [900, 1600] : [1200, 1200];
+        canvas.width = dimensions[0];
+        canvas.height = dimensions[1];
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("Die Grafikfunktion ist in diesem Browser nicht verfügbar.");
+        const w = canvas.width, h = canvas.height;
+
+        ctx.fillStyle = spec.background;
+        ctx.fillRect(0, 0, w, h);
+        if (spec.background === "#ffffff") {
+          ctx.fillStyle = "rgba(23,54,93,0.035)";
+          ctx.beginPath(); ctx.arc(w * .87, h * .16, Math.min(w,h) * .25, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = "rgba(23,54,93,0.025)";
+          ctx.beginPath(); ctx.arc(w * .10, h * .88, Math.min(w,h) * .31, 0, Math.PI * 2); ctx.fill();
+        } else {
+          const shade = ctx.createLinearGradient(0, 0, w, h);
+          shade.addColorStop(0, "rgba(255,255,255,.12)");
+          shade.addColorStop(1, "rgba(0,0,0,.10)");
+          ctx.fillStyle = shade; ctx.fillRect(0,0,w,h);
+        }
+
+        const words = spec.text.split(/\s+/).filter(Boolean).slice(0,12);
+        const maxWidth = w * .82;
+        const lines = [];
+        let line = "";
+        let fontSize = Math.min(w * .16, h * .15, 190);
+        ctx.font = "800 " + fontSize + "px Inter, Arial, sans-serif";
+        for (const word of words) {
+          const candidate = line ? line + " " + word : word;
+          if (line && ctx.measureText(candidate).width > maxWidth) {
+            lines.push(line); line = word;
+          } else line = candidate;
+        }
+        if (line) lines.push(line);
+        if (lines.length > 5) lines.length = 5;
+        while (fontSize > 32 && lines.some(function(item){return ctx.measureText(item).width > maxWidth;})) {
+          fontSize -= 4;
+          ctx.font = "800 " + fontSize + "px Inter, Arial, sans-serif";
+        }
+        const lineHeight = fontSize * 1.16;
+        let y = (h - lineHeight * lines.length) / 2 + fontSize * .82;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "alphabetic";
+        ctx.fillStyle = spec.foreground;
+        ctx.shadowColor = "rgba(13,38,69,.10)";
+        ctx.shadowBlur = 9;
+        ctx.shadowOffsetY = 3;
+        lines.forEach(function(item) {
+          ctx.fillText(item, w / 2, y, maxWidth);
+          y += lineHeight;
+        });
+        ctx.shadowColor = "transparent";
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+        return canvas.toDataURL("image/png");
+      }
+
       async function generateLiveOSReply(input) {
         const t = normalize(input);
         const example = exampleReply(input);
@@ -1160,8 +1306,26 @@
         messageInput.value = "";
         resizeComposer();
         try {
-          const reply = await generateLiveOSReply(value);
-          messageHistory.push({ id:"m-"+(Date.now()+1), role:"assistant", content:reply, model_id:"os1", created_at:new Date().toISOString() });
+          const imageSpec = parseImageRequest(value);
+          if (imageSpec && imageSpec.text) {
+            const imageData = createDesignedImage(imageSpec);
+            messageHistory.push({
+              id:"m-"+(Date.now()+1), role:"assistant",
+              content:"Fertig! Ich habe dein Textbild erstellt.",
+              image_data:imageData, image_alt:imageSpec.text,
+              image_file:imageSpec.file, model_id:"os1",
+              created_at:new Date().toISOString()
+            });
+          } else if (imageSpec) {
+            messageHistory.push({
+              id:"m-"+(Date.now()+1), role:"assistant",
+              content:"Ich kann bereits Textbilder und einfache Grafiken erstellen. Schreib mir zum Beispiel: „Erstelle ein weißes Bild, auf dem BEN in dunkelblauer Schrift steht.“ Für freie Motive wie fotorealistische Tiere, Menschen oder Landschaften braucht LiveOS noch ein richtiges Bildmodell.",
+              model_id:"os1", created_at:new Date().toISOString()
+            });
+          } else {
+            const reply = await generateLiveOSReply(value);
+            messageHistory.push({ id:"m-"+(Date.now()+1), role:"assistant", content:reply, model_id:"os1", created_at:new Date().toISOString() });
+          }
           currentConversation.messages = messageHistory;
           currentConversation.updated_at = new Date().toISOString();
           conversations.sort(function(a,b){return String(b.updated_at||"").localeCompare(String(a.updated_at||""));});
@@ -1191,7 +1355,7 @@
           { trigger_phrases:["hallo","hi","hey","moin"], ideal_response:"Hallo! Schön, dass du da bist. Was möchtest du heute wissen?", priority:1 },
           { trigger_phrases:["wer bist du","wie heißt du","wie heisst du"], ideal_response:"Ich bin LiveOS – dein persönlicher KI-Assistent. Ich kann mit dir schreiben, einfache Aufgaben lösen und Informationen im Internet nachschlagen.", priority:2 },
           { trigger_phrases:["danke","vielen dank"], ideal_response:"Sehr gerne! Was kann ich noch für dich tun?", priority:3 },
-          { trigger_phrases:["was kannst du"], ideal_response:"Ich kann mit dir chatten, einfache Berechnungen durchführen und öffentliche Informationen über Wikipedia nachschlagen. Weitere Funktionen werden Schritt für Schritt ergänzt.", priority:4 }
+          { trigger_phrases:["was kannst du"], ideal_response:"Ich kann mit dir chatten, einfache Berechnungen durchführen, Textbilder und einfache Grafiken als PNG erstellen und öffentliche Informationen über Wikipedia nachschlagen. Freie Bildmotive brauchen noch ein separates Bildmodell.", priority:4 }
         ];
         showApp();
         await loadConversations();
