@@ -1,18 +1,18 @@
 {
   "name": "LiveOS",
   "short_name": "LiveOS",
-  "description": "LiveOS OS1 – dein eigener persönlicher Assistent",
+  "description": "LiveOS OS2 – dein eigener KI-Assistent",
   "lang": "de-DE",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "#f7f9fc",
+  "theme_color": "#10243f",
   "icons": [
     {
-      "src": "./assets/liveos-icon.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "src": "./assets/liveos-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ]
