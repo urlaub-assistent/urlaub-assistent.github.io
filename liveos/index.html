@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#ffffff">
-  <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" type="image/svg+xml" href="./assets/liveos-icon.svg">
-  <link rel="apple-touch-icon" href="./assets/liveos-icon.svg">
-  <meta name="description" content="LiveOS – dein persönlicher KI-Assistent.">
+  <meta name="theme-color" content="#10243f">
+  <link rel="manifest" href="./manifest.webmanifest?v=os2">
+  <link rel="icon" type="image/svg+xml" href="./assets/liveos-icon.svg?v=os2">
+  <link rel="apple-touch-icon" href="./assets/liveos-icon.svg?v=os2">
+  <meta name="description" content="LiveOS OS2 – dein persönlicher KI-Assistent.">
   <title>LiveOS · Dein KI-Assistent</title>
   
   
@@ -523,7 +523,7 @@
   <section id="authScreen" class="auth-wrap" hidden>
     <div class="auth-card glass">
       <div class="auth-brand">
-        <div class="brand-mark"><img src="./assets/liveos-icon.svg" alt="LiveOS"></div>
+        <div class="brand-mark"><img src="./assets/liveos-icon.svg?v=os2" alt="LiveOS"></div>
         <div><div class="brand-name">LiveOS</div><div class="brand-sub">Dein eigenes KI-System</div></div>
       </div>
       <div id="authContent"></div>
@@ -539,7 +539,7 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
         <button class="model-switcher" id="modelBadge" type="button" data-action="show-model" aria-label="Aktives Modell LiveOS OS2">
-          <img class="model-brand-icon" src="./assets/liveos-icon.svg" alt="">
+          <img class="model-brand-icon" src="./assets/liveos-icon.svg?v=os2" alt="">
           <span class="model-switcher-title">LiveOS</span>
           <span class="model-switcher-version">OS2</span>
           <svg class="model-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
@@ -553,7 +553,7 @@
         <span id="conversationTitle" hidden aria-hidden="true">Neuer Chat</span>
         <div class="messages" id="messages" aria-live="polite">
           <div class="welcome">
-            <div class="welcome-orb"><img src="./assets/liveos-icon.svg" alt="LiveOS"></div>
+            <div class="welcome-orb"><img src="./assets/liveos-icon.svg?v=os2" alt="LiveOS"></div>
             <h2>Womit kann ich dir helfen?</h2>
             <p>Ich bin LiveOS OS2. Schreib mir einfach, was dich beschäftigt.</p>
             <div class="suggestions">
@@ -580,7 +580,7 @@
       <aside class="history-drawer" id="historyDrawer" aria-label="Chatverlauf" aria-hidden="true">
         <div class="drawer-header">
           <div class="drawer-brand">
-            <div class="drawer-logo"><img src="./assets/liveos-icon.svg" alt=""></div>
+            <div class="drawer-logo"><img src="./assets/liveos-icon.svg?v=os2" alt=""></div>
             <div><strong>LiveOS</strong><span>Deine Unterhaltungen</span></div>
           </div>
           <button class="header-icon drawer-close" type="button" data-action="close-drawer" aria-label="Menü schließen">
@@ -645,7 +645,7 @@
         <button class="icon-btn modal-close" type="button" aria-label="Schließen" data-action="close-modal"><i data-lucide="x"></i></button>
       </div>
       <div class="model-version-card">
-        <div class="model-version-mark"><img src="./assets/liveos-icon.svg" alt="" style="width:30px;height:30px"></div>
+        <div class="model-version-mark"><img src="./assets/liveos-icon.svg?v=os2" alt="" style="width:30px;height:30px"></div>
         <div><strong id="modelVersionName">LiveOS OS2</strong><span id="modelVersionLabel">OS2 · Version 2 · Prototyp</span></div>
       </div>
       <p id="modelDescription" class="model-description">Erweiterte Wissensbasis, Programmierhilfen, Chat-Kontext und automatische Qualitätsbewertung.</p>
@@ -1000,7 +1000,7 @@
           avatar.appendChild(avatarIcon);
         } else {
           const logo = document.createElement("img");
-          logo.src = "./assets/liveos-icon.svg";
+          logo.src = "./assets/liveos-icon.svg?v=os2";
           logo.alt = "";
           logo.style.width = "23px";
           logo.style.height = "23px";
@@ -1101,7 +1101,7 @@
           const welcome = document.createElement("div");
           welcome.className = "welcome";
           welcome.innerHTML =
-            '<div class="welcome-orb"><img src="./assets/liveos-icon.svg" alt="LiveOS"></div>' +
+            '<div class="welcome-orb"><img src="./assets/liveos-icon.svg?v=os2" alt="LiveOS"></div>' +
             '<h2>Womit kann ich dir helfen?</h2>' +
             '<p>Ich bin LiveOS OS2. Schreib mir einfach, was dich beschäftigt.</p>' +
             '<div class="suggestions">' +
