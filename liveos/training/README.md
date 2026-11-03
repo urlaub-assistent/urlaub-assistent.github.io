@@ -1,14 +1,35 @@
-# LiveOS OS2 – kostenloses GPU-Training
+# LiveOS OS2 — kostenloses GPU-Training
 
 ## Was eingerichtet wurde
-- Supabase hält den freigegebenen OS2-Trainingsdatensatz und die geheimen Benchmarks.
-- Ein abgesicherter Worker-RPC ermöglicht ausschließlich `service_role` Zugriff.
-- Das Notebook trainiert Qwen2.5-0.5B-Instruct mit LoRA auf einer Kaggle-GPU.
-- LoRA-Adapter werden privat in deinem Hugging-Face-Konto gespeichert und beim nächsten Lauf als Startpunkt geladen.
-- Supabase bewertet Antworten gegen versteckte Tests. Das Notebook erhält nur Punktzahl/Status, niemals Sollmuster oder Prüfkriterien.
+- Supabase enthält freigegebene OS2-Trainingsbeispiele und private Benchmark-Aufgaben.
+- Ein abgesicherter Worker-RPC stellt dem Kaggle-Notebook Trainingsbeispiele bereit.
+- Versteckte Sollmuster und Scorer-Regeln verlassen Supabase nicht.
+- Das Kaggle-Notebook trainiert echte LoRA-Adaptergewichte auf Qwen2.5-0.5B-Instruct.
+- Ein privates Hugging-Face-Repository speichert den jeweils letzten Adapter.
+- Adapter-Gewichte werden nach jeder abgeschlossenen Epoche auf Hugging Face synchronisiert und beim Folgelauf als Startpunkt geladen.
+
+## Trainingsdaten im Notebook
+
+1. **Beko2210/German-Instruct-Dataset** — CC-BY-4.0. Das Notebook filtert ausschließlich `language=de`, `pii_status=clean` und `quality_score >= 0.90`. Die Dataset-Seite nennt 8.013 Trainingszeilen im Train-Split; die tatsächlich übernommenen Beispiele hängen vom Filter ab.
+2. **OpenAssistant/OASST-DE** — Apache-2.0. Enthält 3.721 deutschsprachige Konversationen; das Notebook extrahiert bis zu 3.500 Nutzer-/Assistenten-Turns.
+3. **LiveOS OS2** — freigegebene, eigene Trainingsbeispiele aus Supabase.
+
+Die Daten werden dedupliziert, gemischt und in Trainings- und Validierungsdaten geteilt. Obergrenze: 9.000 Paare pro Lauf, maximale Sequenzlänge 512 Token. Es werden keine privaten Chatverläufe aus deinem Urlaub Assistenten importiert.
+
+Quellen:
+- https://huggingface.co/datasets/Beko2210/German-Instruct-Dataset
+- https://huggingface.co/datasets/OpenAssistant/OASST-DE
+- https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct
+
+## Belohnungs- und Scorer-Regeln
+- Volle Aufgabenpunkte gibt es nur, wenn alle versteckten Assertions erfüllt sind.
+- Bei einer tatsächlich unlösbaren Aufgabe erhält ein ehrlicher, klar formulierter sicherer Stopp ebenfalls volle Punkte.
+- Ein manipuliertes Testsystem, veränderte Aufgaben, ausgelesene Lösungsschlüssel oder gefälschte Erfolge erhalten null Aufgabenpunkte und werden als Cheating markiert.
+- Die versteckten Kriterien werden dem trainierenden Notebook nicht mitgegeben.
+- Das ist derzeit SFT/LoRA-Fine-Tuning plus separate Bewertung, kein vollständiges Reinforcement-Learning mit GRPO/PPO.
 
 ## 0-Euro-Sicherheitsgrenze
-Es werden keine bezahlten GPU-Anbieter, Inference-APIs oder kostenpflichtigen Endpoints verwendet. Kaggle-GPU-Zeit ist kostenlos, aber kontingentiert und nicht dauerhaft verfügbar. Das Notebook kann daher nicht garantiert ununterbrochen tagelang laufen. Nach dem Stop kann es mit dem zuletzt gespeicherten Adapter fortgesetzt werden.
+Es werden keine bezahlten GPU-Anbieter, Inference-APIs oder kostenpflichtigen Endpoints verwendet. Kaggle-GPU-Zeit ist kostenlos, aber kontingentiert und nicht dauerhaft verfügbar. Eine laufende Kaggle-Session kann beendet werden; der letzte Adapter-Checkpoint kann danach erneut geladen werden. Ein durchgehender Lauf über Nacht ist nicht garantiert.
 
 ## Einmalige Kaggle-Secrets
 In Kaggle im Notebook unter **Add-ons → Secrets** zwei Secrets anlegen:
@@ -17,17 +38,18 @@ In Kaggle im Notebook unter **Add-ons → Secrets** zwei Secrets anlegen:
 
 Die Supabase-Projekt-URL ist im Notebook bereits gesetzt: `https://twcacjwmahameglodljl.supabase.co`.
 
-## Start
-1. Die Datei `liveos/training/os2_kaggle_training.ipynb` herunterladen.
-2. In Kaggle ein Notebook erstellen und die Notebook-Datei importieren.
+## Start auf dem iPad
+1. Notebook-Datei vom GitHub-Raw-Link herunterladen:
+   https://raw.githubusercontent.com/urlaub-assistent/urlaub-assistent.github.io/main/liveos/training/os2_kaggle_training.ipynb
+2. In Kaggle **File → Import Notebook** öffnen und die heruntergeladene `.ipynb`-Datei auswählen.
 3. Settings → Accelerator → GPU einstellen und Internet aktivieren.
 4. Die beiden Secrets anlegen.
-5. Zellen der Reihe nach ausführen.
+5. Zellen der Reihe nach über **Run All** ausführen.
 
-Beim ersten Lauf wird ein privates HF-Repository `<dein-benutzername>/liveos-os2-lora` angelegt. Weitere Läufe laden den letzten Adapter und verbessern dessen Gewichte weiter.
+Beim ersten Lauf wird ein privates HF-Repository `<dein-benutzername>/liveos-os2-lora` angelegt. Weitere Läufe laden den letzten Adapter und trainieren dessen Gewichte weiter.
 
-## Aktueller Datensatz
-Zum Zeitpunkt der Einrichtung liefert Supabase 17 aktive freigegebene Trainingsbeispiele und 19 aktive versteckte Benchmarks. Das ist ein erster technischer Trainingssatz, aber noch zu klein für ein leistungsstarkes Allzweckmodell. Weitere kuratierte Daten müssen folgen.
+## Was ein erster Lauf leisten kann
+Der Ausgangsdatensatz wächst damit von wenigen Dutzend eigenen Beispielen auf mehrere Tausend allgemeine deutschsprachige Instruktions- und Gesprächsbeispiele. Das verbessert die Trainingsbasis deutlich, garantiert aber keine starke Allzweck-KI über Nacht. Qwen2.5-0.5B-Instruct hat nur rund 0,5 Milliarden Parameter; LoRA passt einen kleinen Adapter an, trainiert nicht das gesamte Grundmodell neu.
 
 ## Wichtige Grenze
-Das Notebook erzeugt echte LoRA-Adaptergewichte. Das vorhandene LiveOS-Webfrontend hat jedoch noch kein Inference-Backend für diesen Adapter. Der erfolgreiche Trainingslauf allein macht OS2 also noch nicht automatisch im Live-Chat verfügbar. Dafür braucht es anschließend eine kostenlose Ausführungsstrategie, z. B. lokale Browser-Ausführung oder eine jeweils manuell gestartete kostenlose GPU-Session.
+Das Notebook erzeugt echte LoRA-Adaptergewichte. Das vorhandene LiveOS-Webfrontend hat noch kein Inference-Backend für diesen Adapter. Der erfolgreiche Trainingslauf allein macht OS2 also noch nicht automatisch im Live-Chat verfügbar.
