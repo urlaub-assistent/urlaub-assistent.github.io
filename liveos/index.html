@@ -1126,10 +1126,13 @@
       }
 
       function containsWholePhrase(input, phrase) {
-        const text = " " + normalize(input).replace(/\s+/g," ").trim() + " ";
+        const normalizedInput = normalize(input).replace(/\s+/g," ").trim();
         const needleText = normalize(phrase).replace(/\s+/g," ").trim();
         if (!needleText) return false;
-        return text.includes(" " + needleText + " ");
+        // Very short greetings only count at the start of a message; never inside a name or sentence.
+        if (/^(hi|hey|hallo|moin|servus|yo)$/.test(needleText) &&
+            normalizedInput !== needleText && !normalizedInput.startsWith(needleText + " ")) return false;
+        return (" " + normalizedInput + " ").includes(" " + needleText + " ");
       }
       function exampleReply(input) {
         const matches = [];
