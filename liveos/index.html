@@ -962,7 +962,8 @@
         let text = "";
         const patterns = [
           /\bwo\s+(.+?)\s+(?:darauf\s+)?(?:drauf)?steht\b/i,
-          /\bmit\s+(?:dem\s+)?(?:schriftzug|text)\s+["'„]?(.+?)["'“]?(?:\s+(?:in|auf|mit)\s+.+)?$/i,
+          /\bauf\s+dem\s+(.+?)\s+(?:in\s+.+?\s+)?steht\b/i,
+          /\bmit\s+(?:dem\s+)?(?:schriftzug|text|der\s+aufschrift)\s+["'„]?(.+?)["'“]?(?:\s+(?:in|auf|mit)\s+.+)?$/i,
           /\btext\s*:\s*["'„]?(.+?)["'“]?$/i,
           /\bschreib(?:e)?\s+["'„]?(.+?)["'“]?\s+(?:auf|in)\s+(?:das|ein)\s+(?:bild|poster|grafik)\b/i
         ];
@@ -985,12 +986,16 @@
         let background = "#ffffff";
         let foreground = "#17365d";
         for (const pair of colors) {
-          if (t.includes(pair[0] + "er hintergrund") || t.includes(pair[0] + "es bild") || t.includes("hintergrund " + pair[0])) {
+          if (t.includes(pair[0] + "er hintergrund") || t.includes(pair[0] + "es bild") ||
+              t.includes(pair[0] + "es poster") || t.includes(pair[0] + "e poster") ||
+              t.includes(pair[0] + "e grafik") || t.includes("hintergrund " + pair[0])) {
             background = pair[1]; break;
           }
         }
         for (const pair of colors) {
-          if (t.includes(pair[0] + "e schrift") || t.includes("schrift " + pair[0]) || t.includes("text " + pair[0])) {
+          if (t.includes(pair[0] + "e schrift") || t.includes(pair[0] + "er schrift") ||
+              t.includes(pair[0] + "en schrift") || t.includes("schrift " + pair[0]) ||
+              t.includes("text " + pair[0])) {
             foreground = pair[1]; break;
           }
         }
