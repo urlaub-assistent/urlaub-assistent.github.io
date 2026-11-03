@@ -964,6 +964,8 @@
           /\bwo\s+(.+?)\s+(?:darauf\s+)?(?:drauf)?steht\b/i,
           /\bauf\s+dem\s+(.+?)\s+(?:in\s+.+?\s+)?steht\b/i,
           /\bmit\s+(?:dem\s+)?(?:schriftzug|text|der\s+aufschrift)\s+["'„]?(.+?)["'“]?(?:\s+(?:in|auf|mit)\s+.+)?$/i,
+          /\bmit\s+(.+?)\s+in\s+.+?\s+schrift\b/i,
+          /:\s*["'„]?(.+?)["'“]?\s*$/i,
           /\btext\s*:\s*["'„]?(.+?)["'“]?$/i,
           /\bschreib(?:e)?\s+["'„]?(.+?)["'“]?\s+(?:auf|in)\s+(?:das|ein)\s+(?:bild|poster|grafik)\b/i
         ];
@@ -985,10 +987,12 @@
         ];
         let background = "#ffffff";
         let foreground = "#17365d";
+        let hasForeground = false;
         for (const pair of colors) {
-          if (t.includes(pair[0] + "er hintergrund") || t.includes(pair[0] + "es bild") ||
-              t.includes(pair[0] + "es poster") || t.includes(pair[0] + "e poster") ||
-              t.includes(pair[0] + "e grafik") || t.includes("hintergrund " + pair[0])) {
+          if (t.includes(pair[0] + "er hintergrund") || t.includes(pair[0] + "en hintergrund") ||
+              t.includes(pair[0] + "es bild") || t.includes(pair[0] + "es poster") ||
+              t.includes(pair[0] + "e poster") || t.includes(pair[0] + "e grafik") ||
+              t.includes("hintergrund " + pair[0])) {
             background = pair[1]; break;
           }
         }
@@ -996,9 +1000,10 @@
           if (t.includes(pair[0] + "e schrift") || t.includes(pair[0] + "er schrift") ||
               t.includes(pair[0] + "en schrift") || t.includes("schrift " + pair[0]) ||
               t.includes("text " + pair[0])) {
-            foreground = pair[1]; break;
+            foreground = pair[1]; hasForeground = true; break;
           }
         }
+        if (!hasForeground && !["#ffffff", "#e9dfcf", "#e5b52f"].includes(background)) foreground = "#ffffff";
         if (foreground === background) foreground = background === "#ffffff" ? "#17365d" : "#ffffff";
         const aspect = /querformat|16\s*:\s*9|landscape/i.test(raw) ? "landscape" :
           /hochformat|9\s*:\s*16|portrait/i.test(raw) ? "portrait" : "square";
