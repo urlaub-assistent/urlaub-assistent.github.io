@@ -521,7 +521,7 @@
         <div class="composer-zone">
           <form id="composerForm" class="composer">
             <textarea id="messageInput" rows="1" maxlength="12000" placeholder="Nachricht an LiveOS" aria-label="Nachricht an LiveOS"></textarea>
-            <button id="sendButton" class="send-btn" type="submit" aria-label="Nachricht senden">
+            <button id="sendButton" class="send-btn" type="button" aria-label="Nachricht senden">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
             </button>
           </form>
@@ -1330,6 +1330,11 @@
         event.preventDefault();
         sendMessage(messageInput.value);
       });
+      // Explicit mobile button handler: do not rely on implicit form-submit behavior.
+      $("sendButton").addEventListener("click", function (event) {
+        event.preventDefault();
+        sendMessage(messageInput.value);
+      });
       messageInput.addEventListener("input", resizeComposer);
       messageInput.addEventListener("keydown", function (event) {
         if (event.key === "Enter" && !event.shiftKey) {
@@ -1418,56 +1423,93 @@
       };
       sendMessage = async function (text) {
         const value = String(text || "").trim();
-        if (!value || sending || !currentConversation) return;
+        if (!value || sending) return;
+
+        if (!currentConversation) {
+          try { await createConversation(); } catch (_) {}
+        }
+        if (!currentConversation) {
+          const now = new Date().toISOString();
+          currentConversation = { id:"local-"+Date.now(), title:"Neuer Chat", model_id:"os1", created_at:now, updated_at:now, messages:[] };
+          conversations.unshift(currentConversation);
+        }
+
         sending = true;
-        $("sendButton").disabled = true;
+        const sendButton = $("sendButton");
+        sendButton.disabled = true;
         messageInput.disabled = true;
-        messageHistory.push({ id:"m-"+Date.now(), role:"user", content:value, model_id:"os1", created_at:new Date().toISOString() });
+
+        const now = new Date().toISOString();
+        messageHistory.push({ id:"m-"+Date.now(), role:"user", content:value, model_id:"os1", created_at:now });
         currentConversation.messages = messageHistory;
-        const isFirst = messageHistory.filter(function(item){return item.role==="user";}).length===1;
-        if (isFirst) {
+        if (messageHistory.filter(function(item){return item.role==="user";}).length === 1) {
           currentConversation.title = value.length > 36 ? value.slice(0,36).trim()+"…" : value;
           $("conversationTitle").textContent = currentConversation.title;
         }
-        currentConversation.updated_at = new Date().toISOString();
+        currentConversation.updated_at = now;
         saveGuestData();
-        renderMessages();
         messageInput.value = "";
         resizeComposer();
+        messageHistory.push({ id:"typing-"+Date.now(), role:"assistant", typing:true, content:"", model_id:"os1" });
+        renderMessages();
+
         try {
+          let answer;
           const imageSpec = parseImageRequest(value);
           if (imageSpec && imageSpec.text) {
-            const imageData = createDesignedImage(imageSpec);
-            messageHistory.push({
+            answer = {
               id:"m-"+(Date.now()+1), role:"assistant",
               content:"Fertig! Ich habe dein Textbild erstellt.",
-              image_data:imageData, image_alt:imageSpec.text,
-              image_file:imageSpec.file, model_id:"os1",
-              created_at:new Date().toISOString()
-            });
+              image_data:createDesignedImage(imageSpec), image_alt:imageSpec.text,
+              image_file:imageSpec.file, model_id:"os1", created_at:new Date().toISOString()
+            };
           } else if (imageSpec) {
-            messageHistory.push({
+            answer = {
               id:"m-"+(Date.now()+1), role:"assistant",
-              content:"Ich kann bereits Textbilder und einfache Grafiken erstellen. Schreib mir zum Beispiel: „Erstelle ein weißes Bild, auf dem BEN in dunkelblauer Schrift steht.“ Für freie Motive wie fotorealistische Tiere, Menschen oder Landschaften braucht LiveOS noch ein richtiges Bildmodell.",
+              content:"Ich kann bereits Textbilder und einfache Grafiken erstellen. Für freie Motive braucht LiveOS noch ein Bildmodell.",
               model_id:"os1", created_at:new Date().toISOString()
-            });
+            };
           } else {
-            const reply = await generateLiveOSReply(value);
-            messageHistory.push({ id:"m-"+(Date.now()+1), role:"assistant", content:reply, model_id:"os1", created_at:new Date().toISOString() });
+            let reply = "";
+            try {
+              reply = await Promise.race([
+                generateLiveOSReply(value),
+                new Promise(function(_, reject) {
+                  window.setTimeout(function(){ reject(new Error("Antwortzeit überschritten")); }, 12000);
+                })
+              ]);
+            } catch (replyError) {
+              console.warn("OS1 antwort fallback:", replyError);
+              reply = "Ich konnte diese Anfrage gerade nicht vollständig bearbeiten. Ich kann dir aber schon mit HTML, CSS, JavaScript und Python helfen. Formuliere die Aufgabe etwas genauer oder sende deinen Code mit der Fehlermeldung.";
+            }
+            answer = {
+              id:"m-"+(Date.now()+1), role:"assistant",
+              content:String(reply || "Ich habe gerade keine passende Antwort. Bitte stelle deine Frage etwas genauer."),
+              model_id:"os1", created_at:new Date().toISOString()
+            };
           }
+          messageHistory = messageHistory.filter(function(item){return !item.typing;});
+          messageHistory.push(answer);
+        } catch (error) {
+          console.error("OS1 Sendevorgang:", error);
+          messageHistory = messageHistory.filter(function(item){return !item.typing;});
+          messageHistory.push({
+            id:"m-"+(Date.now()+1), role:"assistant",
+            content:"Beim Erstellen der Antwort ist ein Fehler aufgetreten. Deine Nachricht ist angekommen. Bitte versuche es noch einmal.",
+            model_id:"os1", created_at:new Date().toISOString()
+          });
+        } finally {
+          messageHistory = messageHistory.filter(function(item){return !item.typing;});
           currentConversation.messages = messageHistory;
           currentConversation.updated_at = new Date().toISOString();
           conversations.sort(function(a,b){return String(b.updated_at||"").localeCompare(String(a.updated_at||""));});
           saveGuestData();
           renderMessages();
           renderConversationList();
-        } catch (error) {
-          showToast("LiveOS konnte gerade nicht antworten. Bitte versuche es noch einmal.");
-        } finally {
           sending = false;
-          $("sendButton").disabled = false;
+          sendButton.disabled = false;
           messageInput.disabled = false;
-          messageInput.focus();
+          try { messageInput.focus({preventScroll:true}); } catch (_) { messageInput.focus(); }
         }
       };
       refreshConversationList = async function () {
