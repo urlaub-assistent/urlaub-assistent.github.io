@@ -214,6 +214,8 @@
     .image-note{margin-top:7px;color:#7789a0;font-size:10px;line-height:1.5}
     .typing{display:inline-flex;gap:4px;padding:4px 2px}.typing i{width:5px;height:5px;background:#7798bd;border-radius:50%;animation:pulse 1s infinite ease-in-out}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
     @keyframes pulse{0%,60%,100%{transform:translateY(0);opacity:.45}30%{transform:translateY(-4px);opacity:1}}
+    .code-output{max-width:100%;overflow:auto;margin:10px 0 7px;padding:13px;border:1px solid #e1e7ee;border-radius:13px;background:#111c2c;color:#edf4fb;font:12px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre}
+    .copy-code-button{display:inline-flex;align-items:center;margin:0 0 8px;padding:7px 10px;border:1px solid #dce4ed;border-radius:9px;background:#fff;color:#385777;font-size:10px;font-weight:700}
     .modal-shell{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:18px}
     .modal-shell[hidden]{display:none!important}
     .modal-backdrop{position:absolute;inset:0;background:rgba(12,28,49,.36);backdrop-filter:blur(8px)}
@@ -1606,6 +1608,126 @@
           console.warn("OS1 catalogue could not be loaded; local fallback remains active.", error);
         }
       }
+
+      // OS1 Programming Pack: practical, curated code patterns.
+      // This is a deterministic skills layer, not neural-weight fine-tuning.
+      function generateOS1ProgrammingReply(input) {
+        const t = normalize(input);
+        const fence = String.fromCharCode(96).repeat(3);
+        const intent = /programmier|programmiere|code|coding|entwickle|website|webseite|homepage|html|javascript|python|typescript|css|sql|debug|fehler im code|taschenrechner|rechner/.test(t);
+        if (!intent) return null;
+
+        if (/fehler|bug|debug|funktioniert nicht|fehlermeldung/.test(t)) {
+          return "Ich helfe dir beim Debuggen. Sende mir bitte den betroffenen Code und die vollständige Fehlermeldung. Ich prüfe dann die Fehlerstelle, erkläre die Ursache, schlage eine konkrete Änderung vor und gebe dir einen Test dazu. Entferne vorher Passwörter, API-Schlüssel und private Zugangsdaten.";
+        }
+
+        if (/taschenrechner|rechner/.test(t)) {
+          const source = [
+            '<!doctype html>','<html lang="de">','<head>',
+            '  <meta charset="utf-8">',
+            '  <meta name="viewport" content="width=device-width, initial-scale=1">',
+            '  <title>Mein Taschenrechner</title>','  <style>',
+            '    * { box-sizing: border-box; }',
+            '    body { margin: 0; min-height: 100vh; display: grid; place-items: center; font-family: system-ui, sans-serif; background: #eef3f9; }',
+            '    main { width: min(92vw, 340px); padding: 22px; border-radius: 24px; background: white; box-shadow: 0 12px 35px #142b4518; }',
+            '    input { width: 100%; padding: 15px; margin-bottom: 12px; border: 1px solid #dbe4ef; border-radius: 12px; font-size: 24px; text-align: right; }',
+            '    .keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }',
+            '    button { min-height: 52px; border: 0; border-radius: 12px; background: #edf2f8; color: #17365d; font-size: 18px; }',
+            '    button.operator, button.equal { background: #17365d; color: white; }',
+            '  </style>','</head>','<body>','  <main>','    <h1>Mein Rechner</h1>',
+            '    <input id="display" value="0" aria-label="Ergebnis" readonly>',
+            '    <div class="keys" id="keys"></div>','  </main>','  <script>',
+            '    const display = document.querySelector("#display");',
+            '    const keys = document.querySelector("#keys");',
+            '    const labels = ["7","8","9","÷","4","5","6","×","1","2","3","−","C","0","=","+"];',
+            '    let current = "", stored = null, operator = null, reset = false;',
+            '    labels.forEach((label) => {',
+            '      const button = document.createElement("button");',
+            '      button.textContent = label;',
+            '      if (["÷","×","−","+"].includes(label)) button.classList.add("operator");',
+            '      if (label === "=") button.classList.add("equal");',
+            '      button.addEventListener("click", () => press(label));',
+            '      keys.appendChild(button);',
+            '    });',
+            '    function press(key) {',
+            '      if (/^\\d$/.test(key)) { if (reset) current = ""; current += key; reset = false; display.value = current; return; }',
+            '      if (key === "C") { current = ""; stored = null; operator = null; display.value = "0"; return; }',
+            '      if (["÷","×","−","+"].includes(key)) { stored = Number(current || display.value); operator = key; current = ""; return; }',
+            '      if (key === "=" && operator && stored !== null) {',
+            '        const a = stored, b = Number(current || 0);',
+            '        const result = operator === "+" ? a + b : operator === "−" ? a - b : operator === "×" ? a * b : b === 0 ? NaN : a / b;',
+            '        display.value = Number.isFinite(result) ? String(Number(result.toFixed(8))) : "Nicht möglich";',
+            '        current = Number.isFinite(result) ? String(Number(result.toFixed(8))) : "";',
+            '        stored = null; operator = null; reset = true;',
+            '      }',
+            '    }','  </script>','</body>','</html>'
+          ].join("\n");
+          return "Hier ist ein vollständiger Taschenrechner als einzelne HTML-Datei. Speichere ihn als rechner.html und öffne ihn im Browser.\n\n" + fence + "html\n" + source + "\n" + fence + "\n\nEr kann addieren, subtrahieren, multiplizieren und dividieren.";
+        }
+
+        if (/python/.test(t)) {
+          const source = [
+            'def addiere(a: float, b: float) -> float:',
+            '    """Gibt die Summe zweier Zahlen zurück."""',
+            '    return a + b',
+            '',
+            'def main() -> None:',
+            '    erste_zahl = 12',
+            '    zweite_zahl = 8',
+            '    print(f"Ergebnis: {addiere(erste_zahl, zweite_zahl)}")',
+            '',
+            'if __name__ == "__main__":',
+            '    main()'
+          ].join("\n");
+          return "Hier ist ein direkt ausführbares Python-Beispiel mit Funktion und Typannotationen:\n\n" + fence + "python\n" + source + "\n" + fence + "\n\nSpeichere es als main.py und starte es mit python main.py.";
+        }
+
+        if (/javascript|\\bjs\\b|funktion|function/.test(t) && /addier|summe|zahlen|funktion|function|beispiel/.test(t)) {
+          const source = [
+            'function addiere(a, b) {',
+            '  if (typeof a !== "number" || typeof b !== "number") {',
+            '    throw new TypeError("Beide Werte müssen Zahlen sein.");',
+            '  }',
+            '  return a + b;',
+            '}',
+            '',
+            'console.log(addiere(12, 8)); // 20'
+          ].join("\n");
+          return "Hier ist eine JavaScript-Funktion mit Eingabeprüfung und einem kleinen Test:\n\n" + fence + "javascript\n" + source + "\n" + fence + "\n\nDu kannst addiere(12, 8) mit anderen Zahlen aufrufen.";
+        }
+
+        if (/website|webseite|homepage|html|css/.test(t)) {
+          const source = [
+            '<!doctype html>','<html lang="de">','<head>',
+            '  <meta charset="utf-8">',
+            '  <meta name="viewport" content="width=device-width, initial-scale=1">',
+            '  <title>Meine erste Website</title>','  <style>',
+            '    :root { font-family: system-ui, sans-serif; color: #17243a; background: #f2f5fa; }',
+            '    * { box-sizing: border-box; }',
+            '    body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 24px; }',
+            '    main { width: min(100%, 680px); padding: clamp(24px, 6vw, 48px); border: 1px solid #e0e7f0; border-radius: 24px; background: white; box-shadow: 0 16px 45px #142b4514; }',
+            '    h1 { margin-top: 0; color: #17365d; font-size: clamp(30px, 6vw, 48px); }',
+            '    p { color: #64748b; line-height: 1.7; }',
+            '    button { padding: 12px 18px; border: 0; border-radius: 12px; background: #17365d; color: white; font-weight: 700; }',
+            '  </style>','</head>','<body>','  <main>','    <h1>Hallo Welt!</h1>',
+            '    <p>Das ist meine erste Website. HTML beschreibt den Inhalt, CSS das Design und JavaScript die Funktionen.</p>',
+            '    <button id="action">Klick mich</button>',
+            '    <p id="message" aria-live="polite"></p>',
+            '  </main>','  <script>',
+            '    document.querySelector("#action").addEventListener("click", () => {',
+            '      document.querySelector("#message").textContent = "Super – der Button funktioniert!";',
+            '    });',
+            '  </script>','</body>','</html>'
+          ].join("\n");
+          return "Hier ist eine responsive Website als einzelne HTML-Datei. Speichere sie als index.html und öffne sie im Browser:\n\n" + fence + "html\n" + source + "\n" + fence + "\n\nDer Button funktioniert bereits. Du kannst das Design im CSS anpassen.";
+        }
+
+        if (/was ist|erklär|erklaer|unterschied|bedeutet|funktioniert/.test(t)) {
+          return "Die wichtigsten Bausteine einer Website sind:\n\n• HTML legt die Struktur fest – Überschriften, Texte und Buttons.\n• CSS gestaltet die Seite – Farben, Größen, Abstände und das Handy-Layout.\n• JavaScript macht sie interaktiv – zum Beispiel wenn ein Button etwas auslöst.\n• Python ist eine eigene Programmiersprache, die oft für Automatisierung, Daten und Server genutzt wird.";
+        }
+        return "Ja, ich kann dir schon bei Programmieraufgaben helfen und einfachen Code schreiben. Ich unterstütze HTML, CSS, JavaScript und Python. Beschreibe mir, was das Programm machen soll und wo es laufen wird – als Website im Browser oder als Python-Skript. Wenn du schon Code hast, kannst du ihn hier einfügen.";
+      }
+
       const os1BaseReply = generateLiveOSReply;
       generateLiveOSReply = async function(input) {
         const raw = String(input || "").trim();
@@ -1631,6 +1753,8 @@
         if (t.includes("was kannst du") || t.includes("wer bist du")) {
           return "Ich bin LiveOS OS1 – die erste Version deines eigenen Assistenten. Ich kann mit dir schreiben, einfache Rechnungen lösen, bei passenden Fragen Wikipedia nachschlagen und Textbilder gestalten. Ich bin noch ein früher Prototyp und kein großes trainiertes Sprachmodell.\n\nWir entwickeln weitere Modellgenerationen später als OS2, OS3 und so weiter.";
         }
+        const programmingReply = generateOS1ProgrammingReply(input);
+        if (programmingReply) return programmingReply;
         const reply = await os1BaseReply(input);
         if (os1Settings.responseStyle === "concise" && reply.length > 560) return reply.slice(0,557).trimEnd() + "…";
         if (os1Settings.responseStyle === "detailed" && /was ist|wie funktioniert|warum|wieso|erklär|erklaer|schritt/i.test(t) && reply.length < 700) {
