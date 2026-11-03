@@ -1403,7 +1403,7 @@
         renderConversationList();
         renderMessages();
         $("conversationTitle").textContent = "Neuer Chat";
-        layout.classList.remove("sidebar-open");
+        closeHistoryDrawer();
         messageInput.focus();
       };
       openConversation = async function (conversationId) {
