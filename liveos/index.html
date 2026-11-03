@@ -1556,7 +1556,8 @@
           if (!modelResult.error && modelResult.data) {
             os1Model = modelResult.data;
             const badge = $("modelBadge");
-            if (badge) badge.innerHTML = '<span class="status-dot"></span> ' + os1Model.version_label + ' · Version ' + os1Model.version_number;
+            const versionLabel = badge && badge.querySelector(".model-switcher-version");
+            if (versionLabel) versionLabel.textContent = os1Model.version_label || "OS1";
           }
           if (!exampleResult.error && Array.isArray(exampleResult.data) && exampleResult.data.length) learnedExamples = exampleResult.data;
         } catch (error) {
@@ -1599,7 +1600,7 @@
         const action = event.target.closest("[data-action]");
         if (!action) return;
         const name = action.dataset.action;
-        if (name === "show-settings") openOS1Settings();
+        if (name === "show-settings") { closeHistoryDrawer(); openOS1Settings(); }
         if (name === "show-model") openOS1Model();
         if (name === "close-modal") closeOS1Modals();
         if (name === "save-settings") saveOS1Settings();
