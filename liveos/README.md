@@ -54,3 +54,18 @@ OS1 lädt zusätzlich einen kuratierten Programmier-Wissenssatz aus Supabase:
 Die Inhalte liegen in `liveos_os1_examples` und `liveos_os1_knowledge` und werden beim App-Start geladen. OS1 kann damit bereits einfache HTML-Webseiten, JavaScript-Funktionen, Python-Beispiele und einen einfachen HTML-Taschenrechner als Code ausgeben. Code wird im Chat als kopierbarer Codeblock dargestellt.
 
 **Technische Grenze:** Das ist ein kuratierter Wissens-/Regel- und Vorlagenlayer, keine Anpassung neuronaler Modellgewichte. Für echtes Fine-Tuning oder ein großes eigenständiges Sprachmodell braucht es ein passendes Modell, Trainingsdaten und ausreichend GPU-Rechenleistung. Supabase speichert in dieser Architektur die Daten und Tests, führt aber nicht selbst das Modelltraining aus.
+
+
+## LiveOS OS2
+
+OS2 is registered as model generation 2 and is the default model in the chat. It loads its own curated examples and knowledge from the existing model registry/knowledge tables.
+
+### Automated evaluation loop
+- Supabase Cron schedules `liveos_os2_private.run_training_cycle(50)` once per hour.
+- The loop queues an evaluation task for every active OS2 response example.
+- Tasks are claimed with `FOR UPDATE SKIP LOCKED`, tagged with a worker ID, scored and stored in a private schema.
+- The scorer combines expected-token coverage and response-length coverage. A result of 85 or higher passes.
+- Run history, individual task scores and model evaluation metadata are stored in the database.
+- The first manual cycle completed 13/13 rule-routing checks with a 100/100 average.
+
+**Important model limit:** This automatic loop tests the OS2 example/retrieval rules. The SQL candidate generator currently routes prompts to curated OS2 examples; it does not generate free-form neural responses and does not update neural model weights. Real self-training or fine-tuning needs an actual open-weight model, an inference/training worker with compute (normally a GPU), and a model-artifact store. Supabase Cron currently automates the evaluation pipeline, not weight training.
