@@ -582,7 +582,7 @@
         <label class="setting-field"><span>Antwortstil</span><select id="settingResponseStyle">
           <option value="friendly">Freundlich und natürlich</option>
           <option value="concise">Kurz und direkt</option>
-          <option value="detailed">Etwas ausführlicher</option>
+          <option value="detailed">Mehr Erklärung anbieten</option>
         </select></label>
       </div>
       <div class="settings-section setting-row">
@@ -1596,6 +1596,9 @@
         }
         const reply = await os1BaseReply(input);
         if (os1Settings.responseStyle === "concise" && reply.length > 560) return reply.slice(0,557).trimEnd() + "…";
+        if (os1Settings.responseStyle === "detailed" && /was ist|wie funktioniert|warum|wieso|erklär|erklaer|schritt/i.test(t) && reply.length < 700) {
+          return reply + "\n\nFür ein konkretes Beispiel oder eine Schritt-für-Schritt-Erklärung kannst du direkt nachfragen.";
+        }
         return reply;
       };
       document.addEventListener("click", function(event) {
