@@ -36,3 +36,21 @@ Die neue, von den alten Urlaub- und LiveOS-Strukturen getrennte OS1-Gruppe beste
 Alle Tabellen haben RLS. Der öffentliche Client kann nur den Modellkatalog und aktive Beispiele bzw. Wissenseinträge lesen. Private Trainingsbereiche sind auf den LiveOS-Owner beschränkt. Die Urlaubsassistent-Tabellen und alten Daten wurden nicht entfernt.
 
 Die App wird zunächst ohne Anmeldung betrieben; deshalb verbleiben Chats und persönliche Einstellungen aktuell lokal auf dem Gerät. Die neuen Cloud-Tabellen sind die saubere Grundlage für die spätere optionale Kontosynchronisierung.
+
+
+## OS1 Programming Pack
+
+OS1 lädt zusätzlich einen kuratierten Programmier-Wissenssatz aus Supabase:
+
+- HTML5-Dokumentstruktur und semantisches Markup
+- Mobile-first CSS, Flexbox/Grid und Safe Areas
+- JavaScript-Funktionen, DOM-Ereignisse und Eingabeprüfung
+- Python-Funktionen und Programmeinstieg
+- Debugging, Fehlerbehandlung und Tests
+- Git-Arbeitsablauf
+- SQL-Grundlagen und Supabase-RLS
+- Websicherheit und Barrierefreiheit
+
+Die Inhalte liegen in `liveos_os1_examples` und `liveos_os1_knowledge` und werden beim App-Start geladen. OS1 kann damit bereits einfache HTML-Webseiten, JavaScript-Funktionen, Python-Beispiele und einen einfachen HTML-Taschenrechner als Code ausgeben. Code wird im Chat als kopierbarer Codeblock dargestellt.
+
+**Technische Grenze:** Das ist ein kuratierter Wissens-/Regel- und Vorlagenlayer, keine Anpassung neuronaler Modellgewichte. Für echtes Fine-Tuning oder ein großes eigenständiges Sprachmodell braucht es ein passendes Modell, Trainingsdaten und ausreichend GPU-Rechenleistung. Supabase speichert in dieser Architektur die Daten und Tests, führt aber nicht selbst das Modelltraining aus.
