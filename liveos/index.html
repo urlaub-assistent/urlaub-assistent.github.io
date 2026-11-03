@@ -362,7 +362,115 @@
       .capability-grid{grid-template-columns:1fr 1fr}
     }
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
-  </style>
+   
+    /* LiveOS mobile chat — a focused, app-like conversation screen */
+    html,body{width:100%;min-height:100%;margin:0;overscroll-behavior:none}
+    body{background:#fff;color:#17243a}
+    .app-screen{width:100%;height:100vh;height:100dvh;min-height:0;padding:0;background:#fff;overflow:hidden}
+    .mobile-app{--chat-ink:#17243a;--chat-muted:#7c8796;--chat-line:#e8ebef;position:relative;display:flex;flex-direction:column;width:100%;height:100%;min-height:0;margin:0 auto;background:#fff;overflow:hidden}
+    .mobile-topbar{position:relative;z-index:15;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:8px;flex:0 0 auto;min-height:58px;padding:calc(env(safe-area-inset-top) + 5px) 12px 6px;background:rgba(255,255,255,.94);border-bottom:1px solid rgba(20,34,53,.055);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+    .header-icon{width:40px;height:40px;display:grid;place-items:center;border:0;border-radius:13px;background:transparent;color:#39485b;transition:background .16s}
+    .header-icon:hover,.header-icon:active{background:#f1f3f5}
+    .header-icon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+    .model-switcher{justify-self:center;display:flex;align-items:center;gap:7px;min-width:0;max-width:100%;padding:8px 12px;border:1px solid transparent;border-radius:999px;background:transparent;color:#16253a}
+    .model-switcher:hover{background:#f7f8fa}
+    .model-switcher-title{font-size:15px;font-weight:750;letter-spacing:-.035em}
+    .model-switcher-version{padding:3px 7px;border-radius:7px;background:#edf2f8;color:#315276;font-size:10px;font-weight:800}
+    .model-chevron{width:14px;height:14px;color:#718096;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .chat-main{position:relative;display:flex;flex:1;flex-direction:column;min-width:0;min-height:0;background:#fff}
+    .messages{display:flex;flex:1;flex-direction:column;gap:23px;min-height:0;max-height:none;overflow-y:auto;overscroll-behavior:contain;padding:22px 16px 24px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+    .welcome{width:min(100%,590px);margin:auto;text-align:center;padding:24px 9px}
+    .welcome-orb{width:56px;height:56px;display:grid;place-items:center;margin:0 auto 19px;border-radius:18px;border:1px solid #e6eaf0;background:#f6f8fb;box-shadow:0 5px 18px rgba(22,42,66,.045)}
+    .welcome-orb img{width:44px;height:44px;object-fit:contain}
+    .welcome h2{margin:0 0 9px;color:#172b45;font-size:clamp(22px,5vw,28px);font-weight:750;letter-spacing:-.055em;line-height:1.2}
+    .welcome>p{max-width:390px;margin:0 auto;color:#788699;font-size:14px;line-height:1.6}
+    .suggestions{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:22px auto 0;max-width:450px}
+    .suggestion{min-height:37px;padding:8px 12px;border:1px solid #e4e8ed;border-radius:999px;background:#fff;color:#43566e;font-size:11px;font-weight:600;box-shadow:0 2px 7px rgba(25,42,62,.025)}
+    .suggestion:hover{border-color:#ccd7e4;background:#f8fafc}
+    .message-row{display:flex;align-items:flex-start;gap:10px;width:100%;max-width:760px;margin:0 auto}
+    .message-row.user{flex-direction:row-reverse}
+    .message-avatar{width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center;border:1px solid #edf0f3;border-radius:11px;background:#f7f8fa;color:#45617f}
+    .message-avatar svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .message-avatar img{width:23px;height:23px;object-fit:contain}
+    .bubble-wrap{max-width:min(84%,640px);min-width:0}
+    .message-meta{margin:1px 4px 5px;color:#8793a2;font-size:10px}
+    .message-row.user .message-meta{text-align:right}
+    .bubble{padding:2px 2px;border:0;border-radius:0;background:transparent;color:#27384e;font-size:15px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+    .message-row.user .bubble{padding:11px 15px;border:1px solid #edf0f3;border-radius:20px 5px 20px 20px;background:#f1f3f5;color:#1e2d40;box-shadow:none}
+    .image-bubble img{max-width:100%;border-radius:17px;box-shadow:0 4px 18px rgba(20,38,62,.09)}
+    .image-download{border-radius:999px;background:#fff;border-color:#e3e8ee;color:#34516f}
+    .composer-zone{position:relative;z-index:10;flex:0 0 auto;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(255,255,255,.93),#fff 22%);border-top:1px solid rgba(20,34,53,.045)}
+    .composer{display:flex;align-items:flex-end;gap:8px;width:min(100%,820px);margin:0 auto;padding:7px 7px 7px 16px;border:1px solid #dfe4ea;border-radius:28px;background:#fff;box-shadow:0 2px 10px rgba(19,39,63,.045),0 8px 25px rgba(19,39,63,.035);transition:border-color .18s,box-shadow .18s}
+    .composer:focus-within{border-color:#c5d1df;box-shadow:0 0 0 3px rgba(41,78,120,.055),0 8px 25px rgba(19,39,63,.04)}
+    .composer textarea{flex:1;min-width:0;min-height:43px;max-height:145px;resize:none;border:0;outline:0;background:transparent;padding:11px 1px;color:#1d2d42;font-size:16px;line-height:1.35}
+    .composer textarea::placeholder{color:#8793a3}
+    .composer textarea:focus{border:0;box-shadow:none;background:transparent}
+    .send-btn{width:43px;height:43px;flex:0 0 43px;display:grid;place-items:center;border:0;border-radius:50%;background:#17365d;color:#fff;box-shadow:none;transition:background .15s,transform .15s}
+    .send-btn:hover{background:#244c78;transform:scale(1.035)}
+    .send-btn:disabled{opacity:.4}
+    .send-btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .composer-disclaimer{width:min(100%,780px);margin:8px auto 0;text-align:center;color:#929dab;font-size:10px;line-height:1.4}
+    .typing{display:inline-flex;gap:4px;padding:4px 2px}.typing i{width:6px;height:6px;background:#6682a4;border-radius:50%;animation:pulse 1s infinite ease-in-out}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+    .drawer-backdrop{position:fixed;inset:0;z-index:40;background:rgba(18,31,48,.28);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+    .drawer-backdrop[hidden]{display:none!important}
+    .history-drawer{position:fixed;inset:0 auto 0 0;z-index:45;display:flex;flex-direction:column;width:min(86vw,350px);padding:calc(env(safe-area-inset-top) + 13px) 13px calc(14px + env(safe-area-inset-bottom));background:#f8f9fb;border-right:1px solid #e4e8ee;box-shadow:18px 0 50px rgba(17,31,50,.14);transform:translateX(-105%);visibility:hidden;transition:transform .24s cubic-bezier(.2,.8,.2,1),visibility .24s}
+    .history-drawer.open{transform:translateX(0);visibility:visible}
+    .drawer-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;padding:2px 2px 13px;border-bottom:1px solid #e9edf1}
+    .drawer-brand{display:flex;align-items:center;gap:10px;min-width:0}
+    .drawer-logo{width:39px;height:39px;display:grid;place-items:center;border:1px solid #e1e7ef;border-radius:13px;background:#fff}
+    .drawer-logo img{width:31px;height:31px;object-fit:contain}
+    .drawer-brand strong,.drawer-brand span{display:block}
+    .drawer-brand strong{color:#1c3553;font-size:15px;font-weight:800}
+    .drawer-brand span{margin-top:2px;color:#8995a4;font-size:10px}
+    .drawer-close{width:36px;height:36px;flex-basis:36px;background:#fff;border:1px solid #e5e9ef;color:#53657a}
+    .drawer-new-chat{display:flex;align-items:center;gap:11px;width:100%;padding:13px 14px;border:1px solid #dfe5ed;border-radius:15px;background:#fff;color:#203b5e;text-align:left;font-size:12px;font-weight:750;box-shadow:0 2px 7px rgba(24,43,66,.025)}
+    .drawer-new-chat:hover{background:#f1f5f9}
+    .drawer-new-chat svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+    .drawer-section-label{display:flex;align-items:center;justify-content:space-between;margin:22px 5px 8px;color:#8793a1;font-size:9px;font-weight:800;letter-spacing:.12em}
+    .drawer-section-label span:last-child{display:grid;place-items:center;min-width:22px;height:22px;padding:0 5px;border-radius:8px;background:#edf1f5;color:#607188;font-size:9px;letter-spacing:0}
+    .conversation-list{display:grid;align-content:start;gap:4px;flex:1;min-height:0;overflow-y:auto;padding:1px 0 12px}
+    .conversation-item{display:flex;align-items:center;gap:10px;width:100%;min-width:0;padding:11px 10px;border:1px solid transparent;border-radius:12px;background:transparent;color:#596b80;text-align:left;font-size:11px}
+    .conversation-item svg{width:16px;height:16px;flex:0 0 16px;color:#8291a3;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .conversation-item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .conversation-item:hover{background:#f0f3f7}
+    .conversation-item.active{border-color:#e3e8ef;background:#fff;color:#1d385b;font-weight:750;box-shadow:0 2px 8px rgba(20,38,60,.035)}
+    .drawer-bottom{padding-top:12px;border-top:1px solid #e7ebf0}
+    .drawer-setting{display:flex;align-items:center;gap:11px;width:100%;padding:10px 7px;border:0;border-radius:13px;background:transparent;text-align:left}
+    .drawer-setting:hover{background:#f0f3f7}
+    .drawer-setting-icon{width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;border-radius:12px;background:#eaf0f7;color:#315579}
+    .drawer-setting-icon svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    .drawer-setting>span:nth-child(2){display:grid;gap:3px;flex:1;min-width:0}
+    .drawer-setting strong{color:#2a405c;font-size:11px;font-weight:750}
+    .drawer-setting small{color:#8794a4;font-size:9px}
+    .drawer-chevron{width:16px;height:16px;color:#9aa5b2;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .drawer-model{display:flex;align-items:center;gap:7px;margin:12px 7px 0;color:#718095;font-size:9px}
+    .drawer-model-dot{width:6px;height:6px;border-radius:50%;background:#3ba37b}
+    .drawer-model-version{margin-left:auto;color:#8290a2}
+    body.drawer-open{overflow:hidden}
+    .toast{bottom:calc(16px + env(safe-area-inset-bottom));border-radius:15px;background:#172c48}
+    .modal-shell{padding:14px}
+    .modal-card{width:min(100%,460px);max-height:85dvh;padding:21px;border-radius:23px}
+    .modal-top h2{font-size:22px}
+    @media(min-width:760px){
+      .mobile-app{max-width:920px;border-left:1px solid #f0f2f5;border-right:1px solid #f0f2f5;box-shadow:0 0 50px rgba(19,37,59,.035)}
+      .mobile-topbar{padding-left:18px;padding-right:18px}
+      .messages{padding-left:clamp(25px,6vw,80px);padding-right:clamp(25px,6vw,80px)}
+      .history-drawer{width:330px}
+    }
+    @media(max-width:430px){
+      .mobile-topbar{grid-template-columns:42px minmax(0,1fr) 42px;padding-left:8px;padding-right:8px}
+      .messages{padding:17px 12px 20px}
+      .welcome{padding:16px 3px}
+      .welcome h2{font-size:23px}
+      .welcome>p{font-size:13px}
+      .suggestions{gap:6px;margin-top:18px}
+      .suggestion{font-size:10px;padding:8px 10px}
+      .composer-zone{padding-left:9px;padding-right:9px}
+      .composer-disclaimer{font-size:9px}
+    }
+    @media(prefers-reduced-motion:reduce){.history-drawer{transition:none}.messages{scroll-behavior:auto}}
+
+</style>
 </head>
 <body>
   <div class="ambient" aria-hidden="true"></div>
@@ -380,168 +488,73 @@
   </section>
 
   <section id="appScreen" class="app-screen">
-    <div class="app-frame">
-      <header class="app-topbar">
-        <div class="app-brand">
-          <div class="brand-mark"><img src="./assets/liveos-icon.png" alt="LiveOS"></div>
-          <div class="brand-copy">
-            <div class="brand-kicker">DEIN PERSÖNLICHER KI-ARBEITSPLATZ</div>
-            <div class="brand-name">LiveOS</div>
-            <div class="brand-sub">Ein eigenes System. Schritt für Schritt.</div>
-          </div>
-        </div>
-        <div class="top-actions">
-          <button class="model-pill" id="modelBadge" type="button" data-action="show-model">
-            <span class="status-dot"></span><span>OS1 · Version 1</span>
-          </button>
-          <button class="icon-btn top-settings" type="button" title="Einstellungen" aria-label="Einstellungen" data-action="show-settings">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Z"/><path d="m19.4 13.5 1.1.9-1.2 2.1-1.4-.5a7.6 7.6 0 0 1-1.4.8l-.2 1.5h-2.5l-.3-1.5a7.6 7.6 0 0 1-1.5-.8l-1.4.5-1.2-2.1 1.1-.9a6.8 6.8 0 0 1 0-1.7l-1.1-.9 1.2-2.1 1.4.5a7.6 7.6 0 0 1 1.5-.8l.3-1.5h2.5l.2 1.5a7.6 7.6 0 0 1 1.4.8l1.4-.5 1.2 2.1-1.1.9a6.8 6.8 0 0 1 0 1.7Z"/></svg>
-          </button>
-        </div>
+    <div class="mobile-app" id="appLayout">
+      <header class="mobile-topbar">
+        <button class="header-icon" type="button" data-action="toggle-drawer" aria-label="Chatverlauf öffnen" title="Chatverlauf">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <button class="model-switcher" id="modelBadge" type="button" data-action="show-model" aria-label="Aktives Modell LiveOS OS1">
+          <span class="model-switcher-title">LiveOS</span>
+          <span class="model-switcher-version">OS1</span>
+          <svg class="model-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
+        </button>
+        <button class="header-icon new-chat-icon" type="button" data-action="new-chat" aria-label="Neuen Chat starten" title="Neuer Chat">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
       </header>
 
-      <main class="page-shell" id="appLayout">
-        <section class="page-view" id="overviewView" data-view="overview" hidden>
-          <div class="view-intro">
-            <div><span class="eyebrow">ÜBERSICHT</span><h1>Willkommen bei LiveOS.</h1><p>Dein eigener KI-Arbeitsplatz – klar aufgebaut und bereit für die nächsten Entwicklungsschritte.</p></div>
-          </div>
-          <section class="overview-hero">
-            <div class="hero-content">
-              <span class="hero-tag"><span class="status-dot"></span> SYSTEM BEREIT · OS1</span>
-              <h2>Eine eigene KI.<br>Ein System, das wächst.</h2>
-              <p>Starte einen Chat, sieh dir deine Modellgeneration an oder öffne unser Entwicklungs-Labor.</p>
-              <button class="hero-primary" type="button" data-tab="chat">
-                <span>Chat öffnen</span>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-              </button>
+      <main class="chat-main">
+        <div class="messages" id="messages" aria-live="polite">
+          <div class="welcome">
+            <div class="welcome-orb"><img src="./assets/liveos-icon.png" alt="LiveOS"></div>
+            <h2>Womit kann ich dir helfen?</h2>
+            <p>Ich bin LiveOS OS1. Schreib mir einfach, was dich beschäftigt.</p>
+            <div class="suggestions">
+              <button class="suggestion" data-prompt="Hallo LiveOS!">Sag Hallo</button>
+              <button class="suggestion" data-prompt="Wer bist du?">Wer bist du?</button>
+              <button class="suggestion" data-prompt="Was kannst du schon?">Was kannst du?</button>
+              <button class="suggestion" data-prompt="Generiere mir ein weißes Bild, auf dem BEN in dunkelblauer Schrift steht.">Erstelle ein Bild</button>
             </div>
-            <div class="hero-art" aria-hidden="true">
-              <div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div>
-              <div class="hero-core"><img src="./assets/liveos-icon.png" alt=""></div>
-              <span class="orbit-dot dot-one"></span><span class="orbit-dot dot-two"></span><span class="orbit-dot dot-three"></span>
-            </div>
-          </section>
-          <div class="stat-grid">
-            <article class="stat-card"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 3V5Z"/><path d="M8 9h8M8 12h5"/></svg></div><span>ASSISTENT</span><strong>LiveOS</strong><small>Dein eigenes System</small></article>
-            <article class="stat-card"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M12 3 4 7v10l8 4 8-4V7l-8-4Z"/><path d="m4 7 8 4 8-4M12 11v10"/></svg></div><span>MODELL</span><strong>OS1</strong><small>Erste Generation</small></article>
-            <article class="stat-card"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M4 19V5m0 14h16"/><path d="m7 15 4-4 3 2 5-6"/></svg></div><span>STATUS</span><strong>Prototyp</strong><small>Wird weiterentwickelt</small></article>
           </div>
-          <div class="section-heading"><div><span class="eyebrow">SCHNELLZUGRIFF</span><h2>Was möchtest du machen?</h2></div></div>
-          <div class="quick-grid">
-            <button class="quick-card" type="button" data-tab="chat"><span class="quick-icon"><svg viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8 8 0 0 1-3.6-.8L4 20l1.2-3.6A7.2 7.2 0 0 1 4 12c0-4.1 3.6-7.5 8-7.5s8 3.1 8 7Z"/><path d="M8 11h8M8 14h5"/></svg></span><span><strong>Mit OS1 chatten</strong><small>Schreiben, fragen und rechnen</small></span><svg class="quick-arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
-            <button class="quick-card" type="button" data-tab="models"><span class="quick-icon"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="3"/><path d="M9 9h6v6H9zM9 2v3m6-3v3M9 19v3m6-3v3M2 9h3m-3 6h3m14-6h3m-3 6h3"/></svg></span><span><strong>Modelle ansehen</strong><small>OS1 und kommende Generationen</small></span><svg class="quick-arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
-            <button class="quick-card" type="button" data-tab="training"><span class="quick-icon"><svg viewBox="0 0 24 24"><path d="M12 3a7 7 0 0 0-4 12.7V19h8v-3.3A7 7 0 0 0 12 3Z"/><path d="M9 22h6M9 10h.01M15 10h.01M12 7v.01"/></svg></span><span><strong>Entwicklungs-Labor</strong><small>Datensätze und Tests im Blick</small></span><svg class="quick-arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
-            <button class="quick-card" type="button" data-action="show-settings"><span class="quick-icon"><svg viewBox="0 0 24 24"><path d="M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Z"/><path d="m19.4 13.5 1.1.9-1.2 2.1-1.4-.5-1.4.8-.2 1.5h-2.5l-.3-1.5-1.5-.8-1.4.5-1.2-2.1 1.1-.9v-1.7l-1.1-.9 1.2-2.1 1.4.5 1.5-.8.3-1.5h2.5l.2 1.5 1.4.8 1.4-.5 1.2 2.1-1.1.9v1.7Z"/></svg></span><span><strong>Einstellungen</strong><small>Dein LiveOS anpassen</small></span><svg class="quick-arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
-          </div>
-        </section>
+        </div>
 
-        <section class="page-view" id="chatView" data-view="chat">
-          <div class="view-intro chat-intro">
-            <div><span class="eyebrow">LIVEOS · GESPRÄCHE</span><h1>Deine Chats</h1><p>Schreib mit deinem ersten Modell – OS1.</p></div>
-            <button class="primary-action" type="button" data-action="new-chat"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Neuer Chat</span></button>
-          </div>
-          <div class="chat-workspace">
-            <aside class="history-panel" id="sidebar">
-              <div class="history-head">
-                <div><span class="eyebrow">GESPEICHERT</span><h2>Unterhaltungen</h2></div>
-                <span class="count-pill" id="chatCount">0</span>
-              </div>
-              <div class="conversation-list" id="conversationList"></div>
-              <div class="history-foot"><span class="history-dot"></span>Auf diesem Gerät gespeichert</div>
-            </aside>
-
-            <main class="chat-panel">
-              <div class="chat-head">
-                <div class="chat-heading">
-                  <span class="chat-model-label"><span class="status-dot"></span> LiveOS OS1</span>
-                  <h2 id="conversationTitle">Neuer Chat</h2>
-                  <p>Dein persönliches Gespräch</p>
-                </div>
-                <button class="icon-btn chat-new-button" type="button" title="Neuer Chat" aria-label="Neuer Chat" data-action="new-chat">
-                  <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-                </button>
-              </div>
-              <div class="messages" id="messages" aria-live="polite">
-                <div class="welcome">
-                  <div class="welcome-orb"><img src="./assets/liveos-icon.png" alt="LiveOS"></div>
-                  <span class="welcome-kicker">DEIN KI-ASSISTENT</span>
-                  <h2>Hallo! Ich bin LiveOS OS1.</h2>
-                  <p>Ich bin deine erste eigene LiveOS-Version. Wir können schreiben, rechnen, Ideen sortieren und bei passenden Fragen Wikipedia nutzen.</p>
-                  <div class="suggestions">
-                    <button class="suggestion" data-prompt="Hallo LiveOS!">Sag Hallo</button>
-                    <button class="suggestion" data-prompt="Wer bist du?">Wer bist du?</button>
-                    <button class="suggestion" data-prompt="Was kannst du schon?">Was kannst du?</button>
-                  </div>
-                </div>
-              </div>
-              <div class="composer-wrap">
-                <div class="composer-hint"><span>DEINE NACHRICHT</span><span>Enter zum Senden · Shift + Enter für Zeilenumbruch</span></div>
-                <form id="composerForm" class="composer">
-                  <textarea id="messageInput" rows="1" maxlength="12000" placeholder="Schreibe OS1 eine Nachricht …" aria-label="Nachricht"></textarea>
-                  <button id="sendButton" class="send-btn" type="submit" aria-label="Nachricht senden">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
-                  </button>
-                </form>
-                <p class="fine-print">OS1 · Keine externe Chat-KI-API · Deine Chats bleiben lokal auf diesem Gerät.</p>
-              </div>
-            </main>
-          </div>
-        </section>
-
-        <section class="page-view" id="modelsView" data-view="models" hidden>
-          <div class="view-intro"><div><span class="eyebrow">MODELLVERWALTUNG</span><h1>Unsere Modelle</h1><p>Jede Generation bekommt ihre eigene Versionsnummer.</p></div></div>
-          <article class="model-feature-card">
-            <div class="model-feature-top"><span class="eyebrow">AKTUELLES MODELL</span><span class="status-label"><span class="status-dot"></span> Aktiv</span></div>
-            <div class="model-feature-main"><div class="model-feature-icon"><img src="./assets/liveos-icon.png" alt=""></div><div><div class="model-feature-name">LiveOS OS1</div><div class="model-feature-version">OS1 · Version 1 · Erste Generation</div></div></div>
-            <p class="model-feature-copy">Die erste eigenständige Version von LiveOS. OS1 arbeitet mit einer eingebauten Gesprächslogik, kuratierten Beispielen und kleinen Werkzeugen. Es ist noch kein großes trainiertes Sprachmodell.</p>
-            <div class="model-capabilities">
-              <span>Chat</span><span>Mathematik</span><span>Wikipedia</span><span>Textgrafiken</span>
-            </div>
-            <button class="primary-action" type="button" data-action="show-model">Modelldetails öffnen <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
-          </article>
-          <div class="section-heading"><div><span class="eyebrow">MODELLREIHE</span><h2>Was als Nächstes kommt</h2></div></div>
-          <div class="future-model-grid">
-            <article class="future-model-card"><span class="future-model-number">02</span><div><strong>OS2</strong><p>Nächste Modellgeneration</p></div><span class="coming-label">Geplant</span></article>
-            <article class="future-model-card"><span class="future-model-number">03</span><div><strong>OS3</strong><p>Weitere Entwicklungsschritte</p></div><span class="coming-label">Später</span></article>
-          </div>
-        </section>
-
-        <section class="page-view" id="trainingView" data-view="training" hidden>
-          <div class="view-intro"><div><span class="eyebrow">LIVEOS DEVELOPMENT</span><h1>Entwicklungs-Labor</h1><p>Hier entsteht die Grundlage für zukünftige Modellgenerationen.</p></div></div>
-          <section class="lab-hero">
-            <div class="lab-icon"><svg viewBox="0 0 24 24"><path d="M12 3a7 7 0 0 0-4 12.7V19h8v-3.3A7 7 0 0 0 12 3Z"/><path d="M9 22h6M9 10h.01M15 10h.01M12 7v.01"/></svg></div>
-            <div><span class="eyebrow">OS1 · TESTUMGEBUNG</span><h2>Unser Labor ist vorbereitet.</h2><p>Die Datenbank für Datensätze, Trainingsbeispiele, Testläufe und Modellveröffentlichungen ist angelegt.</p></div>
-            <span class="status-label"><span class="status-dot"></span> Datenbank bereit</span>
-          </section>
-          <div class="lab-grid">
-            <article class="lab-card"><span class="lab-card-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h8M8 17h4"/></svg></span><span class="eyebrow">DATEN</span><strong>Datensätze</strong><p>Gesammelte und geprüfte Beispiele für spätere Tests.</p><span class="lab-state">Struktur eingerichtet</span></article>
-            <article class="lab-card"><span class="lab-card-icon"><svg viewBox="0 0 24 24"><path d="M12 3v4m0 10v4M3 12h4m10 0h4M5.6 5.6l2.8 2.8m7.2 7.2 2.8 2.8m0-12.8-2.8 2.8m-7.2 7.2-2.8 2.8"/><circle cx="12" cy="12" r="4"/></svg></span><span class="eyebrow">ENTWICKLUNG</span><strong>Trainingsläufe</strong><p>Platz für spätere Modell- und Regel-Experimente.</p><span class="lab-state">Noch nicht aktiv</span></article>
-            <article class="lab-card"><span class="lab-card-icon"><svg viewBox="0 0 24 24"><path d="m4 12 5 5L20 6"/><circle cx="12" cy="12" r="9"/></svg></span><span class="eyebrow">QUALITÄT</span><strong>Tests & Ergebnisse</strong><p>Antworten vergleichen und nachvollziehbar bewerten.</p><span class="lab-state">Struktur eingerichtet</span></article>
-          </div>
-          <p class="lab-note">Wichtig: OS1 wird hier noch nicht mit neuen Modellgewichten trainiert. Diese Ansicht ist zunächst die gestaltete Oberfläche für unsere spätere Entwicklungsumgebung.</p>
-        </section>
-
-        <section class="page-view" id="moreView" data-view="more" hidden>
-          <div class="view-intro"><div><span class="eyebrow">PERSÖNLICHER BEREICH</span><h1>Mehr</h1><p>Dein Profil, deine App und deine Einstellungen.</p></div></div>
-          <button class="settings-card" type="button" data-action="show-settings">
-            <span class="settings-card-icon"><svg viewBox="0 0 24 24"><path d="M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Z"/><path d="m19.4 13.5 1.1.9-1.2 2.1-1.4-.5-1.4.8-.2 1.5h-2.5l-.3-1.5-1.5-.8-1.4.5-1.2-2.1 1.1-.9v-1.7l-1.1-.9 1.2-2.1 1.4.5 1.5-.8.3-1.5h2.5l.2 1.5 1.4.8 1.4-.5 1.2 2.1-1.1.9v1.7Z"/></svg></span>
-            <span><strong>Einstellungen</strong><small>Anzeigename, Antwortstil und Chatverlauf verwalten</small></span><svg class="quick-arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
-          </button>
-          <article class="more-info-card"><div class="more-info-head"><span class="info-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg></span><div><span class="eyebrow">ÜBER LIVEOS</span><h2>Dein eigenes KI-System</h2></div></div><p>LiveOS wird Schritt für Schritt entwickelt. Die Modellreihe beginnt mit OS1. Zukünftige Generationen werden als OS2, OS3 und so weiter bezeichnet.</p><div class="info-footer"><span>Aktuelle Version</span><strong>OS1 · Version 1</strong></div></article>
-          <article class="more-info-card"><div class="more-info-head"><span class="info-icon"><svg viewBox="0 0 24 24"><path d="M12 3 4 7v5c0 5 3.4 8 8 9 4.6-1 8-4 8-9V7l-8-4Z"/><path d="m9 12 2 2 4-4"/></svg></span><div><span class="eyebrow">DATENSCHUTZ</span><h2>Deine Daten</h2></div></div><p>In dieser ersten Version werden Chatverläufe und persönliche Einstellungen lokal in deinem Browser gespeichert. Es gibt keine externe Chat-KI-API.</p></article>
-          <button class="clear-history-card" type="button" data-action="clear-chats"><span class="clear-icon"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg></span><span><strong>Chatverlauf löschen</strong><small>Lokale Unterhaltungen von diesem Gerät entfernen</small></span></button>
-        </section>
+        <div class="composer-zone">
+          <form id="composerForm" class="composer">
+            <textarea id="messageInput" rows="1" maxlength="12000" placeholder="Nachricht an LiveOS" aria-label="Nachricht an LiveOS"></textarea>
+            <button id="sendButton" class="send-btn" type="submit" aria-label="Nachricht senden">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+            </button>
+          </form>
+          <p class="composer-disclaimer">LiveOS OS1 kann Fehler machen. Prüfe wichtige Informationen bitte selbst.</p>
+        </div>
       </main>
 
-      <nav class="glass-nav" id="bottomNav" aria-label="Hauptnavigation">
-        <div class="nav-inner">
-          <button class="nav-item" type="button" data-tab="overview"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20Z"/><path d="M9 21v-7h6v7"/></svg></span><span>Übersicht</span></button>
-          <button class="nav-item" type="button" data-tab="chat"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8 8 0 0 1-3.6-.8L4 20l1.2-3.6A7.2 7.2 0 0 1 4 12c0-4.1 3.6-7.5 8-7.5s8 3.1 8 7Z"/><path d="M8 11h8M8 14h5"/></svg></span><span>Chats</span></button>
-          <button class="nav-item" type="button" data-tab="models"><span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="3"/><path d="M9 9h6v6H9zM9 2v3m6-3v3M9 19v3m6-3v3M2 9h3m-3 6h3m14-6h3m-3 6h3"/></svg></span><span>Modelle</span></button>
-          <button class="nav-item" type="button" data-tab="training"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 3a7 7 0 0 0-4 12.7V19h8v-3.3A7 7 0 0 0 12 3Z"/><path d="M9 22h6M9 10h.01M15 10h.01M12 7v.01"/></svg></span><span>Labor</span></button>
-          <button class="nav-item" type="button" data-tab="more"><span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></span><span>Mehr</span></button>
+      <div class="drawer-backdrop" id="drawerBackdrop" data-action="close-drawer" hidden></div>
+      <aside class="history-drawer" id="historyDrawer" aria-label="Chatverlauf" aria-hidden="true">
+        <div class="drawer-header">
+          <div class="drawer-brand">
+            <div class="drawer-logo"><img src="./assets/liveos-icon.png" alt=""></div>
+            <div><strong>LiveOS</strong><span>Deine Unterhaltungen</span></div>
+          </div>
+          <button class="header-icon drawer-close" type="button" data-action="close-drawer" aria-label="Menü schließen">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+          </button>
         </div>
-      </nav>
+        <button class="drawer-new-chat" type="button" data-action="new-chat">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <span>Neuer Chat</span>
+        </button>
+        <div class="drawer-section-label"><span>CHATVERLAUF</span><span id="chatCount">0</span></div>
+        <div class="conversation-list" id="conversationList"></div>
+        <div class="drawer-bottom">
+          <button class="drawer-setting" type="button" data-action="show-settings">
+            <span class="drawer-setting-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.1.8-1.2 2.1-1.3-.5a8 8 0 0 1-1.5.8l-.2 1.5h-2.5l-.3-1.5a8 8 0 0 1-1.5-.8l-1.3.5-1.2-2.1 1.1-.9a7 7 0 0 1 0-1.7l-1.1-.9 1.2-2.1 1.3.5a8 8 0 0 1 1.5-.8l.3-1.5h2.5l.2 1.5a8 8 0 0 1 1.5.8l1.3-.5 1.2 2.1-1.1.9a7 7 0 0 1 0 1.7Z"/></svg></span>
+            <span><strong>Einstellungen</strong><small>Dein LiveOS anpassen</small></span>
+            <svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+          <div class="drawer-model"><span class="drawer-model-dot"></span><span>LiveOS OS1</span><span class="drawer-model-version">Version 1</span></div>
+        </div>
+      </aside>
     </div>
   </section>
 
@@ -903,7 +916,7 @@
         renderConversationList();
         renderMessages();
         $("conversationTitle").textContent = "Neuer Chat";
-        layout.classList.remove("sidebar-open");
+        closeHistoryDrawer();
         messageInput.focus();
       }
 
@@ -994,12 +1007,13 @@
           welcome.className = "welcome";
           welcome.innerHTML =
             '<div class="welcome-orb"><img src="./assets/liveos-icon.png" alt="LiveOS"></div>' +
-            '<h2>Hallo! Ich bin LiveOS.</h2>' +
-            '<p>Ich kann mit dir chatten und Informationen im Internet nachschlagen. Schreib mir einfach, was dich interessiert.</p>' +
+            '<h2>Womit kann ich dir helfen?</h2>' +
+            '<p>Ich bin LiveOS OS1. Schreib mir einfach, was dich beschäftigt.</p>' +
             '<div class="suggestions">' +
             '<button class="suggestion" data-prompt="Hallo LiveOS!">Sag Hallo</button>' +
             '<button class="suggestion" data-prompt="Wer bist du?">Wer bist du?</button>' +
-            '<button class="suggestion" data-prompt="Generiere mir ein weißes Bild, auf dem BEN in dunkelblauer Schrift steht.">Bild mit BEN erstellen</button><button class="suggestion" data-prompt="Was kannst du schon?">Was kannst du?</button></div>';
+            '<button class="suggestion" data-prompt="Was kannst du schon?">Was kannst du?</button>' +
+            '<button class="suggestion" data-prompt="Generiere mir ein weißes Bild, auf dem BEN in dunkelblauer Schrift steht.">Erstelle ein Bild</button></div>';
           messagesEl.appendChild(welcome);
           icons();
           return;
@@ -1303,8 +1317,8 @@
         const name = action.dataset.action;
         if (name === "signout") signOut();
         if (name === "new-chat") createConversation();
-        if (name === "toggle-sidebar") layout.classList.toggle("sidebar-open");
-        if (name === "close-sidebar") layout.classList.remove("sidebar-open");
+        if (name === "toggle-drawer") toggleHistoryDrawer();
+        if (name === "close-drawer") closeHistoryDrawer();
       });
 
       conversationListEl.addEventListener("click", function (event) {
@@ -1400,7 +1414,7 @@
         $("conversationTitle").textContent = conversation.title || "Neuer Chat";
         renderConversationList();
         renderMessages();
-        layout.classList.remove("sidebar-open");
+        closeHistoryDrawer();
       };
       sendMessage = async function (text) {
         const value = String(text || "").trim();
@@ -1599,44 +1613,35 @@
       };
 
 
-      // Navigation model inspired by the Urlaub-Assistent mobile app shell.
-      let activeNavTab = localStorage.getItem("liveos_active_tab_v1") || "chat";
-      const validNavTabs = ["overview","chat","models","training","more"];
-      if (!validNavTabs.includes(activeNavTab)) activeNavTab = "chat";
-      function setActiveNav(tab) {
-        if (!validNavTabs.includes(tab)) return;
-        activeNavTab = tab;
-        try { localStorage.setItem("liveos_active_tab_v1", tab); } catch (_) {}
-        document.querySelectorAll("[data-view]").forEach(function(view) {
-          view.hidden = view.dataset.view !== tab;
-        });
-        document.querySelectorAll("[data-tab]").forEach(function(button) {
-          const active = button.dataset.tab === tab;
-          button.classList.toggle("active", active);
-          if (active) button.setAttribute("aria-current","page");
-          else button.removeAttribute("aria-current");
-        });
-        if (tab === "chat") {
-          renderConversationList();
-          renderMessages();
-        }
-        icons();
+
+      // Mobile-first chat drawer (no bottom tab bar or secondary work areas).
+      const historyDrawer = $("historyDrawer");
+      const drawerBackdrop = $("drawerBackdrop");
+      function openHistoryDrawer() {
+        historyDrawer.classList.add("open");
+        historyDrawer.setAttribute("aria-hidden","false");
+        drawerBackdrop.hidden = false;
+        document.body.classList.add("drawer-open");
       }
-      document.addEventListener("click", function(event) {
-        const tabButton = event.target.closest("[data-tab]");
-        if (tabButton) {
-          setActiveNav(tabButton.dataset.tab);
-          return;
-        }
-        const actionButton = event.target.closest("[data-action]");
-        if (actionButton && actionButton.dataset.action === "new-chat") setActiveNav("chat");
-      });
-      const openConversationBeforeNav = openConversation;
+      function closeHistoryDrawer() {
+        if (!historyDrawer || !drawerBackdrop) return;
+        historyDrawer.classList.remove("open");
+        historyDrawer.setAttribute("aria-hidden","true");
+        drawerBackdrop.hidden = true;
+        document.body.classList.remove("drawer-open");
+      }
+      function toggleHistoryDrawer() {
+        if (historyDrawer.classList.contains("open")) closeHistoryDrawer();
+        else openHistoryDrawer();
+      }
+      const openConversationBeforeDrawer = openConversation;
       openConversation = async function(conversationId) {
-        await openConversationBeforeNav(conversationId);
-        setActiveNav("chat");
+        await openConversationBeforeDrawer(conversationId);
+        closeHistoryDrawer();
       };
-      setActiveNav(activeNavTab);
+      document.addEventListener("keydown",function(event) {
+        if(event.key === "Escape") closeHistoryDrawer();
+      });
 
       startGuestMode();
     })();
