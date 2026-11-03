@@ -662,12 +662,21 @@
         const displayName = (existing.data && existing.data.display_name) ||
           (currentUser.user_metadata && currentUser.user_metadata.display_name) ||
           (currentUser.email ? currentUser.email.split("@")[0] : "LiveOS Nutzer");
-        const { error: profileError } = await client.from("liveos_profiles").upsert({
-          id: currentUser.id,
-          display_name: displayName,
-          plan: (existing.data && existing.data.plan) || "os1",
-          updated_at: new Date().toISOString()
-        }, { onConflict: "id" });
+        let profileError = null;
+        if (existing.error) {
+          profileError = existing.error;
+        } else if (existing.data) {
+          if (existing.data.display_name !== displayName) {
+            const updatedProfile = await client.from("liveos_profiles")
+              .update({ display_name: displayName, updated_at: new Date().toISOString() })
+              .eq("id", currentUser.id);
+            profileError = updatedProfile.error;
+          }
+        } else {
+          const createdProfile = await client.from("liveos_profiles")
+            .insert({ id: currentUser.id, display_name: displayName });
+          profileError = createdProfile.error;
+        }
         if (profileError) console.warn("LiveOS profile:", profileError.message);
 
         await loadConversations();
