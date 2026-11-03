@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#ffffff">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" type="image/png" href="./assets/liveos-icon.png">
-  <link rel="apple-touch-icon" href="./assets/liveos-icon.png">
+  <link rel="icon" type="image/svg+xml" href="./assets/liveos-icon.svg">
+  <link rel="apple-touch-icon" href="./assets/liveos-icon.svg">
   <meta name="description" content="LiveOS – dein persönlicher KI-Assistent.">
   <title>LiveOS · Dein KI-Assistent</title>
   
@@ -475,6 +475,46 @@
     }
     @media(prefers-reduced-motion:reduce){.history-drawer{transition:none}.messages{scroll-behavior:auto}}
 
+
+    /* LiveOS OS2: stronger Urlaub-Assistent navy/glass brand */
+    .mobile-topbar{background:linear-gradient(112deg,#101b30 0%,#17365d 62%,#214d79 100%);border-bottom:1px solid rgba(255,255,255,.12);box-shadow:0 7px 24px rgba(11,29,54,.16)}
+    .header-icon{color:#f7faff;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.12)}
+    .header-icon:hover,.header-icon:active{background:rgba(255,255,255,.15)}
+    .model-switcher{color:#fff;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.075);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+    .model-switcher:hover{background:rgba(255,255,255,.13)}
+    .model-switcher-title{color:#fff;font-weight:800;letter-spacing:-.045em}
+    .model-switcher-version{background:rgba(255,255,255,.93);color:#183a62}
+    .model-chevron{color:rgba(255,255,255,.7)}
+    .model-brand-icon{width:25px;height:25px;object-fit:contain;filter:drop-shadow(0 2px 5px rgba(0,0,0,.2))}
+    .mobile-app{background:linear-gradient(180deg,#f7f9fc 0%,#fff 30%,#f8fafd 100%)}
+    .chat-main{background:transparent}
+    .messages{background:linear-gradient(180deg,rgba(255,255,255,.85),rgba(248,250,253,.96))}
+    .welcome-orb{width:78px;height:78px;margin-bottom:20px;border-radius:25px;border:1px solid rgba(35,76,120,.14);background:linear-gradient(145deg,#fff 0%,#eef3f9 100%);box-shadow:0 13px 35px rgba(24,55,91,.10),inset 0 1px 0 #fff}
+    .welcome-orb img{width:66px;height:66px;object-fit:contain}
+    .welcome h2{color:#17365d;font-weight:800}
+    .welcome>p{color:#6f8198}
+    .suggestion{border-color:rgba(33,73,116,.15);background:rgba(255,255,255,.78);color:#355575;box-shadow:0 5px 14px rgba(19,48,82,.035),inset 0 1px 0 #fff;backdrop-filter:blur(10px)}
+    .suggestion:hover{background:#edf3f9;border-color:#bfd0e2;color:#183b63}
+    .composer-zone{background:rgba(255,255,255,.82);border-top:1px solid rgba(21,49,82,.08);box-shadow:0 -8px 28px rgba(18,43,72,.035);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+    .composer{border:1px solid rgba(30,70,112,.17);border-radius:25px;background:rgba(255,255,255,.97);box-shadow:0 8px 26px rgba(19,47,80,.075),inset 0 1px 0 #fff}
+    .composer:focus-within{border-color:#7898bd;box-shadow:0 0 0 3px rgba(40,82,130,.08),0 10px 28px rgba(19,47,80,.075)}
+    .send-btn{background:linear-gradient(145deg,#244d78,#15365e);border:1px solid rgba(12,39,70,.2);box-shadow:0 6px 15px rgba(19,52,88,.2);color:#fff}
+    .send-btn:disabled{opacity:1;background:#9aabc0;color:#fff;box-shadow:none}
+    .composer-disclaimer{color:#8595a9}
+    .drawer-logo{border-color:#d9e3ee;background:linear-gradient(145deg,#fff,#edf3f9)}
+    .drawer-logo img{width:34px;height:34px}
+    .drawer-brand strong{color:#17365d}
+    .drawer-new-chat{border-color:rgba(34,75,119,.17);background:linear-gradient(145deg,#fff,#f5f8fb);color:#17365d;box-shadow:0 7px 17px rgba(21,51,82,.05),inset 0 1px 0 #fff}
+    .conversation-item.active{border-color:#d4e0ed;background:#eaf1f8;color:#17365d}
+    .drawer-setting-icon{background:#e8eff7;color:#214a74}
+    .message-row.user .bubble{border:1px solid rgba(23,54,93,.13);background:linear-gradient(145deg,#244c78,#17365d);color:#fff}
+    .message-avatar{background:#eef3f8;color:#345678;border-color:#dfe7f0}
+    .model-version-mark{background:#eff4f9}
+    .model-version-mark img{width:30px;height:30px;object-fit:contain}
+    .code-output{border-color:#203c5d;background:linear-gradient(145deg,#0e1b2d,#172e4b)}
+    .copy-code-button{border-color:#d9e4ef;color:#214b75}
+    @media(max-width:430px){.model-brand-icon{width:23px;height:23px}.welcome-orb{width:72px;height:72px}.welcome-orb img{width:60px;height:60px}}
+
 </style>
 </head>
 <body>
@@ -483,7 +523,7 @@
   <section id="authScreen" class="auth-wrap" hidden>
     <div class="auth-card glass">
       <div class="auth-brand">
-        <div class="brand-mark"><img src="./assets/liveos-icon.png" alt="LiveOS"></div>
+        <div class="brand-mark"><img src="./assets/liveos-icon.svg" alt="LiveOS"></div>
         <div><div class="brand-name">LiveOS</div><div class="brand-sub">Dein eigenes KI-System</div></div>
       </div>
       <div id="authContent"></div>
@@ -498,9 +538,10 @@
         <button class="header-icon" type="button" data-action="toggle-drawer" aria-label="Chatverlauf öffnen" title="Chatverlauf">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
-        <button class="model-switcher" id="modelBadge" type="button" data-action="show-model" aria-label="Aktives Modell LiveOS OS1">
+        <button class="model-switcher" id="modelBadge" type="button" data-action="show-model" aria-label="Aktives Modell LiveOS OS2">
+          <img class="model-brand-icon" src="./assets/liveos-icon.svg" alt="">
           <span class="model-switcher-title">LiveOS</span>
-          <span class="model-switcher-version">OS1</span>
+          <span class="model-switcher-version">OS2</span>
           <svg class="model-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
         </button>
         <button class="header-icon new-chat-icon" type="button" data-action="new-chat" aria-label="Neuen Chat starten" title="Neuer Chat">
@@ -509,11 +550,12 @@
       </header>
 
       <main class="chat-main">
+        <span id="conversationTitle" hidden aria-hidden="true">Neuer Chat</span>
         <div class="messages" id="messages" aria-live="polite">
           <div class="welcome">
-            <div class="welcome-orb"><img src="./assets/liveos-icon.png" alt="LiveOS"></div>
+            <div class="welcome-orb"><img src="./assets/liveos-icon.svg" alt="LiveOS"></div>
             <h2>Womit kann ich dir helfen?</h2>
-            <p>Ich bin LiveOS OS1. Schreib mir einfach, was dich beschäftigt.</p>
+            <p>Ich bin LiveOS OS2. Schreib mir einfach, was dich beschäftigt.</p>
             <div class="suggestions">
               <button class="suggestion" data-prompt="Hallo LiveOS!">Sag Hallo</button>
               <button class="suggestion" data-prompt="Wer bist du?">Wer bist du?</button>
@@ -530,7 +572,7 @@
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
             </button>
           </form>
-          <p class="composer-disclaimer">LiveOS OS1 kann Fehler machen. Prüfe wichtige Informationen bitte selbst.</p>
+          <p class="composer-disclaimer">LiveOS OS2 kann Fehler machen. Prüfe wichtige Informationen bitte selbst.</p>
         </div>
       </main>
 
@@ -538,7 +580,7 @@
       <aside class="history-drawer" id="historyDrawer" aria-label="Chatverlauf" aria-hidden="true">
         <div class="drawer-header">
           <div class="drawer-brand">
-            <div class="drawer-logo"><img src="./assets/liveos-icon.png" alt=""></div>
+            <div class="drawer-logo"><img src="./assets/liveos-icon.svg" alt=""></div>
             <div><strong>LiveOS</strong><span>Deine Unterhaltungen</span></div>
           </div>
           <button class="header-icon drawer-close" type="button" data-action="close-drawer" aria-label="Menü schließen">
@@ -557,7 +599,7 @@
             <span><strong>Einstellungen</strong><small>Dein LiveOS anpassen</small></span>
             <svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
           </button>
-          <div class="drawer-model"><span class="drawer-model-dot"></span><span>LiveOS OS1</span><span class="drawer-model-version">Version 1</span></div>
+          <div class="drawer-model"><span class="drawer-model-dot"></span><span>LiveOS OS2</span><span class="drawer-model-version">Version 1</span></div>
         </div>
       </aside>
     </div>
@@ -568,12 +610,12 @@
     <div class="modal-backdrop" data-action="close-modal"></div>
     <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
       <div class="modal-top">
-        <div><span class="modal-eyebrow">LIVEOS PERSÖNLICH</span><h2 id="settingsTitle">Einstellungen</h2><p>Gestalte OS1 so, wie du gerne schreibst.</p></div>
+        <div><span class="modal-eyebrow">LIVEOS PERSÖNLICH</span><h2 id="settingsTitle">Einstellungen</h2><p>Gestalte OS2 so, wie du gerne schreibst.</p></div>
         <button class="icon-btn modal-close" type="button" aria-label="Schließen" data-action="close-modal"><i data-lucide="x"></i></button>
       </div>
       <div class="settings-section">
         <h3>Dein Profil</h3>
-        <label class="setting-field"><span>Anzeigename</span><input id="settingDisplayName" type="text" maxlength="50" placeholder="Wie soll OS1 dich nennen?"></label>
+        <label class="setting-field"><span>Anzeigename</span><input id="settingDisplayName" type="text" maxlength="50" placeholder="Wie soll OS2 dich nennen?"></label>
       </div>
       <div class="settings-section">
         <h3>Antworten</h3>
@@ -591,7 +633,7 @@
         <button class="primary-btn" type="button" data-action="save-settings"><i data-lucide="check"></i> Einstellungen speichern</button>
         <button class="danger-text-btn" type="button" data-action="clear-chats">Chatverlauf löschen</button>
       </div>
-      <p class="modal-footnote">LiveOS OS1 ist ein früher Prototyp mit eigener Regel- und Beispielslogik. Es wird nicht automatisch aus privaten Chats trainiert.</p>
+      <p class="modal-footnote">LiveOS OS2 ist ein früher Prototyp mit eigener Regel- und Beispielslogik. Es wird nicht automatisch aus privaten Chats trainiert.</p>
     </section>
   </div>
 
@@ -599,21 +641,21 @@
     <div class="modal-backdrop" data-action="close-modal"></div>
     <section class="modal-card model-modal-card" role="dialog" aria-modal="true" aria-labelledby="modelTitle">
       <div class="modal-top">
-        <div><span class="modal-eyebrow">LIVEOS MODELLREIHE</span><h2 id="modelTitle">OS1</h2><p>Das erste Modell der LiveOS-Familie.</p></div>
+        <div><span class="modal-eyebrow">LIVEOS MODELLREIHE</span><h2 id="modelTitle">OS2</h2><p>Die zweite Modellgeneration von LiveOS.</p></div>
         <button class="icon-btn modal-close" type="button" aria-label="Schließen" data-action="close-modal"><i data-lucide="x"></i></button>
       </div>
       <div class="model-version-card">
-        <div class="model-version-mark"><i data-lucide="sparkles"></i></div>
-        <div><strong id="modelVersionName">LiveOS OS1</strong><span id="modelVersionLabel">OS1 · Version 1 · Prototyp</span></div>
+        <div class="model-version-mark"><img src="./assets/liveos-icon.svg" alt="" style="width:30px;height:30px"></div>
+        <div><strong id="modelVersionName">LiveOS OS2</strong><span id="modelVersionLabel">OS2 · Version 2 · Prototyp</span></div>
       </div>
-      <p id="modelDescription" class="model-description">Die erste eigenständige LiveOS-Version.</p>
+      <p id="modelDescription" class="model-description">Erweiterte Wissensbasis, Programmierhilfen, Chat-Kontext und automatische Qualitätsbewertung.</p>
       <div class="capability-grid">
-        <div><i data-lucide="messages-square"></i><strong>Chat</strong><span>Einfaches Gespräch mit Kontext aus dem aktuellen Chat</span></div>
-        <div><i data-lucide="calculator"></i><strong>Rechnen</strong><span>Einfache mathematische Aufgaben</span></div>
-        <div><i data-lucide="image"></i><strong>Textbilder</strong><span>Grafiken mit Schrift direkt im Browser</span></div>
-        <div><i data-lucide="globe"></i><strong>Nachschlagen</strong><span>Wikipedia bei passenden Fragen</span></div>
+        <div><i data-lucide="messages-square"></i><strong>Gespräch</strong><span>Begrüßungen, Namen und Gesprächskontext</span></div>
+        <div><i data-lucide="code-2"></i><strong>Programmieren</strong><span>HTML, CSS, JavaScript und Python</span></div>
+        <div><i data-lucide="bug"></i><strong>Debugging</strong><span>Fehler systematisch untersuchen und testen</span></div>
+        <div><i data-lucide="book-open"></i><strong>Wissen</strong><span>Wissenssuche und Wikipedia-Nachschlagen</span></div>
       </div>
-      <p class="modal-footnote">OS1 ist noch kein großes trainiertes Sprachmodell und erzeugt noch keine fotorealistischen Bilder. Die Modellnummer steigt mit zukünftigen Modellgenerationen: OS2, OS3 und so weiter.</p>
+      <p class="modal-footnote">OS2 ist ein regel- und wissensbasiertes Modell. Der automatische stündliche Lauf bewertet Antwortregeln und Beispiele. Er trainiert noch keine neuronalen Modellgewichte.</p>
       <div class="settings-actions"><button class="primary-btn" type="button" data-action="close-modal">Schließen</button></div>
     </section>
   </div>
@@ -626,9 +668,11 @@
 
       const SUPABASE_URL = "https://twcacjwmahameglodljl.supabase.co";
       const SUPABASE_PUBLIC_KEY = "sb_publishable_b4InjWFyOs2h-_PT9f8ENg_IDRTCydW";
-      const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY, {
-        auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: true }
-      });
+      const client = (window.supabase && typeof window.supabase.createClient === "function")
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY, {
+            auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: true }
+          })
+        : null;
 
       const $ = function (id) { return document.getElementById(id); };
       const authScreen = $("authScreen");
@@ -909,7 +953,7 @@
         const result = await client.from("liveos_conversations").insert({
           user_id: currentUser.id,
           title: "Neuer Chat",
-          model_id: "os1"
+          model_id: "os2"
         }).select("id,title,updated_at,created_at,model_id").single();
         if (result.error) {
           showToast("Ein neuer Chat konnte nicht erstellt werden: " + result.error.message);
@@ -956,7 +1000,7 @@
           avatar.appendChild(avatarIcon);
         } else {
           const logo = document.createElement("img");
-          logo.src = "./assets/liveos-icon.png";
+          logo.src = "./assets/liveos-icon.svg";
           logo.alt = "";
           logo.style.width = "23px";
           logo.style.height = "23px";
@@ -1057,9 +1101,9 @@
           const welcome = document.createElement("div");
           welcome.className = "welcome";
           welcome.innerHTML =
-            '<div class="welcome-orb"><img src="./assets/liveos-icon.png" alt="LiveOS"></div>' +
+            '<div class="welcome-orb"><img src="./assets/liveos-icon.svg" alt="LiveOS"></div>' +
             '<h2>Womit kann ich dir helfen?</h2>' +
-            '<p>Ich bin LiveOS OS1. Schreib mir einfach, was dich beschäftigt.</p>' +
+            '<p>Ich bin LiveOS OS2. Schreib mir einfach, was dich beschäftigt.</p>' +
             '<div class="suggestions">' +
             '<button class="suggestion" data-prompt="Hallo LiveOS!">Sag Hallo</button>' +
             '<button class="suggestion" data-prompt="Wer bist du?">Wer bist du?</button>' +
@@ -1282,7 +1326,7 @@
             user_id: currentUser.id,
             role: "user",
             content: value,
-            model_id: "os1"
+            model_id: "os2"
           }).select("id,role,content,model_id,created_at").single();
           if (savedUser.error) throw savedUser.error;
           messageHistory[messageHistory.length - 1] = savedUser.data;
@@ -1299,7 +1343,7 @@
             user_id: currentUser.id,
             role: "assistant",
             content: reply,
-            model_id: "os1"
+            model_id: "os2"
           }).select("id,role,content,model_id,created_at").single();
           if (savedAssistant.error) throw savedAssistant.error;
           messageHistory.push(savedAssistant.data);
@@ -1382,7 +1426,8 @@
         sendMessage(messageInput.value);
       });
       // Explicit mobile button handler: do not rely on implicit form-submit behavior.
-      $("sendButton").addEventListener("click", function (event) {
+      const mobileSendButton = $("sendButton");
+      if (mobileSendButton) mobileSendButton.addEventListener("click", function (event) {
         event.preventDefault();
         sendMessage(messageInput.value);
       });
@@ -1450,7 +1495,7 @@
         const now = new Date().toISOString();
         const conversation = {
           id: window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : "guest-" + Date.now() + "-" + Math.random().toString(16).slice(2),
-          title: "Neuer Chat", model_id: "os1", created_at: now, updated_at: now, messages: []
+          title: "Neuer Chat", model_id: "os2", created_at: now, updated_at: now, messages: []
         };
         currentConversation = conversation;
         messageHistory = [];
@@ -1477,34 +1522,36 @@
         if (!value || sending) return;
 
         if (!currentConversation) {
-          try { await createConversation(); } catch (_) {}
-        }
-        if (!currentConversation) {
           const now = new Date().toISOString();
-          currentConversation = { id:"local-"+Date.now(), title:"Neuer Chat", model_id:"os1", created_at:now, updated_at:now, messages:[] };
+          currentConversation = {
+            id: window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : "local-" + Date.now(),
+            title: "Neuer Chat", model_id: "os2", created_at: now, updated_at: now, messages: []
+          };
           conversations.unshift(currentConversation);
+          messageHistory = [];
         }
 
         sending = true;
         const sendButton = $("sendButton");
-        sendButton.disabled = true;
+        if (sendButton) sendButton.disabled = true;
         messageInput.disabled = true;
 
-        const now = new Date().toISOString();
-        messageHistory.push({ id:"m-"+Date.now(), role:"user", content:value, model_id:"os1", created_at:now });
-        currentConversation.messages = messageHistory;
-        if (messageHistory.filter(function(item){return item.role==="user";}).length === 1) {
-          currentConversation.title = value.length > 36 ? value.slice(0,36).trim()+"…" : value;
-          $("conversationTitle").textContent = currentConversation.title;
-        }
-        currentConversation.updated_at = now;
-        saveGuestData();
-        messageInput.value = "";
-        resizeComposer();
-        messageHistory.push({ id:"typing-"+Date.now(), role:"assistant", typing:true, content:"", model_id:"os1" });
-        renderMessages();
-
         try {
+          const now = new Date().toISOString();
+          messageHistory.push({ id:"m-"+Date.now(), role:"user", content:value, model_id:"os2", created_at:now });
+          currentConversation.messages = messageHistory;
+          if (messageHistory.filter(function(item){return item.role==="user";}).length === 1) {
+            currentConversation.title = value.length > 36 ? value.slice(0,36).trim()+"…" : value;
+            const titleEl = $("conversationTitle");
+            if (titleEl) titleEl.textContent = currentConversation.title;
+          }
+          currentConversation.updated_at = now;
+          saveGuestData();
+          messageInput.value = "";
+          resizeComposer();
+          messageHistory.push({ id:"typing-"+Date.now(), role:"assistant", typing:true, content:"", model_id:"os2" });
+          renderMessages();
+
           let answer;
           const imageSpec = parseImageRequest(value);
           if (imageSpec && imageSpec.text) {
@@ -1512,55 +1559,56 @@
               id:"m-"+(Date.now()+1), role:"assistant",
               content:"Fertig! Ich habe dein Textbild erstellt.",
               image_data:createDesignedImage(imageSpec), image_alt:imageSpec.text,
-              image_file:imageSpec.file, model_id:"os1", created_at:new Date().toISOString()
+              image_file:imageSpec.file, model_id:"os2", created_at:new Date().toISOString()
             };
           } else if (imageSpec) {
             answer = {
               id:"m-"+(Date.now()+1), role:"assistant",
               content:"Ich kann bereits Textbilder und einfache Grafiken erstellen. Für freie Motive braucht LiveOS noch ein Bildmodell.",
-              model_id:"os1", created_at:new Date().toISOString()
+              model_id:"os2", created_at:new Date().toISOString()
             };
           } else {
             let reply = "";
             try {
               reply = await Promise.race([
                 generateLiveOSReply(value),
-                new Promise(function(_, reject) {
-                  window.setTimeout(function(){ reject(new Error("Antwortzeit überschritten")); }, 12000);
+                new Promise(function(_,reject){
+                  window.setTimeout(function(){reject(new Error("OS2-Antwortzeit überschritten"));},15000);
                 })
               ]);
             } catch (replyError) {
-              console.warn("OS1 antwort fallback:", replyError);
-              reply = "Ich konnte diese Anfrage gerade nicht vollständig bearbeiten. Ich kann dir aber schon mit HTML, CSS, JavaScript und Python helfen. Formuliere die Aufgabe etwas genauer oder sende deinen Code mit der Fehlermeldung.";
+              console.warn("OS2 reply fallback:",replyError);
+              reply = "Ich konnte diese Anfrage gerade nicht vollständig bearbeiten. Ich kann dir aber bei HTML, CSS, JavaScript und Python helfen. Schick mir gern den Code oder beschreibe die Aufgabe genauer.";
             }
             answer = {
               id:"m-"+(Date.now()+1), role:"assistant",
               content:String(reply || "Ich habe gerade keine passende Antwort. Bitte stelle deine Frage etwas genauer."),
-              model_id:"os1", created_at:new Date().toISOString()
+              model_id:"os2", created_at:new Date().toISOString()
             };
           }
           messageHistory = messageHistory.filter(function(item){return !item.typing;});
           messageHistory.push(answer);
         } catch (error) {
-          console.error("OS1 Sendevorgang:", error);
+          console.error("OS2 send pipeline error:",error);
           messageHistory = messageHistory.filter(function(item){return !item.typing;});
           messageHistory.push({
             id:"m-"+(Date.now()+1), role:"assistant",
-            content:"Beim Erstellen der Antwort ist ein Fehler aufgetreten. Deine Nachricht ist angekommen. Bitte versuche es noch einmal.",
-            model_id:"os1", created_at:new Date().toISOString()
+            content:"Deine Nachricht ist angekommen, aber beim Antworten gab es einen Fehler. Bitte versuche es noch einmal.",
+            model_id:"os2", created_at:new Date().toISOString()
           });
         } finally {
           messageHistory = messageHistory.filter(function(item){return !item.typing;});
-          currentConversation.messages = messageHistory;
-          currentConversation.updated_at = new Date().toISOString();
+          if (currentConversation) {
+            currentConversation.messages = messageHistory;
+            currentConversation.updated_at = new Date().toISOString();
+          }
           conversations.sort(function(a,b){return String(b.updated_at||"").localeCompare(String(a.updated_at||""));});
           saveGuestData();
-          renderMessages();
-          renderConversationList();
+          try { renderMessages(); renderConversationList(); } catch (renderError) { console.error("OS2 render error:",renderError); }
           sending = false;
-          sendButton.disabled = false;
+          if (sendButton) sendButton.disabled = false;
           messageInput.disabled = false;
-          try { messageInput.focus({preventScroll:true}); } catch (_) { messageInput.focus(); }
+          try { messageInput.focus({preventScroll:true}); } catch (_) { try { messageInput.focus(); } catch (__) {} }
         }
       };
       refreshConversationList = async function () {
@@ -1585,43 +1633,43 @@
       }
 
 
-      // OS1 local preferences and public model catalogue.
+      // OS2 local preferences and public model catalogue.
       const os1SettingsKey = "liveos_os1_settings_v1";
       let os1Settings = { displayName:"", responseStyle:"friendly", saveChatHistory:true };
-      let os1Model = { model_key:"os1", version_number:1, version_label:"OS1", display_name:"LiveOS OS1", status:"prototype", description:"Die erste eigenständige LiveOS-Version." };
-      let os1Knowledge = [];
+      let activeModel = { model_key:"os2", version_number:1, version_label:"OS2", display_name:"LiveOS OS2", status:"prototype", description:"Die erste eigenständige LiveOS-Version." };
+      let os2Knowledge = [];
       try {
         const savedSettings = JSON.parse(localStorage.getItem(os1SettingsKey) || "{}");
         os1Settings = { ...os1Settings, ...savedSettings };
       } catch (_) {}
-      function persistOS1Settings() {
+      function persistOS2Settings() {
         try { localStorage.setItem(os1SettingsKey, JSON.stringify(os1Settings)); }
         catch (_) { showToast("Die Einstellungen konnten nicht gespeichert werden."); }
       }
-      function openOS1Settings() {
+      function openOS2Settings() {
         $("settingDisplayName").value = os1Settings.displayName || "";
         $("settingResponseStyle").value = os1Settings.responseStyle || "friendly";
         $("settingSaveHistory").checked = os1Settings.saveChatHistory !== false;
         $("settingsModal").hidden = false;
         document.body.style.overflow = "hidden";
       }
-      function openOS1Model() {
-        $("modelVersionName").textContent = os1Model.display_name || "LiveOS OS1";
-        $("modelVersionLabel").textContent = (os1Model.version_label || "OS1") + " · Version " + (os1Model.version_number || 1) + " · " + (os1Model.status === "stable" ? "Stabil" : "Prototyp");
-        $("modelDescription").textContent = os1Model.description || "Die erste eigenständige LiveOS-Version.";
+      function openOS2Model() {
+        $("modelVersionName").textContent = activeModel.display_name || "LiveOS OS2";
+        $("modelVersionLabel").textContent = (activeModel.version_label || "OS2") + " · Version " + (activeModel.version_number || 1) + " · " + (activeModel.status === "stable" ? "Stabil" : "Prototyp");
+        $("modelDescription").textContent = activeModel.description || "Die erste eigenständige LiveOS-Version.";
         $("modelModal").hidden = false;
         document.body.style.overflow = "hidden";
       }
-      function closeOS1Modals() {
+      function closeOS2Modals() {
         $("settingsModal").hidden = true;
         $("modelModal").hidden = true;
         document.body.style.overflow = "";
       }
-      function saveOS1Settings() {
+      function saveOS2Settings() {
         os1Settings.displayName = $("settingDisplayName").value.trim().slice(0,50);
         os1Settings.responseStyle = $("settingResponseStyle").value;
         os1Settings.saveChatHistory = $("settingSaveHistory").checked;
-        persistOS1Settings();
+        persistOS2Settings();
         if (!os1Settings.saveChatHistory) {
           try { localStorage.removeItem(guestStorageKey); } catch (_) {}
           showToast("Gespeichert. Neue Chats werden nicht dauerhaft gespeichert.");
@@ -1629,47 +1677,51 @@
           saveGuestData();
           showToast("Deine LiveOS-Einstellungen wurden gespeichert.");
         }
-        closeOS1Modals();
+        closeOS2Modals();
       }
-      async function clearOS1Chats() {
+      async function clearOS2Chats() {
         if (!window.confirm("Möchtest du wirklich alle lokal gespeicherten LiveOS-Chats löschen?")) return;
         conversations = [];
         currentConversation = null;
         messageHistory = [];
         try { localStorage.removeItem(guestStorageKey); } catch (_) {}
-        closeOS1Modals();
+        closeOS2Modals();
         await createConversation();
         showToast("Der lokale Chatverlauf wurde gelöscht.");
       }
-      async function loadOS1Foundation() {
+      async function loadOS2Foundation() {
+        if (!client) {
+          console.warn("Supabase JS is not available; LiveOS continues in local OS2 mode.");
+          return;
+        }
         try {
           const [modelResult, exampleResult, knowledgeResult] = await Promise.all([
-            client.from("liveos_os1_models").select("model_key,version_number,version_label,display_name,status,description,capabilities,metadata").eq("model_key","os1").maybeSingle(),
-            client.from("liveos_os1_examples").select("intent,trigger_phrases,ideal_response,style_guidance,priority").eq("model_key","os1").eq("is_active",true).order("priority"),
-            client.from("liveos_os1_knowledge").select("title,content,tags,confidence").eq("model_key","os1").eq("is_active",true)
+            client.from("liveos_os1_models").select("model_key,version_number,version_label,display_name,status,description,capabilities,metadata").eq("model_key","os2").maybeSingle(),
+            client.from("liveos_os1_examples").select("intent,trigger_phrases,ideal_response,style_guidance,priority").eq("model_key","os2").eq("is_active",true).order("priority"),
+            client.from("liveos_os1_knowledge").select("title,content,tags,confidence").eq("model_key","os2").eq("is_active",true)
           ]);
           if (!modelResult.error && modelResult.data) {
-            os1Model = modelResult.data;
+            activeModel = modelResult.data;
             const badge = $("modelBadge");
             const versionLabel = badge && badge.querySelector(".model-switcher-version");
-            if (versionLabel) versionLabel.textContent = os1Model.version_label || "OS1";
+            if (versionLabel) versionLabel.textContent = activeModel.version_label || "OS2";
           }
           if (!exampleResult.error && Array.isArray(exampleResult.data) && exampleResult.data.length) learnedExamples = exampleResult.data;
-          if (!knowledgeResult.error && Array.isArray(knowledgeResult.data)) os1Knowledge = knowledgeResult.data;
+          if (!knowledgeResult.error && Array.isArray(knowledgeResult.data)) os2Knowledge = knowledgeResult.data;
         } catch (error) {
-          console.warn("OS1 catalogue could not be loaded; local fallback remains active.", error);
+          console.warn("OS2 catalogue could not be loaded; local fallback remains active.", error);
         }
       }
 
-      // OS1 Programming Pack: practical, curated code patterns.
+      // OS2 Programming Pack: practical, curated code patterns.
       // This is a deterministic skills layer, not neural-weight fine-tuning.
-      function generateOS1ProgrammingReply(input) {
+      function generateOS2ProgrammingReply(input) {
         const t = normalize(input);
         const fence = String.fromCharCode(96).repeat(3);
         const intent = /programmier|programmiere|code|coding|entwickle|website|webseite|homepage|html|javascript|python|typescript|css|sql|debug|fehler im code|taschenrechner|rechner/.test(t);
         if (!intent) return null;
         if (/was ist|erklär|erklaer|unterschied|bedeutet|grundlagen|wie funktioniert/.test(t)) {
-          const knowledgeMatch = os1Knowledge.find(function(item) {
+          const knowledgeMatch = os2Knowledge.find(function(item) {
             return Number(item.confidence || 0) >= 0.8 &&
               (item.tags || []).some(function(tag) { return t.includes(normalize(tag)); });
           });
@@ -1787,21 +1839,21 @@
         return "Ja, ich kann dir schon bei Programmieraufgaben helfen und einfachen Code schreiben. Ich unterstütze HTML, CSS, JavaScript und Python. Beschreibe mir, was das Programm machen soll und wo es laufen wird – als Website im Browser oder als Python-Skript. Wenn du schon Code hast, kannst du ihn hier einfügen.";
       }
 
-      const os1BaseReply = generateLiveOSReply;
+      const os2BaseReply = generateLiveOSReply;
       generateLiveOSReply = async function(input) {
         const raw = String(input || "").trim();
         const t = normalize(raw);
         const nameMatch = raw.match(/(?:ich heiße|ich heisse|mein name ist|ich bin)\s+([A-Za-zÄÖÜäöüß-]{2,32})\s*$/i);
         if (nameMatch && !/^(müde|muede|glücklich|gluecklich|traurig|krank|fertig)$/i.test(nameMatch[1])) {
           os1Settings.displayName = nameMatch[1];
-          persistOS1Settings();
+          persistOS2Settings();
           return "Schön, dich kennenzulernen, " + nameMatch[1] + "! Ich merke mir deinen Namen in deinen lokalen LiveOS-Einstellungen.";
         }
         if (/^(wie heiße ich|wie heisse ich|was ist mein name|kennst du meinen namen)$/.test(t)) {
           return os1Settings.displayName ? "Du hast mir gesagt, dass du " + os1Settings.displayName + " heißt." : "Deinen Namen kenne ich noch nicht. Du kannst ihn mir sagen oder in den Einstellungen eintragen.";
         }
         if (/^(was haben wir (gerade )?besprochen|worum ging es eben|fass (unser|den) chat zusammen)$/.test(t)) {
-          const recent = messageHistory.slice(-8).filter(m => m && m.content).map(m => (m.role === "user" ? "Du: " : "OS1: ") + m.content.slice(0,260));
+          const recent = messageHistory.slice(-8).filter(m => m && m.content).map(m => (m.role === "user" ? "Du: " : "OS2: ") + m.content.slice(0,260));
           return recent.length ? "Das haben wir zuletzt besprochen:\n\n" + recent.join("\n\n") : "In diesem Chat gibt es noch keinen Gesprächsverlauf.";
         }
         if (/^(erzähl mehr|erzaehl mehr|mehr dazu|erklär das genauer|erklaer das genauer)$/.test(t)) {
@@ -1810,11 +1862,11 @@
         }
         if (/^(hallo|hi|hey|moin|guten morgen|guten tag)$/.test(t) && os1Settings.displayName) return "Hallo, " + os1Settings.displayName + "! Schön, dass du wieder da bist. Was machen wir heute?";
         if (t.includes("was kannst du") || t.includes("wer bist du")) {
-          return "Ich bin LiveOS OS1 – die erste Version deines eigenen Assistenten. Ich kann mit dir schreiben, einfache Rechnungen lösen, bei passenden Fragen Wikipedia nachschlagen und Textbilder gestalten. Ich bin noch ein früher Prototyp und kein großes trainiertes Sprachmodell.\n\nWir entwickeln weitere Modellgenerationen später als OS2, OS3 und so weiter.";
+          return "Ich bin LiveOS OS2 – die erste Version deines eigenen Assistenten. Ich kann mit dir schreiben, einfache Rechnungen lösen, bei passenden Fragen Wikipedia nachschlagen und Textbilder gestalten. Ich bin noch ein früher Prototyp und kein großes trainiertes Sprachmodell.\n\nWir entwickeln weitere Modellgenerationen später als OS2, OS3 und so weiter.";
         }
-        const programmingReply = generateOS1ProgrammingReply(input);
+        const programmingReply = generateOS2ProgrammingReply(input);
         if (programmingReply) return programmingReply;
-        const reply = await os1BaseReply(input);
+        const reply = await os2BaseReply(input);
         if (os1Settings.responseStyle === "concise" && reply.length > 560) return reply.slice(0,557).trimEnd() + "…";
         if (os1Settings.responseStyle === "detailed" && /was ist|wie funktioniert|warum|wieso|erklär|erklaer|schritt/i.test(t) && reply.length < 700) {
           return reply + "\n\nFür ein konkretes Beispiel oder eine Schritt-für-Schritt-Erklärung kannst du direkt nachfragen.";
@@ -1825,19 +1877,44 @@
         const action = event.target.closest("[data-action]");
         if (!action) return;
         const name = action.dataset.action;
-        if (name === "show-settings") { closeHistoryDrawer(); openOS1Settings(); }
-        if (name === "show-model") openOS1Model();
-        if (name === "close-modal") closeOS1Modals();
-        if (name === "save-settings") saveOS1Settings();
-        if (name === "clear-chats") clearOS1Chats();
+        if (name === "show-settings") { closeHistoryDrawer(); openOS2Settings(); }
+        if (name === "show-model") openOS2Model();
+        if (name === "close-modal") closeOS2Modals();
+        if (name === "save-settings") saveOS2Settings();
+        if (name === "clear-chats") clearOS2Chats();
       });
-      document.addEventListener("keydown", function(event) { if (event.key === "Escape") closeOS1Modals(); });
-      const os1OriginalStart = startGuestMode;
+      document.addEventListener("keydown", function(event) { if (event.key === "Escape") closeOS2Modals(); });
+      const originalGuestStart = startGuestMode;
       startGuestMode = async function() {
-        await os1OriginalStart();
-        await loadOS1Foundation();
+        try {
+          await originalGuestStart();
+        } catch (bootError) {
+          console.error("LiveOS startup recovered to local mode:",bootError);
+          authScreen.hidden = true;
+          appScreen.hidden = false;
+          if (lockedScreen) lockedScreen.hidden = true;
+          if (!currentConversation) {
+            const now = new Date().toISOString();
+            currentConversation = { id:"local-"+Date.now(), title:"Neuer Chat", model_id:"os2", created_at:now, updated_at:now, messages:[] };
+            conversations = [currentConversation];
+            messageHistory = [];
+          }
+          try { renderConversationList(); renderMessages(); } catch (_) {}
+        }
+        await loadOS2Foundation();
+        if (!currentConversation) {
+          const now = new Date().toISOString();
+          currentConversation = { id:"local-"+Date.now(), title:"Neuer Chat", model_id:"os2", created_at:now, updated_at:now, messages:[] };
+          conversations = [currentConversation];
+          messageHistory = [];
+          saveGuestData();
+          renderConversationList();
+          renderMessages();
+        }
+        const sendButton = $("sendButton");
+        if (sendButton) sendButton.disabled = false;
+        messageInput.disabled = false;
       };
-
 
 
       // Mobile-first chat drawer (no bottom tab bar or secondary work areas).
