@@ -52,7 +52,18 @@ create table if not exists liveos_os2_private.training_benchmarks (
   created_at timestamptz not null default now()
 );
 alter table liveos_os2_private.training_benchmarks enable row level security;
-revoke all on liveos_os2_private.training_benchmarks from public,anon,authenticated,service_role;
+revoke all on schema liveos_os2_private from public,anon,authenticated,service_role;
+grant usage on schema liveos_os2_private to postgres;
+revoke all on all tables in schema liveos_os2_private from public,anon,authenticated,service_role;
+grant all on all tables in schema liveos_os2_private to postgres;
+drop policy if exists os2_benchmarks_deny_app_access on liveos_os2_private.training_benchmarks;
+create policy os2_benchmarks_deny_app_access on liveos_os2_private.training_benchmarks for all to anon,authenticated using (false) with check (false);
+drop policy if exists os2_tasks_deny_app_access on liveos_os2_private.training_tasks;
+create policy os2_tasks_deny_app_access on liveos_os2_private.training_tasks for all to anon,authenticated using (false) with check (false);
+drop policy if exists os2_runs_deny_app_access on liveos_os2_private.training_runs;
+create policy os2_runs_deny_app_access on liveos_os2_private.training_runs for all to anon,authenticated using (false) with check (false);
+drop policy if exists os2_results_deny_app_access on liveos_os2_private.training_results;
+create policy os2_results_deny_app_access on liveos_os2_private.training_results for all to anon,authenticated using (false) with check (false);
 grant all on liveos_os2_private.training_benchmarks to postgres;
 
 alter table liveos_os2_private.training_tasks
@@ -123,6 +134,10 @@ begin
     or old.task_is_solvable is distinct from new.task_is_solvable
     or old.required_patterns is distinct from new.required_patterns
     or old.forbidden_patterns is distinct from new.forbidden_patterns
+    or old.source_example_id is distinct from new.source_example_id
+    or old.task_slot is distinct from new.task_slot
+    or old.model_key is distinct from new.model_key
+    or old.expected_output is distinct from new.expected_output
   ) then
     raise exception 'OS2 task specification is immutable after queueing.';
   end if;
