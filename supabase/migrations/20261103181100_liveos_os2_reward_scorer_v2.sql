@@ -139,6 +139,8 @@ begin
 
   for v_task in
     select t.id,t.benchmark_id,t.prompt,t.task_kind,t.task_digest,
+      t.source_example_id,t.expected_output,t.model_key,
+      b.source_example_id as canonical_source_example_id,
       b.benchmark_key,b.task_kind as canonical_kind,b.prompt as canonical_prompt,
       b.is_solvable,b.required_patterns,b.forbidden_patterns,b.task_digest as canonical_digest
     from liveos_os2_private.training_tasks t
@@ -159,7 +161,10 @@ begin
     v_integrity:=v_task.task_digest=v_task.canonical_digest
       and v_task.canonical_digest=v_digest
       and v_task.prompt=v_task.canonical_prompt
-      and v_task.task_kind=v_task.canonical_kind;
+      and v_task.task_kind=v_task.canonical_kind
+      and v_task.source_example_id=v_task.canonical_source_example_id
+      and v_task.model_key='os2'
+      and v_task.expected_output=coalesce(array_to_string(v_task.required_patterns,', '),'Unlösbare Aufgabe: 0 Punkte');
 
     -- Candidate comes from the independent response engine, never from expected_output.
     v_candidate:=liveos_os2_private.generate_candidate(v_task.task_kind,v_task.prompt);
