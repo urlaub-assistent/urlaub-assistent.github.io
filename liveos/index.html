@@ -216,6 +216,9 @@
     @keyframes pulse{0%,60%,100%{transform:translateY(0);opacity:.45}30%{transform:translateY(-4px);opacity:1}}
     .code-output{max-width:100%;overflow:auto;margin:10px 0 7px;padding:13px;border:1px solid #e1e7ee;border-radius:13px;background:#111c2c;color:#edf4fb;font:12px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre}
     .copy-code-button{display:inline-flex;align-items:center;margin:0 0 8px;padding:7px 10px;border:1px solid #dce4ed;border-radius:9px;background:#fff;color:#385777;font-size:10px;font-weight:700}
+    .code-output{max-width:100%;overflow:auto;margin:10px 0 7px;padding:13px;border:1px solid #263a54;border-radius:13px;background:#101b2a;color:#eef4fc;font:12px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre}
+    .copy-code-button{display:inline-flex;align-items:center;margin:0 0 8px;padding:7px 10px;border:1px solid #dce4ed;border-radius:9px;background:#fff;color:#385777;font-size:10px;font-weight:700}
+    .copy-code-button:active{background:#f1f5f9}
     .modal-shell{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:18px}
     .modal-shell[hidden]{display:none!important}
     .modal-backdrop{position:absolute;inset:0;background:rgba(12,28,49,.36);backdrop-filter:blur(8px)}
@@ -993,7 +996,53 @@
         } else {
           const bubble = document.createElement("div");
           bubble.className = "bubble";
-          bubble.textContent = message.content;
+          if (message.typing) {
+            const typing = document.createElement("span");
+            typing.className = "typing";
+            typing.setAttribute("aria-label","LiveOS schreibt");
+            typing.innerHTML = "<i></i><i></i><i></i>";
+            bubble.appendChild(typing);
+          } else {
+            const text = String(message.content || "");
+            const fence = String.fromCharCode(96).repeat(3);
+            const pattern = new RegExp(fence + "([a-zA-Z0-9+#.-]*)\\n([\\s\\S]*?)" + fence, "g");
+            let cursor = 0;
+            let match;
+            while ((match = pattern.exec(text)) !== null) {
+              const before = text.slice(cursor,match.index).trim();
+              if (before) {
+                const paragraph = document.createElement("div");
+                paragraph.textContent = before;
+                bubble.appendChild(paragraph);
+              }
+              const pre = document.createElement("pre");
+              pre.className = "code-output";
+              const code = document.createElement("code");
+              code.textContent = match[2].replace(/\\n$/,"");
+              pre.appendChild(code);
+              bubble.appendChild(pre);
+              const copy = document.createElement("button");
+              copy.type = "button";
+              copy.className = "copy-code-button";
+              copy.textContent = "Code kopieren";
+              copy.addEventListener("click", async function () {
+                try {
+                  await navigator.clipboard.writeText(code.textContent);
+                  copy.textContent = "Kopiert";
+                } catch (_) {
+                  copy.textContent = "Code bitte markieren";
+                }
+              });
+              bubble.appendChild(copy);
+              cursor = pattern.lastIndex;
+            }
+            const after = text.slice(cursor).trim();
+            if (after || !bubble.childNodes.length) {
+              const paragraph = document.createElement("div");
+              paragraph.textContent = after || text;
+              bubble.appendChild(paragraph);
+            }
+          }
           wrap.appendChild(meta);
           wrap.appendChild(bubble);
         }
