@@ -774,10 +774,10 @@
       }
 
       function showApp() {
-        authScreen.hidden = true;
-        lockedScreen.hidden = true;
+        if (authScreen) authScreen.hidden = true;
+        if (lockedScreen) lockedScreen.hidden = true;
         appScreen.hidden = false;
-        layout.classList.remove("sidebar-open");
+        closeHistoryDrawer();
         icons();
       }
 
@@ -1656,7 +1656,7 @@
       function openOS2Model() {
         $("modelVersionName").textContent = activeModel.display_name || "LiveOS OS2";
         $("modelVersionLabel").textContent = (activeModel.version_label || "OS2") + " · Version " + (activeModel.version_number || 1) + " · " + (activeModel.status === "stable" ? "Stabil" : "Prototyp");
-        $("modelDescription").textContent = activeModel.description || "Die erste eigenständige LiveOS-Version.";
+        $("modelDescription").textContent = activeModel.description || "Die zweite Modellgeneration von LiveOS.";
         $("modelModal").hidden = false;
         document.body.style.overflow = "hidden";
       }
