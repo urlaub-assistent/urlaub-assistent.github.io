@@ -1067,19 +1067,7 @@
         }
       });
 
-      client.auth.onAuthStateChange(function (event, nextSession) {
-        if (event === "PASSWORD_RECOVERY") {
-          session = nextSession;
-          showResetView("Gib jetzt dein neues Passwort ein.");
-          return;
-        }
-        if (event === "SIGNED_OUT") {
-          session = null;
-          currentUser = null;
-          currentConversation = null;
-          renderAuth("login");
-        }
-      });
+      // Authentication is intentionally not used in the guest-only first version.
 
       async function start() {
         renderAuth("login");
