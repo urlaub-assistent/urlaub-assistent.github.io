@@ -29,7 +29,7 @@ Quellen:
 - Das ist derzeit SFT/LoRA-Fine-Tuning plus separate Bewertung, kein vollständiges Reinforcement-Learning mit GRPO/PPO.
 
 ## 0-Euro-Sicherheitsgrenze
-Es werden keine bezahlten GPU-Anbieter, Inference-APIs oder kostenpflichtigen Endpoints verwendet. Kaggle-GPU-Zeit ist kostenlos, aber kontingentiert und nicht dauerhaft verfügbar. Eine laufende Kaggle-Session kann beendet werden; der letzte Adapter-Checkpoint kann danach erneut geladen werden. Ein durchgehender Lauf über Nacht ist nicht garantiert.
+Es werden keine bezahlten GPU-Anbieter, Inference-APIs oder kostenpflichtigen Endpoints verwendet. Kaggle nennt für Notebook-Sessions bis zu 12 Stunden Laufzeit und ein GPU-Wochenkontingent von üblicherweise bis zu 30 Stunden (je nach Verfügbarkeit und Auslastung). Eine laufende Session kann enden; der letzte nach einer Epoche synchronisierte Adapter kann danach erneut geladen werden. Ein kompletter Lauf über Nacht ist daher nicht garantiert. Quelle: https://www.kaggle.com/docs/notebooks und https://www.kaggle.com/docs/efficient-gpu-usage
 
 ## Einmalige Kaggle-Secrets
 In Kaggle im Notebook unter **Add-ons → Secrets** zwei Secrets anlegen:
