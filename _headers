@@ -19,3 +19,6 @@
 
 /liveos.html
   Cache-Control: no-cache, no-store, must-revalidate
+
+/liveos/*
+  Cache-Control: no-cache, no-store, must-revalidate
