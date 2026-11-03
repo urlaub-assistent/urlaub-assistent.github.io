@@ -1125,12 +1125,26 @@
           .replace(/\s+/g, " ");
       }
 
+      function containsWholePhrase(input, phrase) {
+        const text = " " + normalize(input).replace(/\s+/g," ").trim() + " ";
+        const needleText = normalize(phrase).replace(/\s+/g," ").trim();
+        if (!needleText) return false;
+        return text.includes(" " + needleText + " ");
+      }
       function exampleReply(input) {
-        const t = normalize(input);
-        const match = learnedExamples.filter(function (example) {
-          return (example.trigger_phrases || []).some(function (phrase) { return phrase && t.includes(normalize(phrase)); });
-        }).sort(function (a, b) { return (a.priority || 100) - (b.priority || 100); })[0];
-        return match ? match.ideal_response : null;
+        const matches = [];
+        learnedExamples.forEach(function (example) {
+          (example.trigger_phrases || []).forEach(function (phrase) {
+            if (phrase && containsWholePhrase(input,phrase)) {
+              matches.push({ example:example, phrase:normalize(phrase) });
+            }
+          });
+        });
+        matches.sort(function(a,b) {
+          if (b.phrase.length !== a.phrase.length) return b.phrase.length-a.phrase.length;
+          return (a.example.priority || 100)-(b.example.priority || 100);
+        });
+        return matches.length ? matches[0].example.ideal_response : null;
       }
       function needsInternetSearch(input) {
         const t = normalize(input);
@@ -1723,7 +1737,7 @@
         if (/was ist|erklär|erklaer|unterschied|bedeutet|grundlagen|wie funktioniert/.test(t)) {
           const knowledgeMatch = os2Knowledge.find(function(item) {
             return Number(item.confidence || 0) >= 0.8 &&
-              (item.tags || []).some(function(tag) { return t.includes(normalize(tag)); });
+              (item.tags || []).some(function(tag) { return containsWholePhrase(t,tag); });
           });
           if (knowledgeMatch) return knowledgeMatch.title + "\n\n" + knowledgeMatch.content;
         }
@@ -1852,6 +1866,18 @@
         if (/^(wie heiße ich|wie heisse ich|was ist mein name|kennst du meinen namen)$/.test(t)) {
           return os1Settings.displayName ? "Du hast mir gesagt, dass du " + os1Settings.displayName + " heißt." : "Deinen Namen kenne ich noch nicht. Du kannst ihn mir sagen oder in den Einstellungen eintragen.";
         }
+        if (/lamborghini|ferrari|porsche|bugatti/.test(t) && /(kostet|kosten|preis|teuer|wie viel|wieviel)/.test(t)) {
+          return "Das hängt stark vom Modell, Baujahr, der Ausstattung und davon ab, ob der Wagen neu oder gebraucht ist. Meinst du bei Lamborghini den Urus, Temerario oder Revuelto – und möchtest du einen Neuwagen oder Gebrauchtwagen vergleichen? Ohne aktuelle Händlerangebote möchte ich dir keinen erfundenen Preis nennen.";
+        }
+        if (/(mir geht es schlecht|mir gehts schlecht|ich bin traurig|ich bin gestresst|ich habe angst|ich fühle mich|ich fuehle mich|ich bin enttäuscht|ich bin enttaeuscht)/.test(t)) {
+          return "Das tut mir leid. Möchtest du erzählen, was passiert ist? Ich höre dir zu – wir können gemeinsam überlegen, was dir jetzt helfen könnte.";
+        }
+        if (/^(danke|vielen dank|danke dir|das war hilfreich|super danke)$/.test(t)) {
+          return "Sehr gerne! Schön, dass ich helfen konnte. Was möchtest du als Nächstes machen?";
+        }
+        if (/^(guten morgen|guten tag|guten abend|hi|hey|hallo|moin)[!. ]*$/.test(t)) {
+          return "Hallo! Schön, dass du da bist. Was beschäftigt dich gerade?";
+        }
         if (/^(was haben wir (gerade )?besprochen|worum ging es eben|fass (unser|den) chat zusammen)$/.test(t)) {
           const recent = messageHistory.slice(-8).filter(m => m && m.content).map(m => (m.role === "user" ? "Du: " : "OS2: ") + m.content.slice(0,260));
           return recent.length ? "Das haben wir zuletzt besprochen:\n\n" + recent.join("\n\n") : "In diesem Chat gibt es noch keinen Gesprächsverlauf.";
@@ -1862,7 +1888,7 @@
         }
         if (/^(hallo|hi|hey|moin|guten morgen|guten tag)$/.test(t) && os1Settings.displayName) return "Hallo, " + os1Settings.displayName + "! Schön, dass du wieder da bist. Was machen wir heute?";
         if (t.includes("was kannst du") || t.includes("wer bist du")) {
-          return "Ich bin LiveOS OS2 – die zweite Generation deines eigenen Assistenten. Ich kann mit dir schreiben, einfache Rechnungen lösen, bei passenden Fragen Wikipedia nachschlagen und Textbilder gestalten. Ich bin noch ein früher Prototyp und kein großes trainiertes Sprachmodell.\n\nWir entwickeln weitere Modellgenerationen später als OS2, OS3 und so weiter.";
+          return "Ich bin LiveOS OS2 – die zweite Generation deines eigenen Assistenten. Ich kann mit dir schreiben, einfache Rechnungen lösen, bei passenden Fragen Wikipedia nachschlagen und dir beim Programmieren helfen. Ich bin noch ein früher Prototyp und kein großes trainiertes Sprachmodell.\n\nWeitere Generationen bauen wir später als OS3, OS4 und so weiter.";
         }
         const programmingReply = generateOS2ProgrammingReply(input);
         if (programmingReply) return programmingReply;
