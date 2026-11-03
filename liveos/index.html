@@ -599,7 +599,7 @@
             <span><strong>Einstellungen</strong><small>Dein LiveOS anpassen</small></span>
             <svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
           </button>
-          <div class="drawer-model"><span class="drawer-model-dot"></span><span>LiveOS OS2</span><span class="drawer-model-version">Version 1</span></div>
+          <div class="drawer-model"><span class="drawer-model-dot"></span><span>LiveOS OS2</span><span class="drawer-model-version">Version 2</span></div>
         </div>
       </aside>
     </div>
@@ -1623,7 +1623,7 @@
         currentUser = { id:"local-guest", email:"Gast", user_metadata:{display_name:"Gast"} };
         learnedExamples = [
           { trigger_phrases:["hallo","hi","hey","moin"], ideal_response:"Hallo! Schön, dass du da bist. Was möchtest du heute wissen?", priority:1 },
-          { trigger_phrases:["wer bist du","wie heißt du","wie heisst du"], ideal_response:"Ich bin LiveOS – dein persönlicher KI-Assistent. Ich kann mit dir schreiben, einfache Aufgaben lösen und Informationen im Internet nachschlagen.", priority:2 },
+          { trigger_phrases:["wer bist du","wie heißt du","wie heisst du"], ideal_response:"Ich bin LiveOS OS2 – die zweite Generation deines persönlichen Assistenten. Ich kann mit dir schreiben, rechnen und dir beim Programmieren helfen.", priority:2 },
           { trigger_phrases:["danke","vielen dank"], ideal_response:"Sehr gerne! Was kann ich noch für dich tun?", priority:3 },
           { trigger_phrases:["was kannst du"], ideal_response:"Ich kann mit dir chatten, einfache Berechnungen durchführen, Textbilder und einfache Grafiken als PNG erstellen und öffentliche Informationen über Wikipedia nachschlagen. Freie Bildmotive brauchen noch ein separates Bildmodell.", priority:4 }
         ];
@@ -1636,7 +1636,7 @@
       // OS2 local preferences and public model catalogue.
       const os1SettingsKey = "liveos_os1_settings_v1";
       let os1Settings = { displayName:"", responseStyle:"friendly", saveChatHistory:true };
-      let activeModel = { model_key:"os2", version_number:1, version_label:"OS2", display_name:"LiveOS OS2", status:"prototype", description:"Die erste eigenständige LiveOS-Version." };
+      let activeModel = { model_key:"os2", version_number:2, version_label:"OS2", display_name:"LiveOS OS2", status:"prototype", description:"Zweite Modellgeneration mit erweiterter Wissensbasis und automatischer Qualitätsbewertung." };
       let os2Knowledge = [];
       try {
         const savedSettings = JSON.parse(localStorage.getItem(os1SettingsKey) || "{}");
@@ -1862,7 +1862,7 @@
         }
         if (/^(hallo|hi|hey|moin|guten morgen|guten tag)$/.test(t) && os1Settings.displayName) return "Hallo, " + os1Settings.displayName + "! Schön, dass du wieder da bist. Was machen wir heute?";
         if (t.includes("was kannst du") || t.includes("wer bist du")) {
-          return "Ich bin LiveOS OS2 – die erste Version deines eigenen Assistenten. Ich kann mit dir schreiben, einfache Rechnungen lösen, bei passenden Fragen Wikipedia nachschlagen und Textbilder gestalten. Ich bin noch ein früher Prototyp und kein großes trainiertes Sprachmodell.\n\nWir entwickeln weitere Modellgenerationen später als OS2, OS3 und so weiter.";
+          return "Ich bin LiveOS OS2 – die zweite Generation deines eigenen Assistenten. Ich kann mit dir schreiben, einfache Rechnungen lösen, bei passenden Fragen Wikipedia nachschlagen und Textbilder gestalten. Ich bin noch ein früher Prototyp und kein großes trainiertes Sprachmodell.\n\nWir entwickeln weitere Modellgenerationen später als OS2, OS3 und so weiter.";
         }
         const programmingReply = generateOS2ProgrammingReply(input);
         if (programmingReply) return programmingReply;
