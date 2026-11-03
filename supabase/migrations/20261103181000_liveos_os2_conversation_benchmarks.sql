@@ -82,6 +82,8 @@ create index if not exists liveos_os2_training_tasks_benchmark_idx
   on liveos_os2_private.training_tasks(benchmark_id,task_slot);
 create index if not exists liveos_os2_benchmarks_active_idx
   on liveos_os2_private.training_benchmarks(is_active,task_kind);
+create index if not exists liveos_os2_benchmarks_source_example_idx
+  on liveos_os2_private.training_benchmarks(source_example_id);
 
 create or replace function liveos_os2_private.benchmark_digest(
   p_key text,p_kind text,p_prompt text,p_solvable boolean,p_required text[],p_forbidden text[]
