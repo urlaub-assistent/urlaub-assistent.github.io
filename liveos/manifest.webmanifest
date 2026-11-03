@@ -6,7 +6,14 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f6f8fc",
-  "theme_color": "#17365d",
-  "icons": [{"src":"./assets/liveos-icon.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "./assets/liveos-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }
