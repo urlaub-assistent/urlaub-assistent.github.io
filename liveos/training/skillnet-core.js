@@ -245,11 +245,21 @@
     return Array.from(new Set(v.map(x=>x.replace(/\s+/g," ").trim())));
   }
 
-  function buildDataset(focusText) {
+  function buildDataset(focusText,curatedExamples) {
     const focusKey=resolveFocus(focusText).key;
+    const mergedBank={};
+    Object.keys(BANK).forEach(function(label){mergedBank[label]=BANK[label].slice();});
+    (Array.isArray(curatedExamples)?curatedExamples:[]).forEach(function(example){
+      const label=String(example.intent||"");
+      if(!mergedBank[label])return;
+      (Array.isArray(example.trigger_phrases)?example.trigger_phrases:[]).forEach(function(phrase){
+        const clean=String(phrase||"").trim();
+        if(clean&&clean.length>=3)mergedBank[label].push(clean);
+      });
+    });
     const train=[],validation=[];
-    Object.keys(BANK).forEach(function(label){
-      const phrases=BANK[label];
+    Object.keys(mergedBank).forEach(function(label){
+      const phrases=Array.from(new Set(mergedBank[label]));
       phrases.forEach(function(phrase,index){
         const target=(index%5===0)?validation:train;
         variants(phrase).forEach(function(text){
