@@ -13,7 +13,7 @@
   
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./training/skillnet-core.js?v=2"></script>
+  <script src="./training/skillnet-core.js?v=3"></script>
   <style>
     :root{
       color-scheme:light;
@@ -1747,10 +1747,10 @@
           // Sync the user's trained OS2 SkillNet checkpoint from Supabase to this device.
           if (currentUser && window.LiveOSSkillNet) {
             const trainedResult = await client.from("liveos_training_engine_states")
-              .select("model_state,updated_at")
+              .select("model_key,model_state,updated_at")
               .eq("user_id", currentUser.id)
               .maybeSingle();
-            if (!trainedResult.error && trainedResult.data && trainedResult.data.model_state) {
+            if (!trainedResult.error && trainedResult.data && trainedResult.data.model_state && trainedResult.data.model_key === window.LiveOSSkillNet.MODEL_KEY) {
               let localModel = null;
               try {
                 localModel = JSON.parse(localStorage.getItem(window.LiveOSSkillNet.STORAGE_KEY) || "null");
