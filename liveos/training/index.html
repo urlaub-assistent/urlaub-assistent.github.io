@@ -369,8 +369,9 @@ function ensureWorker(){
       state.chart=state.chart.slice(-80);
       saveLocal(m.checkpoint);
       renderMetrics();
-      await saveCloud(false);
-      if(state.runId)await updateRunRecord("running");
+      if(m.finalCheckpoint)await saveCloud(true);
+      else await saveCloud(false);
+      if(state.runId&&state.running)await updateRunRecord("running");
     }
     if(m.type==="error"){setStatus(m.message,false);state.running=false;updateButtons();}
   };
@@ -531,7 +532,16 @@ document.addEventListener("visibilitychange",function(){
     updateButtons();
   }
 });
-window.addEventListener("beforeunload",function(){saveLocal();});
+window.addEventListener("beforeunload",function(){
+  if(state.running){
+    state.activeElapsed+=state.startedAt?Date.now()-state.startedAt:0;
+    state.startedAt=0;
+    state.running=false;
+    state.paused=true;
+    state.resumePending=true;
+  }
+  saveLocal();
+});
 setInterval(function(){
   if(state.modelState&&state.user&&Date.now()-state.lastCloudSave>120000)saveCloud(false);
   if(state.running&&state.duration>0&&state.activeElapsed+(state.startedAt?Date.now()-state.startedAt:0)>=state.duration*1000)finishTraining();
