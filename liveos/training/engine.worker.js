@@ -72,7 +72,7 @@ function loop(){
 self.onmessage=function(event){
   const message=event.data||{};
   if(message.type==="init"){
-    dataset=Core.buildDataset(message.focus||"");
+    dataset=Core.buildDataset(message.focus||"",message.curatedExamples||[]);
     dataset.byLabel={};
     dataset.train.forEach(function(row){
       (dataset.byLabel[row.label]||(dataset.byLabel[row.label]=[])).push(row);
