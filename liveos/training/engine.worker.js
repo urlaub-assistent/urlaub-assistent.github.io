@@ -51,7 +51,7 @@ function loop(){
   while(running&&batches<3&&performance.now()-start<45){
     const batch=[];
     for(let i=0;i<24;i++)batch.push(pickTrainingItem());
-    const learningRate=Math.max(0.045,0.15/(1+model.steps/5000));
+    const learningRate=Math.max(0.006,0.035/(1+model.steps/3500));
     const result=Core.trainBatch(model,batch,learningRate);
     lastLoss=result.loss;
     lastAccuracy=result.accuracy;
