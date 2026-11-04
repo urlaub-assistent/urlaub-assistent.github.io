@@ -2,7 +2,7 @@ importScripts("./skillnet-core.js");
 "use strict";
 const Core=self.LiveOSSkillNet;
 let model=null,dataset=null,focusLabels=null,random=null;
-let running=false,lastMetricsAt=0;
+let running=false,lastMetricsAt=0,lastCheckpointStep=0;
 let totalReward=0,totalBatchSamples=0,lastLoss=0,lastAccuracy=0;
 function makeRandom(seed){
   let x=seed>>>0||1;
@@ -57,7 +57,7 @@ function loop(){
     totalBatchSamples+=batch.length;
     batches++;
   }
-  if(model.steps%10===0)sendCheckpoint(false);
+  if(model.steps-lastCheckpointStep>=10){sendCheckpoint(false);lastCheckpointStep=model.steps;}
   if(batches>0){
     self.postMessage({
       type:"tick",
