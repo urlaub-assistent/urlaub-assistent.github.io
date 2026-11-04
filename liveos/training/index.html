@@ -98,6 +98,7 @@ input:focus,select:focus{border-color:#587ba6;box-shadow:0 0 0 3px #315c8e16}
       <div class="actions"><button class="btn primary" type="submit" id="loginButton">Anmelden</button></div>
     </form>
     <p class="muted" id="loginMessage"></p>
+    <div class="actions"><button class="btn secondary" id="guestModeButton" type="button">Ohne Konto lokal trainieren</button></div>
   </section>
 
   <main id="engineApp" hidden>
@@ -116,6 +117,7 @@ input:focus,select:focus{border-color:#587ba6;box-shadow:0 0 0 3px #315c8e16}
           <button class="chip" type="button" data-goal="Mathematik und Rechnen">Mathematik</button>
           <button class="chip" type="button" data-goal="Sicherheit und zuverlässige Antworten">Sicherheit</button>
         </div>
+        <p class="muted" id="focusHint">Das Trainingsziel wird automatisch einem vorhandenen Kompetenzbereich zugeordnet.</p>
         <div class="field">
           <label for="duration">Trainingsdauer pro Lauf</label>
           <select id="duration">
@@ -306,6 +308,26 @@ function drawChart(){
   });
   ctx.stroke();
 }
+function updateFocusHint(){
+  const input=$("focusInput");
+  const hint=$("focusHint");
+  if(!input||!hint||!Core)return;
+  const result=Core.resolveFocus(input.value);
+  const names={
+    all:"Allgemeine Fähigkeiten",
+    programming:"Programmierung",
+    conversation:"Gespräche und Sprache",
+    mathematics:"Mathematik",
+    reasoning:"Logik und Problemlösung",
+    knowledge:"Wissen und Erklärungen",
+    safety:"Sicherheit und Zuverlässigkeit"
+  };
+  if(result.custom){
+    hint.textContent="Dieses Thema ist noch keinem eigenen Kompetenzbereich zugeordnet. OS2 trainiert deshalb die allgemeinen Grundfähigkeiten.";
+  }else{
+    hint.textContent="Erkanntes Trainingsfeld: "+(names[result.key]||"Allgemeine Fähigkeiten")+". Andere Grundfähigkeiten werden ebenfalls weitertrainiert.";
+  }
+}
 function updateButtons(){
   $("startButton").disabled=state.running||state.paused;
   $("pauseButton").disabled=!state.running&&!state.paused;
@@ -483,6 +505,7 @@ async function bootAuthenticated(){
     state.resumePending=true;
   }
   $("deviceInfo").textContent="Gerät: "+(navigator.userAgent.includes("iPad")?"iPad":navigator.userAgent.includes("iPhone")?"iPhone":navigator.userAgent.includes("Mac")?"Mac":"Browser")+" · "+(navigator.hardwareConcurrency||"—")+" CPU-Kerne · Training läuft in einem separaten JavaScript-Worker.";
+  updateFocusHint();
   if(state.resumePending){
     $("duration").value=String(state.duration);
     setStatus("Checkpoint gefunden · Drücke Start, um fortzusetzen",false);
@@ -504,10 +527,24 @@ async function finishTraining(){
   updateButtons();
   await loadHistory();
 }
+async function bootLocalGuest(){
+  state.user=null;state.session=null;state.runId=null;
+  $("loginCard").hidden=true;$("engineApp").hidden=false;
+  $("accountPill").textContent="Nur dieses Gerät · Gastmodus";
+  loadLocal();
+  $("focusInput").value=state.focus;
+  $("duration").value=String(state.duration);
+  renderMetrics();updateButtons();
+  $("deviceInfo").textContent="Lokaler Gastmodus · "+(navigator.hardwareConcurrency||"—")+" CPU-Kerne · kein Cloud-Sync, bis du dich mit deinem LiveOS-Konto anmeldest.";
+  updateFocusHint();
+  setStatus(state.resumePending?"Checkpoint gefunden · Drücke Start, um fortzusetzen":"Bereit · Dein Trainingsstand wird lokal gespeichert",false);
+}
 async function init(){
-  if(!client){$("loginCard").hidden=false;$("loginMessage").textContent="Supabase konnte nicht geladen werden.";return;}
+  if(!client){await bootLocalGuest();return;}
   $("loginForm").addEventListener("submit",login);
-  document.querySelectorAll("[data-goal]").forEach(btn=>btn.addEventListener("click",()=>{$("focusInput").value=btn.dataset.goal;}));
+  $("guestModeButton").addEventListener("click",bootLocalGuest);
+  $("focusInput").addEventListener("input",updateFocusHint);
+  document.querySelectorAll("[data-goal]").forEach(btn=>btn.addEventListener("click",()=>{$("focusInput").value=btn.dataset.goal;updateFocusHint();}));
   $("startButton").addEventListener("click",startTraining);
   $("pauseButton").addEventListener("click",pauseTraining);
   $("stopButton").addEventListener("click",stopTraining);
@@ -516,11 +553,7 @@ async function init(){
   state.session=sessionResult.data.session;
   state.user=state.session&&state.session.user;
   if(state.user)await bootAuthenticated();
-  else{
-    $("loginCard").hidden=false;
-    $("engineApp").hidden=true;
-    $("accountPill").textContent="Anmeldung erforderlich";
-  }
+  else await bootLocalGuest();
 }
 document.addEventListener("visibilitychange",function(){
   if(document.visibilityState==="hidden"&&state.running){
