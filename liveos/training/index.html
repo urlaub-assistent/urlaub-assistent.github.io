@@ -9,7 +9,7 @@
 <link rel="icon" type="image/svg+xml" href="../assets/liveos-icon.svg">
 <title>LiveOS · Training Engine</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="./skillnet-core.js?v=2"></script>
+<script src="./skillnet-core.js?v=3"></script>
 <style>
 :root{color-scheme:light;--navy:#10243f;--navy2:#17365d;--navy3:#244c78;--text:#152944;--muted:#718198;--line:#e1e8f0;--surface:#fff;--soft:#f5f8fc;--green:#168b64;--red:#b54848;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 *{box-sizing:border-box}
@@ -161,7 +161,7 @@ input:focus,select:focus{border-color:#587ba6;box-shadow:0 0 0 3px #315c8e16}
       <p class="muted">Läufe und gespeicherte Modellstände werden automatisch synchronisiert, sobald eine Internetverbindung besteht.</p>
       <div class="metrics">
         <div class="metric"><span>Beste Validierung</span><strong id="bestAccuracy">0 %</strong><small>seit Beginn</small></div>
-        <div class="metric"><span>Modellversion</span><strong id="modelVersion">OS2</strong><small>SkillNet v1 · trainierbarer Intent-Kern</small></div>
+        <div class="metric"><span>Modellversion</span><strong id="modelVersion">OS2</strong><small>SkillNet v2 · trainierbarer Intent-Kern</small></div>
       </div>
       <div class="history" id="runHistory"><div class="muted">Noch keine Trainingsläufe.</div></div>
     </section>
@@ -363,7 +363,7 @@ async function updateRunRecord(status){
 }
 function ensureWorker(){
   if(state.worker)return;
-  state.worker=new Worker("./engine.worker.js?v=2");
+  state.worker=new Worker("./engine.worker.js?v=3");
   state.worker.onmessage=async function(event){
     const m=event.data||{};
     if(m.type==="ready"){
