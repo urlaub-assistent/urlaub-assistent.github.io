@@ -461,7 +461,7 @@ async function bootAuthenticated(){
   if(existing)setStatus("Checkpoint gefunden · Drücke Start, um fortzusetzen",false);
   else setStatus("Bereit · Drücke Start, um den ersten Trainingslauf zu beginnen",false);
 }
-async async function finishTraining(){
+async function finishTraining(){
   if(!state.worker)return;
   state.worker.postMessage({type:"stop"});
   state.running=false;state.paused=false;
@@ -474,7 +474,7 @@ async async function finishTraining(){
   updateButtons();
   await loadHistory();
 }
-function init(){
+async function init(){
   if(!client){$("loginCard").hidden=false;$("loginMessage").textContent="Supabase konnte nicht geladen werden.";return;}
   $("loginForm").addEventListener("submit",login);
   document.querySelectorAll("[data-goal]").forEach(btn=>btn.addEventListener("click",()=>{$("focusInput").value=btn.dataset.goal;}));
