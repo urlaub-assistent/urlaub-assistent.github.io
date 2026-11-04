@@ -13,6 +13,7 @@
   
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./training/skillnet-core.js?v=1"></script>
   <style>
     :root{
       color-scheme:light;
@@ -599,6 +600,11 @@
             <span><strong>Einstellungen</strong><small>Dein LiveOS anpassen</small></span>
             <svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
           </button>
+          <a class="drawer-setting" href="./training/index.html" style="text-decoration:none;color:inherit">
+            <span class="drawer-setting-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-7"/><path d="M18 6h1v1"/></svg></span>
+            <span><strong>Training Engine</strong><small>OS2 gezielt verbessern</small></span>
+            <svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
           <div class="drawer-model"><span class="drawer-model-dot"></span><span>LiveOS OS2</span><span class="drawer-model-version">Version 2</span></div>
         </div>
       </aside>
@@ -1147,7 +1153,19 @@
           if (b.phrase.length !== a.phrase.length) return b.phrase.length-a.phrase.length;
           return (a.example.priority || 100)-(b.example.priority || 100);
         });
-        return matches.length ? matches[0].example.ideal_response : null;
+        if(matches.length) return matches[0].example.ideal_response;
+        // The locally trained OS2 SkillNet can generalize beyond exact trigger phrases.
+        // It only routes to an existing reviewed response when its confidence is high.
+        try {
+          const skillNet=window.LiveOSSkillNet;
+          const trainedModel=skillNet&&skillNet.getStoredModel();
+          const prediction=trainedModel&&skillNet.predict(trainedModel,input);
+          if(prediction&&prediction.confidence>=0.78&&prediction.label!=="unknown"){
+            const learned=learnedExamples.find(function(item){return item.intent===prediction.label;});
+            if(learned&&learned.ideal_response) return learned.ideal_response;
+          }
+        } catch(error) { console.warn("OS2 SkillNet prediction skipped:",error); }
+        return null;
       }
       function needsInternetSearch(input) {
         const t = normalize(input);
