@@ -38,7 +38,7 @@ async function fetchText(url:string,maxBytes=650000){
     if([301,302,303,307,308].includes(response.status)){const location=response.headers.get("location");if(!location)throw new Error("Ungültige Weiterleitung.");current=new URL(location,current).toString();continue;}
     if(!response.ok)throw new Error("Die Webseite antwortet mit HTTP "+response.status+".");
     const type=(response.headers.get("content-type")||"").toLowerCase();
-    if(!(type.includes("text/html")||type.includes("application/xhtml")||type.includes("text/plain")))throw new Error("Diese URL liefert keinen lesbaren HTML- oder Textinhalt.");
+    if(!(type.includes("text/html")||type.includes("application/xhtml")||type.includes("text/plain")||type.includes("xml")||type.includes("vtt")))throw new Error("Diese URL liefert keinen lesbaren HTML- oder Textinhalt.");
     const reader=response.body?.getReader();if(!reader)throw new Error("Kein lesbarer Seiteninhalt.");
     const chunks:Uint8Array[]=[];let size=0;
     while(true){const part=await reader.read();if(part.done)break;size+=part.value.byteLength;if(size>maxBytes){await reader.cancel();break;}chunks.push(part.value);}
