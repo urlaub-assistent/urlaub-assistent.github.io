@@ -167,6 +167,7 @@ input:focus,select:focus{border-color:#587ba6;box-shadow:0 0 0 3px #315c8e16}
 "use strict";
 const SUPABASE_URL="https://twcacjwmahameglodljl.supabase.co";
 const SUPABASE_KEY="sb_publishable_b4InjWFyOs2h-_PT9f8ENg_IDRTCydW";
+const Core=window.LiveOSSkillNet;
 const client=window.supabase&&window.supabase.createClient
   ?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})
   :null;
@@ -187,6 +188,7 @@ function loadLocal(){
   try{
     const raw=localStorage.getItem(Core.STORAGE_KEY);
     state.modelState=raw?JSON.parse(raw):null;
+    state.focus=localStorage.getItem("liveos_training_focus_v1")||state.focus;
     const metrics=JSON.parse(localStorage.getItem("liveos_training_metrics_v1")||"{}");
     state.metrics={...state.metrics,...metrics};
     state.chart=JSON.parse(localStorage.getItem("liveos_training_chart_v1")||"[]");
@@ -197,6 +199,7 @@ function saveLocal(checkpoint){
     if(checkpoint){
       state.modelState=checkpoint;
       localStorage.setItem(Core.STORAGE_KEY,JSON.stringify(checkpoint));
+      localStorage.setItem("liveos_training_focus_v1",state.focus||"Allgemeine Fähigkeiten");
     }
     localStorage.setItem("liveos_training_metrics_v1",JSON.stringify(state.metrics));
     localStorage.setItem("liveos_training_chart_v1",JSON.stringify(state.chart.slice(-80)));
@@ -273,7 +276,10 @@ function renderMetrics(){
   $("reward").textContent=pretty(m.avgReward);
   $("bestAccuracy").textContent=percent(m.bestAccuracy);
   $("focusStatus").textContent=(state.focus||"Allgemeine Fähigkeiten")+" · neuronales SkillNet auf diesem Gerät";
-  $("progressBar").style.width=(state.running?Math.min(100,((Date.now()-state.startedAt)/Math.max(1,state.duration*1000))*100):Math.min(100,Number(m.validationAccuracy||0)*100))+"%";
+  const progress=state.running&&state.duration>0
+    ?Math.min(100,((Date.now()-state.startedAt)/Math.max(1,state.duration*1000))*100)
+    :Math.min(100,Number(m.validationAccuracy||0)*100);
+  $("progressBar").style.width=progress+"%";
   drawChart();
 }
 function drawChart(){
@@ -292,8 +298,8 @@ function drawChart(){
   ctx.stroke();
 }
 function updateButtons(){
-  $("startButton").disabled=state.running;
-  $("pauseButton").disabled=!state.running;
+  $("startButton").disabled=state.running||state.paused;
+  $("pauseButton").disabled=!state.running&&!state.paused;
   $("stopButton").disabled=!state.running&&!state.paused;
   $("pauseButton").textContent=state.paused?"▶ Fortsetzen":"Ⅱ Pause";
 }
@@ -385,7 +391,8 @@ async function startTraining(){
   try{
     if(!state.modelState)loadLocal();
     await prepareEngine();
-    state.runId=await startRunRecord();
+    try{state.runId=await startRunRecord();}
+    catch(cloudError){state.runId=null;console.warn("Run wird zunächst lokal geführt:",cloudError.message);}
     state.startedAt=Date.now();
     state.running=true;state.paused=false;
     requestWakeLock();
@@ -444,7 +451,20 @@ async function bootAuthenticated(){
   if(existing)setStatus("Checkpoint gefunden · Drücke Start, um fortzusetzen",false);
   else setStatus("Bereit · Drücke Start, um den ersten Trainingslauf zu beginnen",false);
 }
-async function init(){
+async async function finishTraining(){
+  if(!state.worker)return;
+  state.worker.postMessage({type:"stop"});
+  state.running=false;state.paused=false;
+  saveLocal();
+  await saveCloud(true);
+  await updateRunRecord("completed");
+  state.runId=null;
+  if(state.wakeLock){try{await state.wakeLock.release();}catch(_){}state.wakeLock=null;}
+  setStatus("Trainingsziel für diesen Lauf erreicht · Checkpoint gespeichert",false);
+  updateButtons();
+  await loadHistory();
+}
+function init(){
   if(!client){$("loginCard").hidden=false;$("loginMessage").textContent="Supabase konnte nicht geladen werden.";return;}
   $("loginForm").addEventListener("submit",login);
   document.querySelectorAll("[data-goal]").forEach(btn=>btn.addEventListener("click",()=>{$("focusInput").value=btn.dataset.goal;}));
@@ -474,7 +494,9 @@ document.addEventListener("visibilitychange",function(){
 window.addEventListener("beforeunload",function(){saveLocal();});
 setInterval(function(){
   if(state.modelState&&state.user&&Date.now()-state.lastCloudSave>120000)saveCloud(false);
-},30000);
+  if(state.running&&state.duration>0&&state.startedAt&&Date.now()-state.startedAt>=state.duration*1000)finishTraining();
+  if(state.running)renderMetrics();
+},5000);
 init();
 })();
 </script>
