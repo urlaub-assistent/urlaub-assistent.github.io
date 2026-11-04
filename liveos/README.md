@@ -88,3 +88,19 @@ The previous scorer copied the ideal response into the candidate and then compar
 - Supabase Cron remains scheduled hourly.
 
 **Important limitation:** This is automated improvement and evaluation of OS2's deterministic conversation/rule layer and curated examples. It still does not train neural model weights or turn the system into a general-purpose neural language model. That requires an actual model backend and separate training compute.
+
+## LiveOS OS3 (current default)
+
+OS3 is the current default model catalogue entry. It reuses the reviewed OS2 conversation/rule layer and the OS2 SkillNet v2 classifier, and adds a public-web research path:
+
+- General public-web search via DuckDuckGo HTML results (no paid search API key).
+- Read-only extraction of public HTML/text pages supplied by search or by URL.
+- YouTube search for public watch/short links; public captions are included only when a caption track is exposed on the public page.
+- Source URLs are printed in the answer and rendered as clickable links in chat.
+- Public page text is treated as untrusted data, not as instructions to LiveOS.
+- The reader rejects non-HTTP(S), localhost and common private-network URL ranges, follows only a small number of redirects, limits response sizes and applies a best-effort per-IP request limit.
+- Only public content is in scope. The function does not sign into websites, bypass paywalls, access private accounts, download video/audio, or execute page scripts.
+
+The Edge Function source is in `liveos/supabase/functions/liveos-web-research/index.ts` and is deployed to the existing Supabase project as `liveos-web-research` with JWT gateway verification disabled to allow the app's local guest mode. The function is read-only and uses a CORS origin allowlist for the current GitHub Pages and Netlify hosts plus the planned LiveOS GitHub Pages host. CORS is not an authentication boundary; the endpoint returns only public web content and applies a basic in-memory rate limit.
+
+**Important OS3 limit:** the search/page reader does not create a generative language model. The answer composer currently selects and joins relevant page sentences (extractive summaries) and reuses deterministic OS2 rules and examples. OS2 SkillNet v2 remains a small intent classifier; it is not a general-purpose neural text generator and its classifier weights are not changed by web searches. Search-engine markup and public caption availability can change, and some sites may block automated reading, so results are best-effort rather than guaranteed complete.
