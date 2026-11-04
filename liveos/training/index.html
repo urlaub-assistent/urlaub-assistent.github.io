@@ -86,7 +86,7 @@ input:focus,select:focus{border-color:#587ba6;box-shadow:0 0 0 3px #315c8e16}
   <section class="intro">
     <span class="eyebrow">Eigene Lernmaschine</span>
     <h2>OS2 wird mit jedem Lauf ein Stück besser.</h2>
-    <p>Die Engine erzeugt ihre Übungsaufgaben selbst, trainiert ein kleines neuronales Skill-Modell direkt auf diesem Gerät, prüft es an getrennten Testaufgaben und speichert die Gewichte automatisch. Du musst keine Prompt-Sammlungen anlegen.</p>
+    <p>Du gibst ein Thema in normaler Sprache ein. Die Engine erzeugt dazu passende Übungsformulierungen aus ihrem eingebauten Aufgabenbaukasten, ergänzt freigegebene LiveOS-Beispiele, trainiert ein kleines neuronales SkillNet direkt auf diesem Gerät und prüft es an getrennten Testvarianten. Keine Prompt-Sammlungen oder externen Trainingsdienste nötig.</p>
   </section>
 
   <section class="card login" id="loginCard" hidden>
@@ -116,14 +116,19 @@ input:focus,select:focus{border-color:#587ba6;box-shadow:0 0 0 3px #315c8e16}
           <button class="chip" type="button" data-goal="Natürliche deutsche Gespräche">Gespräche</button>
           <button class="chip" type="button" data-goal="Mathematik und Rechnen">Mathematik</button>
           <button class="chip" type="button" data-goal="Sicherheit und zuverlässige Antworten">Sicherheit</button>
+          <button class="chip" type="button" data-goal="React und TypeScript programmieren">React / TypeScript</button>
+          <button class="chip" type="button" data-goal="Biologie und Naturwissenschaften">Naturwissenschaften</button>
+          <button class="chip" type="button" data-goal="Deutsche Sprache und Schreiben">Deutsch</button>
         </div>
-        <p class="muted" id="focusHint">Das Trainingsziel wird automatisch einem vorhandenen Kompetenzbereich zugeordnet.</p>
+        <p class="muted" id="focusHint">Dein Thema wird automatisch einem Kompetenzbereich zugeordnet. Bei freien Themen erzeugt LiveOS passende Lern- und Analyseaufgaben; das SkillNet lernt dabei zunächst die Erkennung und Zuordnung dieser Aufgaben.</p>
         <div class="field">
           <label for="duration">Trainingsdauer pro Lauf</label>
           <select id="duration">
             <option value="900">15 Minuten · kurzer Test</option>
             <option value="3600" selected>1 Stunde</option>
             <option value="10800">3 Stunden</option>
+            <option value="21600">6 Stunden</option>
+            <option value="43200">12 Stunden</option>
             <option value="0">Bis ich selbst pausiere</option>
           </select>
         </div>
@@ -133,7 +138,7 @@ input:focus,select:focus{border-color:#587ba6;box-shadow:0 0 0 3px #315c8e16}
           <button class="btn danger" id="stopButton" type="button" disabled>■ Beenden</button>
         </div>
         <div class="statusline"><span class="dot" id="statusDot"></span><span id="statusText">Bereit · Noch kein Trainingslauf aktiv</span></div>
-        <div class="notice"><span>ⓘ</span><span><strong>Wichtig:</strong> Das Training läuft lokal im Browser auf deinem Gerät. Lass diese Seite geöffnet und im Vordergrund. iPadOS kann Hintergrund-Tabs anhalten; bei einer Pause bleiben die letzten gespeicherten Gewichte erhalten. Kostenlimit: 0 €.</span></div>
+        <div class="notice"><span>ⓘ</span><span><strong>Wichtig:</strong> Das Training läuft lokal im Browser auf deinem Gerät. Lass diese Seite geöffnet und möglichst im Vordergrund. iPadOS kann Hintergrund-Tabs anhalten; dann pausiert LiveOS automatisch und speichert den letzten Checkpoint. Du kannst später mit Start fortsetzen. Kostenlimit: 0 €.</span></div>
       </section>
 
       <section class="card">
@@ -156,7 +161,7 @@ input:focus,select:focus{border-color:#587ba6;box-shadow:0 0 0 3px #315c8e16}
       <p class="muted">Läufe und gespeicherte Modellstände werden automatisch synchronisiert, sobald eine Internetverbindung besteht.</p>
       <div class="metrics">
         <div class="metric"><span>Beste Validierung</span><strong id="bestAccuracy">0 %</strong><small>seit Beginn</small></div>
-        <div class="metric"><span>Modellversion</span><strong id="modelVersion">OS2</strong><small>SkillNet v1 · kein vollständiges Sprachmodell</small></div>
+        <div class="metric"><span>Modellversion</span><strong id="modelVersion">OS2</strong><small>SkillNet v1 · trainierbarer Intent-Kern</small></div>
       </div>
       <div class="history" id="runHistory"><div class="muted">Noch keine Trainingsläufe.</div></div>
     </section>
@@ -504,7 +509,7 @@ async function bootAuthenticated(){
   if(!state.resumePending&&state.history[0]&&["paused","running"].includes(state.history[0].status)){
     state.resumePending=true;
   }
-  $("deviceInfo").textContent="Gerät: "+(navigator.userAgent.includes("iPad")?"iPad":navigator.userAgent.includes("iPhone")?"iPhone":navigator.userAgent.includes("Mac")?"Mac":"Browser")+" · "+(navigator.hardwareConcurrency||"—")+" CPU-Kerne · Training läuft in einem separaten JavaScript-Worker.";
+  $("deviceInfo").textContent="Gerät: "+(navigator.userAgent.includes("iPad")?"iPad":navigator.userAgent.includes("iPhone")?"iPhone":navigator.userAgent.includes("Mac")?"Mac":"Browser")+" · "+(navigator.hardwareConcurrency||"—")+" CPU-Kerne · lokales Training im separaten JavaScript-Worker.";
   updateFocusHint();
   if(state.resumePending){
     $("duration").value=String(state.duration);
