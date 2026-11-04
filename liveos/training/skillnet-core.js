@@ -324,12 +324,14 @@
         "Wie teste ich "+subject+" auf Schwachstellen"
       ]);
     }else{
-      add("reasoning",[
+      const resolved=resolveFocus(raw);
+      const targetLabel=resolved.key==="knowledge"?"capabilities":"reasoning";
+      add(targetLabel,[
         "Erkläre die Grundlagen von "+subject,
-        "Welche Teilfragen muss ich zu "+subject zuerst klären",
+        "Welche Teilfragen muss ich zu "+subject+" zuerst klären",
         "Erstelle einen Lernplan für "+subject,
-        "Prüfe eine Lösung zu "+subject auf Fehler",
-        "Fasse die wichtigsten Punkte zu "+subject zusammen"
+        "Prüfe eine Lösung zu "+subject+" auf Fehler",
+        "Fasse die wichtigsten Punkte zu "+subject+" zusammen"
       ]);
     }
     return rows;
