@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#10243f">
+<meta name="description" content="LiveOS Training Engine – trainiere die Fähigkeiten von OS2 direkt auf deinem Gerät.">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="../assets/liveos-icon.svg">
+<title>LiveOS · Training Engine</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./skillnet-core.js?v=1"></script>
+<style>
+:root{color-scheme:light;--navy:#10243f;--navy2:#17365d;--navy3:#244c78;--text:#152944;--muted:#718198;--line:#e1e8f0;--surface:#fff;--soft:#f5f8fc;--green:#168b64;--red:#b54848;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:linear-gradient(180deg,#edf3fa 0%,#f7f9fc 50%,#edf2f8 100%);color:var(--text)}
+body{padding:0 14px 32px}
+button,input,select{font:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:disabled{opacity:.45;cursor:not-allowed}
+.wrap{width:min(100%,1040px);margin:0 auto;padding:18px 0 30px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;border-radius:25px;background:linear-gradient(125deg,#101b30 0%,#17365d 66%,#244c78 100%);color:white;box-shadow:0 18px 40px #142b4521}
+.brand{display:flex;align-items:center;gap:13px;min-width:0}
+.logo{width:48px;height:48px;display:grid;place-items:center;border-radius:16px;background:#fff;flex:0 0 48px}
+.logo img{width:38px;height:38px;object-fit:contain}
+.kicker{font-size:9px;letter-spacing:.18em;font-weight:800;color:#aec0d7}
+.brand h1{font-size:21px;letter-spacing:-.045em;margin:3px 0 2px;color:#fff}
+.brand p{font-size:11px;margin:0;color:#c6d4e4}
+.top-actions{display:flex;align-items:center;gap:9px}
+.pill{border:1px solid #ffffff28;background:#ffffff12;color:#fff;padding:9px 12px;border-radius:999px;font-size:10px;font-weight:750}
+.iconlink{display:grid;place-items:center;width:40px;height:40px;border:1px solid #ffffff28;background:#ffffff12;border-radius:14px;color:#fff;text-decoration:none;font-size:20px}
+.intro{margin:23px 3px 17px}
+.eyebrow{font-size:9px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:#7188a5}
+.intro h2{font-size:clamp(24px,4vw,32px);letter-spacing:-.055em;margin:6px 0;color:#152e50}
+.intro p{font-size:12px;line-height:1.65;color:var(--muted);max-width:720px;margin:0}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);gap:16px;align-items:start}
+.card{background:#ffffffde;border:1px solid #e0e7f0;border-radius:22px;padding:20px;box-shadow:0 10px 26px #10243f09;backdrop-filter:blur(18px)}
+.card h3{font-size:14px;margin:0 0 6px;color:#1a3455}
+.muted{font-size:11px;color:var(--muted);line-height:1.6}
+.field{display:grid;gap:7px;margin-top:17px}
+.field label{font-size:10px;font-weight:800;color:#475d79}
+input,select{width:100%;border:1px solid #dce5ef;border-radius:13px;background:#fff;padding:12px 13px;color:#17304f;font-size:13px;outline:none}
+input:focus,select:focus{border-color:#587ba6;box-shadow:0 0 0 3px #315c8e16}
+.goal-hint{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.chip{border:1px solid #dce5ef;background:#f7f9fc;border-radius:999px;padding:7px 10px;font-size:10px;color:#47617f}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:43px;border-radius:13px;padding:11px 17px;font-size:11px;font-weight:800;border:1px solid transparent}
+.btn.primary{background:#122846;color:#fff;box-shadow:0 8px 18px #10243f20}
+.btn.secondary{background:#edf2f8;border-color:#dce5ef;color:#294767}
+.btn.danger{background:#fff2f2;border-color:#f0d8d8;color:#a23b3b}
+.notice{display:flex;gap:10px;align-items:flex-start;background:#f0f5fb;border:1px solid #dce7f3;border-radius:14px;padding:12px;margin-top:16px;color:#5c718b;font-size:10px;line-height:1.6}
+.notice strong{color:#234365}
+.statusline{display:flex;align-items:center;gap:9px;margin:14px 0 0;font-size:10px;color:#6d7e92}
+.dot{width:8px;height:8px;border-radius:50%;background:#9aa9bb;flex:0 0 8px}
+.dot.live{background:#17a478;box-shadow:0 0 0 4px #17a4781b}
+.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
+.metric{padding:14px;border:1px solid #e4eaf1;border-radius:16px;background:#fbfcfe}
+.metric span{display:block;font-size:9px;color:#7c8ba0;font-weight:700}
+.metric strong{display:block;font-size:22px;letter-spacing:-.04em;color:#183455;margin-top:4px;font-variant-numeric:tabular-nums}
+.metric small{display:block;color:#8c9aac;font-size:9px;margin-top:2px}
+.progress{height:8px;border-radius:999px;background:#e8eef5;overflow:hidden;margin-top:15px}
+.progress>span{display:block;height:100%;width:0;background:linear-gradient(90deg,#315c8c,#20a27c);border-radius:999px;transition:width .25s}
+.chart{width:100%;height:110px;margin-top:13px;display:block}
+.history{display:grid;gap:8px;margin-top:12px}
+.history-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #edf1f5;font-size:10px}
+.history-row strong{color:#294666}
+.history-row span{color:#7d8ba0;text-align:right}
+.login{max-width:430px;margin:40px auto}
+.login[hidden]{display:none}
+.hidden{display:none!important}
+.footer{text-align:center;font-size:9px;color:#8795a8;padding:17px 8px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.top{padding:15px;border-radius:21px}.brand h1{font-size:18px}.top-actions .pill{display:none}.card{padding:17px}}
+@media(max-width:420px){body{padding-left:10px;padding-right:10px}.logo{width:42px;height:42px;flex-basis:42px}.logo img{width:34px;height:34px}.brand p{font-size:10px}.card{border-radius:19px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="logo"><img src="../assets/liveos-icon.svg" alt="LiveOS"></div>
+      <div><div class="kicker">LIVEOS · OS2</div><h1>Training Engine</h1><p>Die Fähigkeiten von OS2 Schritt für Schritt verbessern</p></div>
+    </div>
+    <div class="top-actions"><span class="pill" id="accountPill">Verbindung wird geprüft</span><a class="iconlink" href="../index.html" aria-label="Zurück zum Chat">‹</a></div>
+  </header>
+
+  <section class="intro">
+    <span class="eyebrow">Eigene Lernmaschine</span>
+    <h2>OS2 wird mit jedem Lauf ein Stück besser.</h2>
+    <p>Die Engine erzeugt ihre Übungsaufgaben selbst, trainiert ein kleines neuronales Skill-Modell direkt auf diesem Gerät, prüft es an getrennten Testaufgaben und speichert die Gewichte automatisch. Du musst keine Prompt-Sammlungen anlegen.</p>
+  </section>
+
+  <section class="card login" id="loginCard" hidden>
+    <h3>Bei LiveOS anmelden</h3>
+    <p class="muted">Die Trainingsstände werden deinem LiveOS-Konto zugeordnet. Nutze denselben Zugang wie in deinem LiveOS-Chat.</p>
+    <form id="loginForm">
+      <div class="field"><label for="email">E-Mail</label><input id="email" type="email" autocomplete="username" required></div>
+      <div class="field"><label for="password">Passwort</label><input id="password" type="password" autocomplete="current-password" required></div>
+      <div class="actions"><button class="btn primary" type="submit" id="loginButton">Anmelden</button></div>
+    </form>
+    <p class="muted" id="loginMessage"></p>
+  </section>
+
+  <main id="engineApp" hidden>
+    <div class="grid">
+      <section class="card">
+        <h3>Trainingsziel</h3>
+        <p class="muted">Schreibe einfach, worin OS2 besser werden soll. Die Engine wählt passende Aufgaben automatisch aus und trainiert daneben weiter die übrigen Grundfähigkeiten.</p>
+        <div class="field">
+          <label for="focusInput">Worauf soll OS2 trainieren?</label>
+          <input id="focusInput" type="text" maxlength="120" value="Allgemeine Fähigkeiten" placeholder="z. B. Python programmieren, logisches Denken, Gespräche auf Deutsch">
+        </div>
+        <div class="goal-hint">
+          <button class="chip" type="button" data-goal="Programmieren mit Python und JavaScript">Programmieren</button>
+          <button class="chip" type="button" data-goal="Logisches Denken und Problemlösung">Logik</button>
+          <button class="chip" type="button" data-goal="Natürliche deutsche Gespräche">Gespräche</button>
+          <button class="chip" type="button" data-goal="Mathematik und Rechnen">Mathematik</button>
+          <button class="chip" type="button" data-goal="Sicherheit und zuverlässige Antworten">Sicherheit</button>
+        </div>
+        <div class="field">
+          <label for="duration">Trainingsdauer pro Lauf</label>
+          <select id="duration">
+            <option value="15">15 Minuten · kurzer Test</option>
+            <option value="60" selected>1 Stunde</option>
+            <option value="180">3 Stunden</option>
+            <option value="0">Bis ich selbst pausiere</option>
+          </select>
+        </div>
+        <div class="actions">
+          <button class="btn primary" id="startButton" type="button">▶ Training starten</button>
+          <button class="btn secondary" id="pauseButton" type="button" disabled>Ⅱ Pause</button>
+          <button class="btn danger" id="stopButton" type="button" disabled>■ Beenden</button>
+        </div>
+        <div class="statusline"><span class="dot" id="statusDot"></span><span id="statusText">Bereit · Noch kein Trainingslauf aktiv</span></div>
+        <div class="notice"><span>ⓘ</span><span><strong>Wichtig:</strong> Das Training läuft lokal im Browser auf deinem Gerät. Lass diese Seite geöffnet und im Vordergrund. iPadOS kann Hintergrund-Tabs anhalten; bei einer Pause bleiben die letzten gespeicherten Gewichte erhalten. Kostenlimit: 0 €.</span></div>
+      </section>
+
+      <section class="card">
+        <h3>Live-Trainingsstatus</h3>
+        <p class="muted" id="focusStatus">Allgemeine Fähigkeiten · CPU-Lernkern</p>
+        <div class="metrics">
+          <div class="metric"><span>Trainingsschritte</span><strong id="steps">0</strong><small>Mini-Batches</small></div>
+          <div class="metric"><span>Verarbeitete Aufgaben</span><strong id="examples">0</strong><small>automatisch erzeugt</small></div>
+          <div class="metric"><span>Validierungsquote</span><strong id="accuracy">0 %</strong><small>getrennte Testaufgaben</small></div>
+          <div class="metric"><span>Ø Belohnung</span><strong id="reward">0</strong><small>von 100 Punkten</small></div>
+        </div>
+        <div class="progress"><span id="progressBar"></span></div>
+        <canvas class="chart" id="chart" width="800" height="220" aria-label="Verlauf der Validierungsgenauigkeit"></canvas>
+        <p class="muted" id="deviceInfo">Geräteprüfung läuft …</p>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:16px">
+      <h3>Dein Trainingsverlauf</h3>
+      <p class="muted">Läufe und gespeicherte Modellstände werden automatisch synchronisiert, sobald eine Internetverbindung besteht.</p>
+      <div class="metrics">
+        <div class="metric"><span>Beste Validierung</span><strong id="bestAccuracy">0 %</strong><small>seit Beginn</small></div>
+        <div class="metric"><span>Modellversion</span><strong id="modelVersion">OS2</strong><small>SkillNet v1 · kein vollständiges Sprachmodell</small></div>
+      </div>
+      <div class="history" id="runHistory"><div class="muted">Noch keine Trainingsläufe.</div></div>
+    </section>
+  </main>
+  <div class="footer">LiveOS Training Engine · private Trainingsdaten · keine kostenpflichtigen APIs · 0 € Budget</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const SUPABASE_URL="https://twcacjwmahameglodljl.supabase.co";
+const SUPABASE_KEY="sb_publishable_b4InjWFyOs2h-_PT9f8ENg_IDRTCydW";
+const client=window.supabase&&window.supabase.createClient
+  ?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})
+  :null;
+const $=id=>document.getElementById(id);
+const state={
+  user:null,session:null,worker:null,runId:null,running:false,paused:false,
+  modelState:null,metrics:{steps:0,examplesSeen:0,validationAccuracy:0,avgReward:0,bestAccuracy:0},
+  history:[],chart:[],focus:"Allgemeine Fähigkeiten",duration:3600,
+  lastCloudSave:0,lastLocalSave:0,startedAt:0,workerReady:false
+};
+function setStatus(text,live){
+  $("statusText").textContent=text;
+  $("statusDot").classList.toggle("live",!!live);
+}
+function pretty(n){return new Intl.NumberFormat("de-DE").format(Math.max(0,Number(n)||0));}
+function percent(n){return (Math.max(0,Math.min(1,Number(n)||0))*100).toFixed(1).replace(".",",")+" %";}
+function loadLocal(){
+  try{
+    const raw=localStorage.getItem(Core.STORAGE_KEY);
+    state.modelState=raw?JSON.parse(raw):null;
+    const metrics=JSON.parse(localStorage.getItem("liveos_training_metrics_v1")||"{}");
+    state.metrics={...state.metrics,...metrics};
+    state.chart=JSON.parse(localStorage.getItem("liveos_training_chart_v1")||"[]");
+  }catch(e){console.warn("Lokaler Trainingsstand nicht lesbar",e);}
+}
+function saveLocal(checkpoint){
+  try{
+    if(checkpoint){
+      state.modelState=checkpoint;
+      localStorage.setItem(Core.STORAGE_KEY,JSON.stringify(checkpoint));
+    }
+    localStorage.setItem("liveos_training_metrics_v1",JSON.stringify(state.metrics));
+    localStorage.setItem("liveos_training_chart_v1",JSON.stringify(state.chart.slice(-80)));
+    state.lastLocalSave=Date.now();
+  }catch(e){setStatus("Speicher voll – bitte freien Gerätespeicher prüfen.",false);}
+}
+async function loadCloud(){
+  if(!state.user)return;
+  try{
+    const result=await client.from("liveos_training_engine_states")
+      .select("model_state,metrics,focus,updated_at")
+      .eq("user_id",state.user.id).maybeSingle();
+    if(result.error)throw result.error;
+    if(result.data){
+      const cloudDate=Date.parse(result.data.updated_at||"");
+      const localDate=Date.parse((state.modelState&&state.modelState.savedAt)||"");
+      if(!state.modelState||cloudDate>localDate){
+        state.modelState=result.data.model_state;
+        state.metrics={...state.metrics,...(result.data.metrics||{})};
+        state.focus=result.data.focus||state.focus;
+        $("focusInput").value=state.focus;
+        saveLocal(state.modelState);
+      }
+    }
+  }catch(e){console.warn("Cloud-Stand konnte nicht geladen werden:",e.message);}
+}
+async function saveCloud(force){
+  if(!state.user||!state.modelState)return;
+  if(!force&&Date.now()-state.lastCloudSave<120000)return;
+  try{
+    const payload={
+      user_id:state.user.id,model_key:Core.MODEL_KEY,
+      model_state:state.modelState,metrics:state.metrics,
+      focus:state.focus,updated_at:new Date().toISOString()
+    };
+    const result=await client.from("liveos_training_engine_states").upsert(payload,{onConflict:"user_id"});
+    if(result.error)throw result.error;
+    state.lastCloudSave=Date.now();
+    setStatus(state.running?"Training läuft · Cloud-Checkpoint gesichert":"Trainingsstand gespeichert",state.running);
+  }catch(e){
+    console.warn("Cloud-Synchronisierung fehlgeschlagen:",e.message);
+    setStatus("Lokal gesichert · Cloud-Sync wird erneut versucht",state.running);
+  }
+}
+async function loadHistory(){
+  if(!state.user)return;
+  try{
+    const result=await client.from("liveos_training_engine_runs")
+      .select("id,focus,status,metrics,started_at,finished_at")
+      .eq("user_id",state.user.id).order("started_at",{ascending:false}).limit(6);
+    if(result.error)throw result.error;
+    state.history=result.data||[];
+    renderHistory();
+  }catch(e){console.warn("Trainingsverlauf nicht geladen:",e.message);}
+}
+function renderHistory(){
+  const el=$("runHistory");
+  if(!state.history.length){el.innerHTML='<div class="muted">Noch keine Trainingsläufe.</div>';return;}
+  el.textContent="";
+  state.history.forEach(run=>{
+    const row=document.createElement("div");row.className="history-row";
+    const left=document.createElement("strong");left.textContent=run.focus||"Allgemeine Fähigkeiten";
+    const right=document.createElement("span");
+    const score=run.metrics&&run.metrics.validationAccuracy;
+    right.textContent=(run.status||"")+(Number.isFinite(score)?" · "+percent(score):"")+" · "+new Date(run.started_at).toLocaleString("de-DE",{dateStyle:"short",timeStyle:"short"});
+    row.append(left,right);el.appendChild(row);
+  });
+}
+function renderMetrics(){
+  const m=state.metrics;
+  $("steps").textContent=pretty(m.steps);
+  $("examples").textContent=pretty(m.examplesSeen);
+  $("accuracy").textContent=percent(m.validationAccuracy);
+  $("reward").textContent=pretty(m.avgReward);
+  $("bestAccuracy").textContent=percent(m.bestAccuracy);
+  $("focusStatus").textContent=(state.focus||"Allgemeine Fähigkeiten")+" · neuronales SkillNet auf diesem Gerät";
+  $("progressBar").style.width=(state.running?Math.min(100,((Date.now()-state.startedAt)/Math.max(1,state.duration*1000))*100):Math.min(100,Number(m.validationAccuracy||0)*100))+"%";
+  drawChart();
+}
+function drawChart(){
+  const canvas=$("chart"),ctx=canvas.getContext("2d");
+  const w=canvas.width,h=canvas.height,pad=18;
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle="#e4ebf3";ctx.lineWidth=1;
+  for(let i=0;i<5;i++){const y=pad+(h-pad*2)*i/4;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(w-pad,y);ctx.stroke();}
+  if(state.chart.length<2)return;
+  ctx.strokeStyle="#244f7e";ctx.lineWidth=4;ctx.lineJoin="round";ctx.lineCap="round";ctx.beginPath();
+  state.chart.forEach((value,i)=>{
+    const x=pad+(w-pad*2)*i/Math.max(1,state.chart.length-1);
+    const y=h-pad-(h-pad*2)*Math.max(0,Math.min(1,value));
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+}
+function updateButtons(){
+  $("startButton").disabled=state.running;
+  $("pauseButton").disabled=!state.running;
+  $("stopButton").disabled=!state.running&&!state.paused;
+  $("pauseButton").textContent=state.paused?"▶ Fortsetzen":"Ⅱ Pause";
+}
+function requestWakeLock(){
+  if("wakeLock" in navigator && document.visibilityState==="visible"){
+    navigator.wakeLock.request("screen").then(lock=>{state.wakeLock=lock;}).catch(()=>{});
+  }
+}
+async function startRunRecord(){
+  if(!state.user)return null;
+  const result=await client.from("liveos_training_engine_runs").insert({
+    user_id:state.user.id,model_key:Core.MODEL_KEY,focus:state.focus,
+    status:"running",metrics:state.metrics
+  }).select("id").single();
+  if(result.error)throw result.error;
+  return result.data.id;
+}
+async function updateRunRecord(status){
+  if(!state.runId||!state.user)return;
+  const result=await client.from("liveos_training_engine_runs").update({
+    status,metrics:state.metrics,updated_at:new Date().toISOString(),
+    finished_at:["completed","stopped","failed"].includes(status)?new Date().toISOString():null
+  }).eq("id",state.runId).eq("user_id",state.user.id);
+  if(result.error)console.warn("Laufstatus konnte nicht synchronisiert werden:",result.error.message);
+}
+function ensureWorker(){
+  if(state.worker)return;
+  state.worker=new Worker("./engine.worker.js?v=1");
+  state.worker.onmessage=async function(event){
+    const m=event.data||{};
+    if(m.type==="ready"){
+      state.workerReady=true;
+      $("focusStatus").textContent="Aufgabensatz: "+pretty(m.trainCount)+" Training · "+pretty(m.validationCount)+" Validierung";
+      state.metrics.steps=m.steps||0;state.metrics.examplesSeen=m.examplesSeen||0;
+      setStatus("Bereit · eigener Trainingskern geladen",false);
+      updateButtons();
+    }
+    if(m.type==="status"){
+      state.running=m.status==="running";state.paused=m.status==="paused";
+      setStatus(state.running?"Training läuft · Aufgaben werden automatisch erzeugt":m.status==="paused"?"Pausiert · Checkpoint gespeichert":"Trainingslauf beendet",state.running);
+      updateButtons();
+    }
+    if(m.type==="tick"){
+      state.metrics.steps=m.steps;
+      state.metrics.examplesSeen=m.examplesSeen;
+      state.metrics.avgReward=m.avgReward;
+      state.metrics.trainLoss=m.lastLoss;
+      state.metrics.trainAccuracy=m.lastAccuracy;
+      renderMetrics();
+      if(Date.now()-state.lastLocalSave>3000)saveLocal();
+    }
+    if(m.type==="metrics"){
+      state.modelState=m.checkpoint;
+      state.metrics={...state.metrics,...m.metrics};
+      state.chart.push(m.metrics.validationAccuracy);
+      state.chart=state.chart.slice(-80);
+      saveLocal(m.checkpoint);
+      renderMetrics();
+      await saveCloud(false);
+      if(state.runId)await updateRunRecord("running");
+    }
+    if(m.type==="error"){setStatus(m.message,false);state.running=false;updateButtons();}
+  };
+  state.worker.onerror=function(e){
+    console.error(e);
+    setStatus("Trainings-Worker-Fehler. Der letzte Checkpoint bleibt gespeichert.",false);
+    state.running=false;state.paused=true;saveLocal();updateButtons();
+  };
+}
+async function prepareEngine(){
+  state.focus=$("focusInput").value.trim()||"Allgemeine Fähigkeiten";
+  state.duration=Number($("duration").value)||0;
+  ensureWorker();
+  state.workerReady=false;
+  state.worker.postMessage({type:"init",focus:state.focus,modelState:state.modelState});
+  await new Promise((resolve,reject)=>{
+    const deadline=Date.now()+15000;
+    const poll=()=>{
+      if(state.workerReady)return resolve();
+      if(Date.now()>deadline)return reject(new Error("Der Trainingskern konnte nicht geladen werden."));
+      setTimeout(poll,100);
+    };poll();
+  });
+}
+async function startTraining(){
+  if(state.running)return;
+  $("startButton").disabled=true;
+  setStatus("Trainingsmaschine wird vorbereitet …",false);
+  try{
+    if(!state.modelState)loadLocal();
+    await prepareEngine();
+    state.runId=await startRunRecord();
+    state.startedAt=Date.now();
+    state.running=true;state.paused=false;
+    requestWakeLock();
+    state.worker.postMessage({type:"start"});
+    updateButtons();
+    setStatus("Training läuft · automatische Aufgaben- und Lernzyklen aktiv",true);
+    await loadHistory();
+  }catch(e){
+    state.running=false;state.paused=false;
+    setStatus("Start fehlgeschlagen: "+e.message,false);
+    updateButtons();
+  }
+}
+async function pauseTraining(){
+  if(!state.worker)return;
+  if(state.paused){
+    state.worker.postMessage({type:"start"});
+    state.running=true;state.paused=false;requestWakeLock();
+    updateButtons();setStatus("Training läuft weiter",true);
+    return;
+  }
+  state.worker.postMessage({type:"pause"});
+  state.running=false;state.paused=true;
+  saveLocal();await saveCloud(true);await updateRunRecord("paused");
+  updateButtons();
+}
+async function stopTraining(){
+  if(!state.worker)return;
+  state.worker.postMessage({type:"stop"});
+  state.running=false;state.paused=false;
+  saveLocal();await saveCloud(true);await updateRunRecord("stopped");
+  state.runId=null;
+  if(state.wakeLock){try{await state.wakeLock.release();}catch(_){}state.wakeLock=null;}
+  updateButtons();await loadHistory();
+}
+async function login(event){
+  event.preventDefault();
+  const button=$("loginButton");button.disabled=true;button.textContent="Anmeldung …";
+  try{
+    const result=await client.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});
+    if(result.error)throw result.error;
+    state.session=result.data.session;state.user=result.data.user;
+    await bootAuthenticated();
+  }catch(e){$("loginMessage").textContent=e.message||"Anmeldung fehlgeschlagen.";}
+  finally{button.disabled=false;button.textContent="Anmelden";}
+}
+async function bootAuthenticated(){
+  $("loginCard").hidden=true;$("engineApp").hidden=false;
+  $("accountPill").textContent=state.user.email||"Angemeldet";
+  loadLocal();
+  await loadCloud();
+  renderMetrics();updateButtons();
+  await loadHistory();
+  $("deviceInfo").textContent="Gerät: "+(navigator.userAgent.includes("iPad")?"iPad":navigator.userAgent.includes("iPhone")?"iPhone":navigator.userAgent.includes("Mac")?"Mac":"Browser")+" · "+(navigator.hardwareConcurrency||"—")+" CPU-Kerne · Training läuft in einem separaten JavaScript-Worker.";
+  const existing=JSON.parse(localStorage.getItem("liveos_training_autoresume_v1")||"false");
+  if(existing)setStatus("Checkpoint gefunden · Drücke Start, um fortzusetzen",false);
+  else setStatus("Bereit · Drücke Start, um den ersten Trainingslauf zu beginnen",false);
+}
+async function init(){
+  if(!client){$("loginCard").hidden=false;$("loginMessage").textContent="Supabase konnte nicht geladen werden.";return;}
+  $("loginForm").addEventListener("submit",login);
+  document.querySelectorAll("[data-goal]").forEach(btn=>btn.addEventListener("click",()=>{$("focusInput").value=btn.dataset.goal;}));
+  $("startButton").addEventListener("click",startTraining);
+  $("pauseButton").addEventListener("click",pauseTraining);
+  $("stopButton").addEventListener("click",stopTraining);
+  $("deviceInfo").textContent="Prüfe dein Gerät …";
+  const sessionResult=await client.auth.getSession();
+  state.session=sessionResult.data.session;
+  state.user=state.session&&state.session.user;
+  if(state.user)await bootAuthenticated();
+  else{
+    $("loginCard").hidden=false;
+    $("engineApp").hidden=true;
+    $("accountPill").textContent="Anmeldung erforderlich";
+  }
+}
+document.addEventListener("visibilitychange",function(){
+  if(document.visibilityState==="hidden"&&state.running){
+    state.worker.postMessage({type:"pause"});
+    state.running=false;state.paused=true;
+    saveLocal();saveCloud(true);updateRunRecord("paused");
+    setStatus("Automatisch pausiert · Browser im Hintergrund",false);
+    updateButtons();
+  }
+});
+window.addEventListener("beforeunload",function(){saveLocal();});
+setInterval(function(){
+  if(state.modelState&&state.user&&Date.now()-state.lastCloudSave>120000)saveCloud(false);
+},30000);
+init();
+})();
+</script>
+</body>
+</html>
