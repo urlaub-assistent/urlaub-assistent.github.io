@@ -1,7 +1,7 @@
 (function (root) {
   "use strict";
 
-  const FEATURE_COUNT = 1024;
+  const FEATURE_COUNT = 768;
   const HIDDEN_COUNT = 64;
   const MODEL_KEY = "liveos-os3-skillnet-v3";
   const LEGACY_MODEL_KEYS = ["os2-skillnet-v2"];
