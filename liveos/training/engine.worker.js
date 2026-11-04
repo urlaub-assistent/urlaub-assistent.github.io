@@ -1,4 +1,4 @@
-importScripts("./skillnet-core.js");
+importScripts("./skillnet-core.js?v=2");
 "use strict";
 const Core=self.LiveOSSkillNet;
 let model=null,dataset=null,focusLabels=null,random=null;
