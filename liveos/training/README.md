@@ -4,7 +4,7 @@ LiveOS Training Engine: https://urlaub-assistent.github.io/liveos/training/
 
 ## Was sie tatsächlich trainiert
 
-Die Engine trainiert einen kleinen, eigenen neuronalen **Intent-/Skill-Klassifikator** (128 Eingabefeatures → 32 Hidden-Neuronen → 19 Intent-Klassen) direkt im Browser-Web-Worker. Es handelt sich ausdrücklich **nicht** um ein generatives Sprachmodell und nicht um ein Fine-Tuning von Qwen/ChatGPT. Der trainierte SkillNet kann Nutzeranfragen robuster vorhandenen, kuratierten OS2-Fähigkeiten und geprüften Antwortbeispielen zuordnen. Die Chat-App lädt denselben Checkpoint aus Supabase und nutzt ihn als zusätzlichen Intent-Router, wenn die Vorhersage sicher genug ist.
+Die Engine trainiert einen kleinen, eigenen neuronalen **Intent-/Skill-Klassifikator** (512 Eingabefeatures → 64 Hidden-Neuronen → 19 Intent-Klassen) direkt im Browser-Web-Worker. Es handelt sich ausdrücklich **nicht** um ein generatives Sprachmodell und nicht um ein Fine-Tuning von Qwen/ChatGPT. Der trainierte SkillNet kann Nutzeranfragen robuster vorhandenen, kuratierten OS2-Fähigkeiten und geprüften Antwortbeispielen zuordnen. Die Chat-App lädt denselben Checkpoint aus Supabase und nutzt ihn als zusätzlichen Intent-Router, wenn die Vorhersage sicher genug ist.
 
 ## Bedienung
 
