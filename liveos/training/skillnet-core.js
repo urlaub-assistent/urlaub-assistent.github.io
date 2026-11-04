@@ -321,7 +321,7 @@
         "Wie schütze ich Nutzerdaten bei "+subject,
         "Welche typischen Angriffe gibt es bei "+subject,
         "Erstelle eine Sicherheitscheckliste für "+subject,
-        "Wie teste ich "+subject" auf Schwachstellen"
+        "Wie teste ich "+subject+" auf Schwachstellen"
       ]);
     }else{
       add("reasoning",[
