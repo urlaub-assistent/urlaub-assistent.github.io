@@ -240,15 +240,109 @@
       "ich brauche hilfe: "+clean,
       "ich moechte wissen: "+clean+"?",
       "kannst du bitte "+clean+"?",
-      "hilf mir bitte: "+clean
+      "hilf mir bitte: "+clean,
+      "erklaere mir bitte "+clean+" mit einem beispiel",
+      "ich komme bei folgendem thema nicht weiter: "+clean,
+      "wie gehe ich dabei am besten vor: "+clean,
+      "fuehre mich schritt fuer schritt durch: "+clean,
+      "ich moechte das besser verstehen: "+clean
     ];
     return Array.from(new Set(v.map(x=>x.replace(/\s+/g," ").trim())));
+  }
+
+  // Turn the user's plain-language training goal into a small, deterministic
+  // curriculum. These are intent-learning examples, not factual knowledge.
+  function focusedExamples(focusText) {
+    const raw=String(focusText||"").trim();
+    const t=normalize(raw);
+    const rows=[];
+    const add=(label,phrases)=>phrases.forEach(text=>rows.push({intent:label,trigger_phrases:[text]}));
+    if(!t||/allgemein|allround|alle bereiche|alles/.test(t))return rows;
+    const subject=raw.replace(/[?.!]+$/,"").slice(0,70);
+    if(/python/.test(t)){
+      add("programming_python",[
+        "Schreibe eine Python-Funktion zum Thema "+subject,
+        "Erkläre "+subject+" in Python mit einem kleinen Beispiel",
+        "Debugge diesen Python-Code zu "+subject,
+        "Wie teste ich eine Python-Lösung für "+subject,
+        "Welche Python-Datenstruktur passt zu "+subject
+      ]);
+    }else if(/javascript|typescript|react|node|webentwicklung|frontend/.test(t)){
+      add("programming_javascript",[
+        "Erkläre "+subject+" in JavaScript mit Beispiel",
+        "Schreibe eine JavaScript-Funktion für "+subject,
+        "Debugge einen Fehler bei "+subject,
+        "Wie teste ich JavaScript-Code zu "+subject,
+        "Wie baue ich eine wiederverwendbare Komponente für "+subject
+      ]);
+    }else if(/html|css|website|webseite|design|layout/.test(t)){
+      add(/css|layout|design/.test(t)?"programming_css":"programming_html",[
+        "Erstelle eine responsive Seite zum Thema "+subject,
+        "Erkläre die HTML-Struktur für "+subject,
+        "Wie gestalte ich "+subject+" mobilfreundlich",
+        "Finde den Layoutfehler bei "+subject,
+        "Wie baue ich ein barrierearmes Formular für "+subject
+      ]);
+    }else if(/sql|supabase|datenbank|postgres/.test(t)){
+      add("supabase",[
+        "Entwirf ein sicheres Datenbankschema für "+subject,
+        "Wie speichere ich "+subject+" in Supabase",
+        "Erkläre Row Level Security für "+subject,
+        "Schreibe eine SQL-Abfrage zu "+subject,
+        "Wie teste ich Datenbankzugriffe für "+subject
+      ]);
+    }else if(/mathe|mathematik|rechnen|algebra|geometrie|prozent/.test(t)){
+      add("mathematics",[
+        "Erkläre "+subject+" Schritt für Schritt",
+        "Gib mir eine Übungsaufgabe zu "+subject,
+        "Prüfe meinen Rechenweg zu "+subject,
+        "Welche Formel brauche ich für "+subject,
+        "Zeige mir ein einfaches Beispiel zu "+subject
+      ]);
+    }else if(/logik|reasoning|problemlos|analyse|schlussfolger|kritisch denken/.test(t)){
+      add("reasoning",[
+        "Analysiere dieses Problem zu "+subject,
+        "Teile "+subject+" in überprüfbare Teilschritte",
+        "Vergleiche zwei Lösungswege für "+subject,
+        "Finde mögliche Widersprüche bei "+subject,
+        "Prüfe, welche Annahmen für "+subject fehlen"
+      ]);
+    }else if(/gespraech|kommunikation|deutsch|schreiben|sprache|empath/.test(t)){
+      add("conversation",[
+        "Führe ein natürliches Gespräch über "+subject,
+        "Erkläre "+subject+" in einfachem, freundlichem Deutsch",
+        "Formuliere eine klare Nachricht zu "+subject,
+        "Reagiere einfühlsam auf eine Frage zu "+subject,
+        "Fasse "+subject+" verständlich zusammen"
+      ]);
+    }else if(/sicherheit|security|datenschutz|privacy|schutz/.test(t)){
+      add("security",[
+        "Prüfe "+subject+" auf Sicherheitsrisiken",
+        "Wie schütze ich Nutzerdaten bei "+subject,
+        "Welche typischen Angriffe gibt es bei "+subject,
+        "Erstelle eine Sicherheitscheckliste für "+subject,
+        "Wie teste ich "+subject" auf Schwachstellen"
+      ]);
+    }else{
+      add("reasoning",[
+        "Erkläre die Grundlagen von "+subject,
+        "Welche Teilfragen muss ich zu "+subject zuerst klären",
+        "Erstelle einen Lernplan für "+subject,
+        "Prüfe eine Lösung zu "+subject auf Fehler",
+        "Fasse die wichtigsten Punkte zu "+subject zusammen"
+      ]);
+    }
+    return rows;
   }
 
   function buildDataset(focusText,curatedExamples) {
     const focusKey=resolveFocus(focusText).key;
     const mergedBank={};
     Object.keys(BANK).forEach(function(label){mergedBank[label]=BANK[label].slice();});
+    focusedExamples(focusText).forEach(function(example){
+      const label=String(example.intent||"");
+      if(mergedBank[label])mergedBank[label].push.apply(mergedBank[label],example.trigger_phrases||[]);
+    });
     (Array.isArray(curatedExamples)?curatedExamples:[]).forEach(function(example){
       const label=String(example.intent||"");
       if(!mergedBank[label])return;
@@ -288,11 +382,11 @@
   function resolveFocus(value) {
     const t=normalize(value);
     if(!t||/allround|allgemein|alles|gesamt|alle bereiche/.test(t))return {key:"all",name:"Allgemeine Fähigkeiten"};
-    if(/programm|coding|code|html|css|javascript|python|website|webseite|app entwickeln/.test(t))return {key:"programming",name:"Programmierung"};
-    if(/mathe|mathematik|rechnen|zahlen|formel/.test(t))return {key:"mathematics",name:"Mathematik"};
+    if(/programm|coding|code|html|css|javascript|typescript|python|react|node|rust|java|c\+\+|website|webseite|app entwickeln|webentwicklung|frontend/.test(t))return {key:"programming",name:"Programmierung"};
+    if(/mathe|mathematik|rechnen|zahlen|formel|algebra|geometrie|prozent/.test(t))return {key:"mathematics",name:"Mathematik"};
     if(/logik|reasoning|problemlos|problemloes|analysier|denken|schlussfolger/.test(t))return {key:"reasoning",name:"Logik und Problemlösung"};
     if(/gespraech|kommunikation|deutsch|smalltalk|empath|konversation|schreiben/.test(t))return {key:"conversation",name:"Gespräche und Sprache"};
-    if(/wissen|wissen|fakten|allgemeinwissen|recherche|erkl[aä]r/.test(t))return {key:"knowledge",name:"Wissen und Erklärungen"};
+    if(/wissen|fakten|allgemeinwissen|recherche|erkl[aä]r|biologie|geschichte|physik|chemie/.test(t))return {key:"knowledge",name:"Wissen und Erklärungen"};
     if(/sicherheit|security|datenschutz|schutz|privacy/.test(t))return {key:"safety",name:"Sicherheit und Zuverlässigkeit"};
     return {key:"all",name:"Allgemeine Fähigkeiten",custom:String(value||"").trim()};
   }
