@@ -13,7 +13,7 @@
   
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./training/skillnet-core.js?v=3"></script>
+  <script src="./training/skillnet-core.js?v=4"></script>
   <style>
     :root{
       color-scheme:light;
@@ -695,6 +695,7 @@
       let currentConversation = null;
       let conversations = [];
       let learnedExamples = [];
+      let skillNetRealtimeChannel = null;
       let messageHistory = [];
       let sending = false;
       let toastTimer = null;
@@ -1489,6 +1490,10 @@
       }
 
       async function signOut() {
+        if (skillNetRealtimeChannel) {
+          try { await client.removeChannel(skillNetRealtimeChannel); } catch (_) {}
+          skillNetRealtimeChannel = null;
+        }
         await client.auth.signOut();
         session = null;
         currentUser = null;
@@ -1792,6 +1797,43 @@
         await createConversation();
         showToast("Der lokale Chatverlauf wurde gelöscht.");
       }
+      async function connectSkillNetRealtime() {
+        if (!client || !currentUser || !window.LiveOSSkillNet || typeof client.channel !== "function") return;
+        const skillNet = window.LiveOSSkillNet;
+        try {
+          if (skillNetRealtimeChannel) {
+            try { await client.removeChannel(skillNetRealtimeChannel); } catch (_) {}
+            skillNetRealtimeChannel = null;
+          }
+          const userId = currentUser.id;
+          skillNetRealtimeChannel = client.channel("liveos-chat-skillnet-" + userId)
+            .on("postgres_changes", {
+              event: "*", schema: "public", table: "liveos_training_engine_states",
+              filter: "user_id=eq." + userId
+            }, function (payload) {
+              const row = payload && payload.new;
+              if (!row || !row.model_state) return;
+              const compatible = row.model_key === skillNet.MODEL_KEY ||
+                (Array.isArray(skillNet.LEGACY_MODEL_KEYS) && skillNet.LEGACY_MODEL_KEYS.includes(row.model_key));
+              if (!compatible) return;
+              try {
+                const incoming = skillNet.serialize(skillNet.createModel(row.model_state));
+                incoming.savedAt = row.updated_at || incoming.savedAt;
+                const local = skillNet.getStoredModel();
+                const localTime = Date.parse((local && local.savedAt) || "") || 0;
+                const remoteTime = Date.parse(row.updated_at || "") || 0;
+                if (remoteTime > localTime) {
+                  localStorage.setItem(skillNet.STORAGE_KEY, JSON.stringify(incoming));
+                  console.info("LiveOS SkillNet: neuer geprüfter Checkpoint wurde live übernommen.");
+                }
+              } catch (error) { console.warn("LiveOS SkillNet realtime update skipped:", error); }
+            })
+            .subscribe(function (status) {
+              if (status === "SUBSCRIBED") console.info("LiveOS Chat ist mit dem gemeinsamen SkillNet verbunden.");
+            });
+        } catch (error) { console.warn("LiveOS SkillNet realtime connection unavailable:", error); }
+      }
+
       async function loadOS2Foundation() {
         if (!client) {
           console.warn("Supabase JS is not available; LiveOS continues in local OS2 mode.");
@@ -1818,24 +1860,25 @@
               .select("model_key,model_state,updated_at")
               .eq("user_id", currentUser.id)
               .maybeSingle();
-            if (!trainedResult.error && trainedResult.data && trainedResult.data.model_state && trainedResult.data.model_key === window.LiveOSSkillNet.MODEL_KEY) {
-              let localModel = null;
-              try {
-                localModel = JSON.parse(localStorage.getItem(window.LiveOSSkillNet.STORAGE_KEY) || "null");
-              } catch (_) {}
+            const skillNet = window.LiveOSSkillNet;
+            const compatibleCheckpoint = trainedResult.data && trainedResult.data.model_state &&
+              (trainedResult.data.model_key === skillNet.MODEL_KEY ||
+               (Array.isArray(skillNet.LEGACY_MODEL_KEYS) && skillNet.LEGACY_MODEL_KEYS.includes(trainedResult.data.model_key)));
+            if (!trainedResult.error && compatibleCheckpoint) {
+              const localModel = skillNet.getStoredModel();
               const localTime = Date.parse((localModel && localModel.savedAt) || "") || 0;
               const cloudTime = Date.parse(trainedResult.data.updated_at || "") || 0;
               if (!localModel || cloudTime >= localTime) {
-                localStorage.setItem(
-                  window.LiveOSSkillNet.STORAGE_KEY,
-                  JSON.stringify(trainedResult.data.model_state)
-                );
+                const migrated = skillNet.serialize(skillNet.createModel(trainedResult.data.model_state));
+                migrated.savedAt = trainedResult.data.updated_at || migrated.savedAt;
+                localStorage.setItem(skillNet.STORAGE_KEY, JSON.stringify(migrated));
               }
             }
           }
         } catch (error) {
           console.warn("OS2 catalogue could not be loaded; local fallback remains active.", error);
         }
+        await connectSkillNetRealtime();
       }
 
       // OS2 Programming Pack: practical, curated code patterns.
