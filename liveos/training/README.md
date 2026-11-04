@@ -1,42 +1,40 @@
-# LiveOS OS2 Training Engine
+# LiveOS OS3 Training Engine
 
-LiveOS Training Engine: https://urlaub-assistent.github.io/liveos/training/
+Die Training Engine trainiert den gemeinsamen OS3-SkillNet-Intent-Router lokal im Browser. Der Chat und die Trainingsseite verwenden denselben Supabase-Checkpoint.
 
-## Was sie tatsächlich trainiert
+## Was das Training wirklich lernt
 
-Die Engine trainiert einen kleinen, eigenen neuronalen **Intent-/Skill-Klassifikator** (512 Eingabefeatures → 64 Hidden-Neuronen → 19 Intent-Klassen) direkt im Browser-Web-Worker. Es handelt sich ausdrücklich **nicht** um ein generatives Sprachmodell und nicht um ein Fine-Tuning von Qwen/ChatGPT. Der trainierte SkillNet kann Nutzeranfragen robuster vorhandenen, kuratierten OS2-Fähigkeiten und geprüften Antwortbeispielen zuordnen. Die Chat-App lädt denselben Checkpoint aus Supabase und nutzt ihn als zusätzlichen Intent-Router, wenn die Vorhersage sicher genug ist.
+- Ein neuronaler Intent-Klassifikator mit 512 Eingabefeatures → 64 Hidden-Neuronen → 19 Klassen.
+- Er ordnet Formulierungen vorhandenen LiveOS-Fähigkeitsbereichen zu, etwa Programmierung, Mathematik, Gespräch, Debugging und Sicherheit.
+- Das Training erzeugt zusätzliche Formulierungen aus dem gewählten Lernfokus und ergänzt freigegebene Beispielphrasen.
+- Es trainiert **kein** generatives Sprachmodell und schreibt dadurch nicht automatisch bessere freie Antworten oder Fakten in das Modell. Web-Recherche und Antwortregeln sind davon getrennte Funktionen.
 
-## Bedienung
+## Verbesserte Lernpipeline
 
-1. Mit demselben LiveOS-Konto wie im Chat anmelden (die Session wird auf derselben Domain geteilt). Gastmodus ist optional und speichert nur lokal.
-2. Ein Thema in normaler Sprache in **Worauf soll OS2 trainieren?** eingeben, zum Beispiel „Python und JavaScript programmieren“, „Mathematik und Rechnen“, „Biologie und Naturwissenschaften“ oder ein eigenes Thema.
-3. Trainingsdauer auswählen: 15 Minuten, 1, 3, 6 oder 12 Stunden oder bis zum manuellen Pausieren.
-4. **Training starten** drücken. Es werden keine externen Prompt-Sammlungen benötigt.
+1. **Ausgewogene Auswahl:** Trainingsbeispiele werden stärker nach Kompetenzklasse ausgeglichen. Dadurch dominieren große Klassen nicht den ganzen Lauf.
+2. **Stabileres Optimieren:** Mini-Batches, Backpropagation, Momentum, Label-Smoothing, Gradient Clipping und Weight Decay.
+3. **Getrennte Prüfung:** Nach Trainingsabschnitten wird die Validierungsmenge ausgewertet. Die ausgewogene Validierungsquote berücksichtigt jede Klasse gleich.
+4. **Beste Version sichern:** Ein Checkpoint wird nur übernommen, wenn die Validierung besser wird. Wenn fünf Prüfungen hintereinander keinen Fortschritt zeigen, stellt die Engine den besten Stand wieder her und senkt die Lernrate.
+5. **Alte Stände übernehmen:** Die bisherigen OS2-Checkpoints werden in die OS3-Struktur migriert. Die ursprünglichen 512 Feature-Buckets bleiben erhalten; Momentum-Zustände starten bei alten Checkpoints zunächst bei null.
 
-## Aufgaben- und Lernpipeline
+## Gemeinsamer Stand in LiveOS
 
-- Integrierter deutscher Aufgabenpool mit 19 Kompetenzklassen.
-- Der Generator erzeugt aus jeder Aufgabe automatisch mehrere natürliche Formulierungen, darunter Bitten, Fragen, Schritt-für-Schritt-Anfragen und Hilfegesuche.
-- Der freie Trainingsfokus erzeugt zusätzliche auf das Thema zugeschnittene Lern-/Analyseprompts und gewichtet passende Kompetenzbereiche stärker.
-- Freigegebene OS2-Beispiele aus `public.liveos_os1_examples` werden ergänzt, sofern sie über die angemeldete Session lesbar sind.
-- Training und Validierung werden auf getrennte Basisformulierungen verteilt; das Training bewertet nicht nur die Trainingsbeispiele.
-- Der Worker verwendet Mini-Batches, Backpropagation, Gradient Clipping und eine abfallende Lernrate.
-- Checkpoints werden lokal im Browser gespeichert; Supabase synchronisiert den Nutzer-Checkpoint und Laufhistorie.
-- Der Chat verwendet den gleichen Checkpoint-Key `liveos_os2_skillnet_v1` und synchronisiert den neuesten Cloud-Stand beim Öffnen.
-- Die Engine verarbeitet keine privaten Chatverläufe als Trainingsdaten.
+- Jeder angemeldete LiveOS-Nutzer hat **einen** persönlichen Checkpoint in `public.liveos_training_engine_states`.
+- Jeder neue Trainingslauf dieses Kontos startet mit dem vorhandenen Checkpoint und setzt das Training fort.
+- Training und Chat lesen/schreiben denselben Checkpoint.
+- Supabase Realtime meldet dem bereits geöffneten Chat neu gespeicherte Checkpoints desselben Kontos. Andere Benutzer können den Stand wegen Row Level Security nicht lesen.
+- Alle Geräte mit demselben LiveOS-Login erhalten so denselben Modellstand. Gastmodus bleibt lokal und wird nicht mit der Cloud geteilt.
+- Zwei Geräte sollten nicht gleichzeitig trainieren: Der gemeinsame Checkpoint wird als Ganzes gespeichert; parallele Läufe könnten sich gegenseitig überschreiben. Nacheinander gestartete Läufe bauen zuverlässig auf dem zuletzt synchronisierten Stand auf.
 
-## Belohnung und Bewertung
+## Bewertung und Grenzen
 
-Der Reward ist aktuell eine nachvollziehbare Klassifikationsbelohnung: 100 Punkte bei richtiger Intent-Zuordnung, 0 Punkte bei falscher Zuordnung. Die getrennte Validierungsquote und der Validierungsverlust sind die Qualitätsmetriken. Es gibt derzeit kein PPO/GRPO, kein autonomes Reinforcement Learning mit einem generativen Modell und keine semantische Bewertung komplexer Antworten. Ein „Cheating“-Detektor für einen generativen Agenten ist daher nicht Teil dieses SkillNet-Kerns.
+Der Reward ist weiterhin eine einfache Klassifikationsbelohnung: 100 Punkte für eine richtige Intent-Zuordnung, 0 für eine falsche. Balanced Accuracy, Validierungsverlust und die Werte je Klasse sind aussagekräftiger als die Zahl der Trainingsschritte allein.
 
-## Gerätebetrieb und Grenzen
+Es gibt kein PPO/GRPO und keinen generativen Agenten, der seine eigenen freien Antworten semantisch bewertet. Mehr Trainingsschritte oder eine höhere Intent-Quote machen LiveOS deshalb nicht automatisch zu einem allgemein intelligenteren Sprachmodell.
 
-- Das Training läuft lokal im Browser auf CPU in einem separaten JavaScript-Web-Worker; es benötigt weder Kaggle noch einen GPU-Anbieter oder eine kostenpflichtige API.
-- Es kann mehrere Stunden laufen, solange der Browser-Tab aktiv bleibt und das Betriebssystem die Seite nicht anhält.
-- Wenn Safari/iPadOS die Seite in den Hintergrund legt oder pausiert, stoppt die Engine sicher, speichert den letzten Checkpoint und kann nach erneutem Öffnen mit **Start** fortgesetzt werden. Wake Lock wird angefragt, sofern der Browser es unterstützt; das ist keine Garantie für einen ununterbrochenen Betrieb.
-- Cloud-Checkpoint und Verlauf werden nutzerbezogen mit Supabase RLS geschützt.
-- Das Budget bleibt bei 0 €; es werden keine bezahlten Endpoints oder APIs aufgerufen.
+## Betrieb und Kosten
 
-## Qualitätsziel
-
-Die Engine soll den Intent-Router über wiederholte Läufe robuster machen und die Zuordnung von Nutzeranfragen zu den vorhandenen OS2-Fähigkeiten verbessern. Mehr Trainingsschritte oder eine höhere Validierungsquote bedeuten nicht automatisch, dass LiveOS ein besseres allgemeines Sprachmodell geworden ist. Für generative Sprachkompetenz wäre später ein separates Modell mit einem echten Inference- und Fine-Tuning-Backend erforderlich.
+- Lokales CPU-Training in einem Web Worker, ohne bezahlte API und ohne GPU-Anbieter.
+- Budget: 0 € zusätzliche Trainingskosten.
+- Der Browser-Tab muss aktiv bleiben. Safari/iPadOS kann Hintergrund-Tabs oder gesperrte Geräte pausieren. In diesem Fall wird ein Checkpoint gespeichert und der Lauf kann nach dem Öffnen fortgesetzt werden.
+- Private Chatverläufe werden nicht automatisch als Trainingsdaten verwendet.
