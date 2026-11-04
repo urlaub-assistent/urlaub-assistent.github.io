@@ -1,10 +1,12 @@
 (function (root) {
   "use strict";
 
-  const FEATURE_COUNT = 512;
+  const FEATURE_COUNT = 1024;
   const HIDDEN_COUNT = 64;
-  const MODEL_KEY = "os2-skillnet-v2";
-  const STORAGE_KEY = "liveos_os2_skillnet_v2";
+  const MODEL_KEY = "liveos-os3-skillnet-v3";
+  const LEGACY_MODEL_KEYS = ["os2-skillnet-v2"];
+  const STORAGE_KEY = "liveos_os3_skillnet_v3";
+  const LEGACY_STORAGE_KEYS = ["liveos_os2_skillnet_v2"];
 
   const BANK = {
     greeting: [
@@ -161,28 +163,57 @@
 
   function createModel(existing) {
     const labels = Object.keys(BANK);
-    if (existing && existing.modelKey===MODEL_KEY && JSON.stringify(existing.labels)===JSON.stringify(labels)
-      && Array.isArray(existing.w1) && existing.w1.length===FEATURE_COUNT*HIDDEN_COUNT
-      && Array.isArray(existing.w2) && existing.w2.length===HIDDEN_COUNT*labels.length
-      && Array.isArray(existing.b1) && existing.b1.length===HIDDEN_COUNT
-      && Array.isArray(existing.b2) && existing.b2.length===labels.length) {
+    const oldFeatureCount = existing && existing.b1 && existing.b1.length === HIDDEN_COUNT &&
+      existing.w1 && existing.w1.length % HIDDEN_COUNT === 0
+      ? existing.w1.length / HIDDEN_COUNT : 0;
+    const compatible = existing &&
+      (existing.modelKey === MODEL_KEY || LEGACY_MODEL_KEYS.includes(existing.modelKey)) &&
+      JSON.stringify(existing.labels) === JSON.stringify(labels) &&
+      oldFeatureCount > 0 && oldFeatureCount <= FEATURE_COUNT &&
+      Array.isArray(existing.w2) && existing.w2.length === HIDDEN_COUNT * labels.length &&
+      Array.isArray(existing.b1) && existing.b1.length === HIDDEN_COUNT &&
+      Array.isArray(existing.b2) && existing.b2.length === labels.length;
+    if (compatible) {
+      const zeros = function (length) { return new Float32Array(length); };
+      const migratedRows = function (values, oldWidth, newWidth, rows) {
+        const output = zeros(newWidth * rows);
+        if (!Array.isArray(values) || values.length !== oldWidth * rows) return output;
+        for (let row = 0; row < rows; row++) {
+          output.set(values.slice(row * oldWidth, (row + 1) * oldWidth), row * newWidth);
+        }
+        return output;
+      };
+      const arrayOrZeros = function (value, length) {
+        return Array.isArray(value) && value.length === length ? Float32Array.from(value) : zeros(length);
+      };
       return {
-        modelKey:MODEL_KEY, labels,
-        w1:Float32Array.from(existing.w1), b1:Float32Array.from(existing.b1),
-        w2:Float32Array.from(existing.w2), b2:Float32Array.from(existing.b2),
-        steps:Number(existing.steps)||0, examplesSeen:Number(existing.examplesSeen)||0,
-        bestAccuracy:Number(existing.bestAccuracy)||0, version:1
+        modelKey: MODEL_KEY, labels,
+        w1: migratedRows(existing.w1, oldFeatureCount, FEATURE_COUNT, HIDDEN_COUNT),
+        b1: Float32Array.from(existing.b1),
+        w2: Float32Array.from(existing.w2), b2: Float32Array.from(existing.b2),
+        momentumW1: migratedRows(existing.momentumW1, oldFeatureCount, FEATURE_COUNT, HIDDEN_COUNT),
+        momentumB1: arrayOrZeros(existing.momentumB1, HIDDEN_COUNT),
+        momentumW2: arrayOrZeros(existing.momentumW2, HIDDEN_COUNT * labels.length),
+        momentumB2: arrayOrZeros(existing.momentumB2, labels.length),
+        steps: Number(existing.steps) || 0,
+        examplesSeen: Number(existing.examplesSeen) || 0,
+        bestAccuracy: Number(existing.bestAccuracy) || 0,
+        version: 2
       };
     }
     const rand = seededRandom(20261104);
-    const w1 = new Float32Array(FEATURE_COUNT*HIDDEN_COUNT);
-    const w2 = new Float32Array(HIDDEN_COUNT*labels.length);
-    for (let i=0;i<w1.length;i++) w1[i]=(rand()-0.5)*0.06;
-    for (let i=0;i<w2.length;i++) w2[i]=(rand()-0.5)*0.08;
+    const w1 = new Float32Array(FEATURE_COUNT * HIDDEN_COUNT);
+    const w2 = new Float32Array(HIDDEN_COUNT * labels.length);
+    for (let i = 0; i < w1.length; i++) w1[i] = (rand() - 0.5) * 0.06;
+    for (let i = 0; i < w2.length; i++) w2[i] = (rand() - 0.5) * 0.08;
     return {
-      modelKey:MODEL_KEY, labels,
-      w1,b1:new Float32Array(HIDDEN_COUNT),w2,b2:new Float32Array(labels.length),
-      steps:0,examplesSeen:0,bestAccuracy:0,version:1
+      modelKey: MODEL_KEY, labels, w1, b1: new Float32Array(HIDDEN_COUNT),
+      w2, b2: new Float32Array(labels.length),
+      momentumW1: new Float32Array(w1.length),
+      momentumB1: new Float32Array(HIDDEN_COUNT),
+      momentumW2: new Float32Array(w2.length),
+      momentumB2: new Float32Array(labels.length),
+      steps: 0, examplesSeen: 0, bestAccuracy: 0, version: 2
     };
   }
 
@@ -397,100 +428,140 @@
     return list[Math.floor(random()*list.length)];
   }
 
-  function trainBatch(model,batch,learningRate) {
-    const n=model.labels.length;
-    const gradW1=new Float32Array(model.w1.length);
-    const gradB1=new Float32Array(model.b1.length);
-    const gradW2=new Float32Array(model.w2.length);
-    const gradB2=new Float32Array(model.b2.length);
-    let loss=0,correct=0,reward=0;
-    for(let s=0;s<batch.length;s++){
-      const item=batch[s],target=model.labels.indexOf(item.label);
-      if(target<0)continue;
-      const x=vectorize(item.text);
-      const f=forward(model,x);
-      const probs=f.probs,hidden=f.hidden;
-      const maxProb=probs[target];
-      loss-=Math.log(Math.max(1e-8,maxProb));
-      let predicted=0;
-      for(let c=1;c<n;c++)if(probs[c]>probs[predicted])predicted=c;
-      const right=predicted===target;
-      if(right){correct++;reward+=100;}
-
-      const delta2=Float32Array.from(probs);
-      delta2[target]-=1;
-      for(let h=0;h<HIDDEN_COUNT;h++){
-        const base=h*n;
-        for(let c=0;c<n;c++)gradW2[base+c]+=hidden[h]*delta2[c];
+  function trainBatch(model, batch, learningRate) {
+    const n = model.labels.length;
+    const gradW1 = new Float32Array(model.w1.length);
+    const gradB1 = new Float32Array(model.b1.length);
+    const gradW2 = new Float32Array(model.w2.length);
+    const gradB2 = new Float32Array(model.b2.length);
+    const labelSmoothing = 0.02;
+    let loss = 0, correct = 0, reward = 0, used = 0;
+    for (let s = 0; s < batch.length; s++) {
+      const item = batch[s], target = model.labels.indexOf(item.label);
+      if (target < 0) continue;
+      used++;
+      const x = vectorize(item.text), f = forward(model, x);
+      const probs = f.probs, hidden = f.hidden;
+      let predicted = 0;
+      for (let c = 1; c < n; c++) if (probs[c] > probs[predicted]) predicted = c;
+      const right = predicted === target;
+      if (right) { correct++; reward += 100; }
+      const otherTarget = labelSmoothing / Math.max(1, n - 1);
+      const delta2 = new Float32Array(n);
+      for (let c = 0; c < n; c++) {
+        const desired = c === target ? 1 - labelSmoothing : otherTarget;
+        loss -= desired * Math.log(Math.max(1e-8, probs[c]));
+        delta2[c] = probs[c] - desired;
+        gradB2[c] += delta2[c];
       }
-      for(let c=0;c<n;c++)gradB2[c]+=delta2[c];
-
-      for(let h=0;h<HIDDEN_COUNT;h++){
-        let delta=0;
-        for(let c=0;c<n;c++)delta+=model.w2[h*n+c]*delta2[c];
-        if(hidden[h]<=0)delta=0;
-        gradB1[h]+=delta;
-        const base=h*FEATURE_COUNT;
-        for(let i=0;i<FEATURE_COUNT;i++)gradW1[base+i]+=delta*x[i];
+      for (let h = 0; h < HIDDEN_COUNT; h++) {
+        const base = h * n;
+        for (let c = 0; c < n; c++) gradW2[base + c] += hidden[h] * delta2[c];
+      }
+      for (let h = 0; h < HIDDEN_COUNT; h++) {
+        let delta = 0;
+        for (let c = 0; c < n; c++) delta += model.w2[h * n + c] * delta2[c];
+        if (hidden[h] <= 0) delta = 0;
+        gradB1[h] += delta;
+        const base = h * FEATURE_COUNT;
+        for (let i = 0; i < FEATURE_COUNT; i++) gradW1[base + i] += delta * x[i];
       }
     }
-    const scale=1/Math.max(1,batch.length);
-    let norm=0;
-    for(let i=0;i<gradW1.length;i++){gradW1[i]*=scale;norm+=gradW1[i]*gradW1[i];}
-    for(let i=0;i<gradW2.length;i++){gradW2[i]*=scale;norm+=gradW2[i]*gradW2[i];}
-    norm=Math.sqrt(norm)||1;
-    const clip=norm>5?5/norm:1;
-    for(let i=0;i<model.w1.length;i++)model.w1[i]-=learningRate*gradW1[i]*clip+learningRate*0.00008*model.w1[i];
-    for(let i=0;i<model.b1.length;i++)model.b1[i]-=learningRate*gradB1[i]*scale*clip;
-    for(let i=0;i<model.w2.length;i++)model.w2[i]-=learningRate*gradW2[i]*clip+learningRate*0.00008*model.w2[i];
-    for(let i=0;i<model.b2.length;i++)model.b2[i]-=learningRate*gradB2[i]*scale*clip;
-    model.steps++;
-    model.examplesSeen+=batch.length;
-    return {
-      loss:loss/Math.max(1,batch.length),
-      accuracy:correct/Math.max(1,batch.length),
-      reward:reward/Math.max(1,batch.length)
-    };
+    const scale = 1 / Math.max(1, used);
+    const grads = [gradW1, gradB1, gradW2, gradB2];
+    let normSquared = 0;
+    for (const grad of grads) for (let i = 0; i < grad.length; i++) {
+      grad[i] *= scale;
+      normSquared += grad[i] * grad[i];
+    }
+    const norm = Math.sqrt(normSquared) || 1;
+    const clip = norm > 3 ? 3 / norm : 1;
+    const momentum = 0.88, weightDecay = 0.000025;
+    for (let i = 0; i < model.w1.length; i++) {
+      model.momentumW1[i] = momentum * model.momentumW1[i] + gradW1[i] * clip;
+      model.w1[i] -= learningRate * (model.momentumW1[i] + weightDecay * model.w1[i]);
+    }
+    for (let i = 0; i < model.b1.length; i++) {
+      model.momentumB1[i] = momentum * model.momentumB1[i] + gradB1[i] * clip;
+      model.b1[i] -= learningRate * model.momentumB1[i];
+    }
+    for (let i = 0; i < model.w2.length; i++) {
+      model.momentumW2[i] = momentum * model.momentumW2[i] + gradW2[i] * clip;
+      model.w2[i] -= learningRate * (model.momentumW2[i] + weightDecay * model.w2[i]);
+    }
+    for (let i = 0; i < model.b2.length; i++) {
+      model.momentumB2[i] = momentum * model.momentumB2[i] + gradB2[i] * clip;
+      model.b2[i] -= learningRate * model.momentumB2[i];
+    }
+    model.steps++; model.examplesSeen += used;
+    return { loss: loss / Math.max(1, used), accuracy: correct / Math.max(1, used), reward: reward / Math.max(1, used), used };
   }
 
-  function evaluate(model,rows) {
-    let correct=0,loss=0;
-    const perClass={};
-    rows.forEach(function(item){
-      const p=predict(model,item.text);
-      const isCorrect=p&&p.label===item.label;
-      if(isCorrect)correct++;
-      const idx=model.labels.indexOf(item.label);
-      const probs=forward(model,vectorize(item.text)).probs;
-      loss-=Math.log(Math.max(1e-8,probs[idx]));
-      if(!perClass[item.label])perClass[item.label]={total:0,correct:0};
+  function evaluate(model, rows) {
+    let correct = 0, loss = 0, scored = 0;
+    const perClass = {};
+    rows.forEach(function (item) {
+      const idx = model.labels.indexOf(item.label);
+      if (idx < 0) return;
+      const prediction = predict(model, item.text);
+      const probabilities = forward(model, vectorize(item.text)).probs;
+      const desired = 0.98, other = 0.02 / Math.max(1, model.labels.length - 1);
+      for (let c = 0; c < probabilities.length; c++) {
+        loss -= (c === idx ? desired : other) * Math.log(Math.max(1e-8, probabilities[c]));
+      }
+      const isCorrect = prediction && prediction.label === item.label;
+      if (isCorrect) correct++;
+      if (!perClass[item.label]) perClass[item.label] = { total: 0, correct: 0, accuracy: 0 };
       perClass[item.label].total++;
-      if(isCorrect)perClass[item.label].correct++;
+      if (isCorrect) perClass[item.label].correct++;
+      scored++;
     });
-    const accuracy=correct/Math.max(1,rows.length);
-    return {accuracy,loss:loss/Math.max(1,rows.length),count:rows.length,perClass};
+    let classScore = 0, classCount = 0;
+    Object.keys(perClass).forEach(function (label) {
+      const item = perClass[label];
+      item.accuracy = item.correct / Math.max(1, item.total);
+      classScore += item.accuracy;
+      classCount++;
+    });
+    return {
+      accuracy: correct / Math.max(1, scored),
+      balancedAccuracy: classScore / Math.max(1, classCount),
+      loss: loss / Math.max(1, scored),
+      count: scored, classes: classCount, perClass
+    };
   }
 
   function serialize(model) {
     return {
-      modelKey:MODEL_KEY,labels:model.labels,
-      w1:Array.from(model.w1),b1:Array.from(model.b1),
-      w2:Array.from(model.w2),b2:Array.from(model.b2),
-      steps:model.steps,examplesSeen:model.examplesSeen,
-      bestAccuracy:model.bestAccuracy,version:1,
-      savedAt:new Date().toISOString()
+      modelKey: MODEL_KEY, labels: model.labels,
+      w1: Array.from(model.w1), b1: Array.from(model.b1),
+      w2: Array.from(model.w2), b2: Array.from(model.b2),
+      momentumW1: Array.from(model.momentumW1 || []),
+      momentumB1: Array.from(model.momentumB1 || []),
+      momentumW2: Array.from(model.momentumW2 || []),
+      momentumB2: Array.from(model.momentumB2 || []),
+      steps: model.steps, examplesSeen: model.examplesSeen,
+      bestAccuracy: model.bestAccuracy, version: 2, savedAt: new Date().toISOString()
     };
   }
 
   function getStoredModel() {
     try {
-      const raw=root.localStorage&&root.localStorage.getItem(STORAGE_KEY);
-      return raw?createModel(JSON.parse(raw)):null;
-    } catch(_){return null;}
+      const storage = root.localStorage;
+      if (!storage) return null;
+      let raw = storage.getItem(STORAGE_KEY);
+      if (!raw) {
+        for (let i = 0; i < LEGACY_STORAGE_KEYS.length && !raw; i++) raw = storage.getItem(LEGACY_STORAGE_KEYS[i]);
+      }
+      if (!raw) return null;
+      const model = createModel(JSON.parse(raw));
+      if (model.modelKey === MODEL_KEY) storage.setItem(STORAGE_KEY, JSON.stringify(serialize(model)));
+      return model;
+    } catch (_) { return null; }
   }
 
   root.LiveOSSkillNet = {
-    FEATURE_COUNT,HIDDEN_COUNT,MODEL_KEY,STORAGE_KEY,BANK,FOCUS,
+    FEATURE_COUNT,HIDDEN_COUNT,MODEL_KEY,LEGACY_MODEL_KEYS,LEGACY_STORAGE_KEYS,STORAGE_KEY,BANK,FOCUS,
     normalize,vectorize,createModel,predict,buildDataset,resolveFocus,
     trainBatch,evaluate,serialize,getStoredModel
   };
