@@ -176,7 +176,7 @@ const state={
   user:null,session:null,worker:null,runId:null,running:false,paused:false,
   modelState:null,metrics:{steps:0,examplesSeen:0,validationAccuracy:0,avgReward:0,bestAccuracy:0},
   history:[],chart:[],focus:"Allgemeine Fähigkeiten",duration:3600,
-  lastCloudSave:0,lastLocalSave:0,startedAt:0,workerReady:false
+  lastCloudSave:0,lastLocalSave:0,startedAt:0,workerReady:false,curatedExamples:[]
 };
 function setStatus(text,live){
   $("statusText").textContent=text;
@@ -374,7 +374,17 @@ async function prepareEngine(){
   state.duration=Number($("duration").value)||0;
   ensureWorker();
   state.workerReady=false;
-  state.worker.postMessage({type:"init",focus:state.focus,modelState:state.modelState});
+  try{
+    const curated=await client.from("liveos_os1_examples")
+      .select("intent,trigger_phrases,ideal_response,style_guidance,priority")
+      .eq("model_key","os2").eq("is_active",true).order("priority",{ascending:true});
+    if(!curated.error)state.curatedExamples=curated.data||[];
+    else console.warn("OS2 Beispiele konnten nicht geladen werden:",curated.error.message);
+  }catch(e){console.warn("OS2 Beispiele werden übersprungen:",e.message);}
+  state.worker.postMessage({
+    type:"init",focus:state.focus,modelState:state.modelState,
+    curatedExamples:state.curatedExamples
+  });
   await new Promise((resolve,reject)=>{
     const deadline=Date.now()+15000;
     const poll=()=>{
