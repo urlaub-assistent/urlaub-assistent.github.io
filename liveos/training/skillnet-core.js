@@ -1,10 +1,10 @@
 (function (root) {
   "use strict";
 
-  const FEATURE_COUNT = 128;
-  const HIDDEN_COUNT = 32;
-  const MODEL_KEY = "os2-skillnet-v1";
-  const STORAGE_KEY = "liveos_os2_skillnet_v1";
+  const FEATURE_COUNT = 512;
+  const HIDDEN_COUNT = 64;
+  const MODEL_KEY = "os2-skillnet-v2";
+  const STORAGE_KEY = "liveos_os2_skillnet_v2";
 
   const BANK = {
     greeting: [
