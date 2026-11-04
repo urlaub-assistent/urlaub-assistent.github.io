@@ -602,7 +602,7 @@
           </button>
           <a class="drawer-setting" href="./training/index.html" style="text-decoration:none;color:inherit">
             <span class="drawer-setting-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-7"/><path d="M18 6h1v1"/></svg></span>
-            <span><strong>Training Engine</strong><small>OS2 gezielt verbessern</small></span>
+            <span><strong>Training Engine</strong><small>SkillNet-Basis von OS3 trainieren</small></span>
             <svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
           </a>
           <div class="drawer-model"><span class="drawer-model-dot"></span><span>LiveOS OS3</span><span class="drawer-model-version">Version 3</span></div>
@@ -1384,12 +1384,15 @@
 
       async function generateLiveOSReply(input) {
         const t = normalize(input);
+        if (t.includes("wer bist du") || t.includes("was kannst du") || t.includes("was kannst liveos")) {
+          return "Ich bin LiveOS OS3 – die dritte Generation deines eigenen Assistenten. Ich kann mit dir schreiben, rechnen, programmieren, öffentliche Webseiten recherchieren und lesen, öffentliche YouTube-Treffer finden und Quellen verlinken. Ich bin weiterhin ein Prototyp mit Regel- und Wissenslogik, kein großes generatives Sprachmodell.";
+        }
         const example = exampleReply(input);
-        if (example) return example;
+        if (example) return example.replace("die zweite Generation", "die dritte Generation");
         if (t.includes("wie geht es dir") || t.includes("wie gehts dir")) return "Danke der Nachfrage! Mir geht es gut – ich bin bereit für unser Gespräch. Und wie geht es dir?";
         if (t.includes("wie heisst du") || t.includes("dein name")) return "Ich bin LiveOS, dein persönlicher KI-Assistent. Schön, dass wir miteinander schreiben!";
         if (t.includes("liveos")) return "LiveOS ist dein persönlicher KI-Assistent. Ich kann mit dir chatten, öffentliche Webseiten lesen, YouTube-Treffer recherchieren und Quellen verlinken.";
-        if (t.includes("internet") || t.includes("online") || t.includes("webzugriff")) return "Ja – ich kann jetzt öffentliche öffentliche Webseiten suchen und lesen, Suchtreffer auswerten und öffentliche YouTube-Videos finden. Quellen verlinke ich direkt. Private Konten, geschützte Bereiche und nicht öffentlich verfügbare Inhalte kann ich nicht auslesen.";
+        if (t.includes("internet") || t.includes("online") || t.includes("webzugriff")) return "Ja – ich kann öffentliche Webseiten suchen und lesen, Suchtreffer auswerten und öffentliche YouTube-Videos finden. Quellen verlinke ich direkt. Private Konten, geschützte Bereiche und nicht öffentlich verfügbare Inhalte kann ich nicht auslesen.";
         if (t.includes("api") || t.includes("chatgpt") || t.includes("fremdes modell")) return "Ich verwende in dieser Version keine externe Chat-KI-API. Die Antworten entstehen aus meiner eingebauten Gesprächslogik, Formulierungsbeispielen und den Informationen aus der Websuche. Ein eigenes trainiertes Sprachmodell ist ein späterer Entwicklungsschritt.";
         if (t.includes("tschuss") || t.includes("bis dann") || t.includes("auf wiedersehen") || t.includes("gute nacht")) return "Bis bald! Ich freue mich auf unser nächstes Gespräch.";
         if (t.includes("dein alter") || t.includes("wie alt bist du")) return "Ich habe kein menschliches Alter. LiveOS ist ein Software-Assistent, der weiterentwickelt wird.";
@@ -1756,7 +1759,7 @@
       function openOS2Model() {
         $("modelVersionName").textContent = activeModel.display_name || "LiveOS OS2";
         $("modelVersionLabel").textContent = (activeModel.version_label || "OS2") + " · Version " + (activeModel.version_number || 1) + " · " + (activeModel.status === "stable" ? "Stabil" : "Prototyp");
-        $("modelDescription").textContent = activeModel.description || "Die zweite Modellgeneration von LiveOS.";
+        $("modelDescription").textContent = activeModel.description || "Die dritte Modellgeneration von LiveOS.";
         $("modelModal").hidden = false;
         document.body.style.overflow = "hidden";
       }
