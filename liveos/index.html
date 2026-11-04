@@ -1276,7 +1276,7 @@
         }
         let text = "";
         const patterns = [
-          /\bmit\s+(?:der|dem)\s+(?:schrift|schriftzug|aufschrift|text)\s*[:=]?\s*["'„“]?(.+?)["'„“]?\s*$/i,
+          /\bmit\s+(?:der|dem)\s+(?:schriftzug|aufschrift|schrift|text)\s*[:=]?\s*["'„“]?(.+?)["'„“]?\s*$/i,
           /\b(?:mit|in)\s+(?:dem\s+)?(?:schriftzug|aufschrift|text)\s*[:=]?\s*["'„“]?(.+?)["'„“]?\s*$/i,
           /\b(?:text|schrift|schriftzug|aufschrift)\s*[:=]\s*["'„“]?(.+?)["'„“]?\s*$/i,
           /\bwo\s+(.+?)\s+(?:darauf\s+)?draufsteht\b/i,
@@ -1295,7 +1295,7 @@
         }
         if (!text) {
           const afterImage = raw.match(/\b(?:bild|poster|grafik)\s+(?:mit|von)\s+(.+)$/i);
-          if (afterImage) text = cleanImageText(afterImage[1].replace(/^(?:der|die|das)\s+(?:schrift|schriftzug|aufschrift|text)\s+/i, ""));
+          if (afterImage) text = cleanImageText(afterImage[1].replace(/^(?:der|die|das)\s+(?:schriftzug|aufschrift|schrift|text)\s+/i, ""));
         }
         if (!text) {
           const quoted = raw.match(/["'„“]([^"'„“]{1,120})["'„“]/);
