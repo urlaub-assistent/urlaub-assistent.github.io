@@ -1,55 +1,50 @@
-# LiveOS OS2 — kostenloses GPU-Training
+# LiveOS Training Engine
 
-## Was eingerichtet wurde
-- Supabase enthält freigegebene OS2-Trainingsbeispiele und private Benchmark-Aufgaben.
-- Ein abgesicherter Worker-RPC stellt dem Kaggle-Notebook Trainingsbeispiele bereit.
-- Versteckte Sollmuster und Scorer-Regeln verlassen Supabase nicht.
-- Das Kaggle-Notebook trainiert echte LoRA-Adaptergewichte auf Qwen2.5-0.5B-Instruct.
-- Ein privates Hugging-Face-Repository speichert den jeweils letzten Adapter.
-- Adapter-Gewichte werden nach jeder abgeschlossenen Epoche auf Hugging Face synchronisiert und beim Folgelauf als Startpunkt geladen.
+Die eigene LiveOS Training Engine läuft als lokale Webanwendung unter:
 
-## Trainingsdaten im Notebook
+`https://urlaub-assistent.github.io/liveos/training/`
 
-1. **Beko2210/German-Instruct-Dataset** — CC-BY-4.0. Das Notebook filtert ausschließlich `language=de`, `pii_status=clean` und `quality_score >= 0.90`. Die Dataset-Seite nennt 8.013 Trainingszeilen im Train-Split; die tatsächlich übernommenen Beispiele hängen vom Filter ab.
-2. **OpenAssistant/OASST-DE** — Apache-2.0. Enthält 3.721 deutschsprachige Konversationen; das Notebook extrahiert bis zu 3.500 Nutzer-/Assistenten-Turns.
-3. **LiveOS OS2** — freigegebene, eigene Trainingsbeispiele aus Supabase.
+## Was sie macht
+- Erzeugt deutschsprachige Übungsaufgaben automatisch aus dem internen Aufgabenpool.
+- Ergänzt diesen Pool mit den aktiven, kuratierten OS2-Antwortbeispielen aus Supabase.
+- Trainiert ein kleines neuronales MLP (128 Eingabefeatures → 32 Hidden-Neuronen → Intent-Klassen) mit Backpropagation und SGD direkt in einem JavaScript-Web-Worker auf dem Gerät.
+- Prüft den Lernfortschritt auf getrennten, zurückgehaltenen Variationen.
+- Vergibt 100 Reward-Punkte für korrekt klassifizierte Aufgaben und 0 für Fehlklassifikationen.
+- Speichert die Gewichte lokal und synchronisiert Modellzustand und Laufhistorie nutzerbezogen in Supabase.
+- Die Chat-App lädt denselben lokalen SkillNet-Checkpoint und verwendet ihn bei hoher Konfidenz als zusätzlichen Intent-Router zu vorhandenen, geprüften Antwortbeispielen.
 
-Die Daten werden dedupliziert, gemischt und in Trainings- und Validierungsdaten geteilt. Obergrenze: 9.000 Paare pro Lauf, maximale Sequenzlänge 512 Token. Es werden keine privaten Chatverläufe aus deinem Urlaub Assistenten importiert.
+## Trainingsziele
+Das Freitextziel wird automatisch einem Themenbereich zugeordnet:
+- Programmierung
+- Mathematik
+- Logik und Problemlösung
+- Gespräche und Sprache
+- Wissen und Erklärungen
+- Sicherheit und Zuverlässigkeit
+- Allgemeine Fähigkeiten
 
-Quellen:
-- https://huggingface.co/datasets/Beko2210/German-Instruct-Dataset
-- https://huggingface.co/datasets/OpenAssistant/OASST-DE
-- https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct
+Der gewählte Bereich erhält die stärkere Trainingsgewichtung; andere Grundfähigkeiten werden weiter mittrainiert.
 
-## Belohnungs- und Scorer-Regeln
-- Volle Aufgabenpunkte gibt es nur, wenn alle versteckten Assertions erfüllt sind.
-- Bei einer tatsächlich unlösbaren Aufgabe erhält ein ehrlicher, klar formulierter sicherer Stopp ebenfalls volle Punkte.
-- Ein manipuliertes Testsystem, veränderte Aufgaben, ausgelesene Lösungsschlüssel oder gefälschte Erfolge erhalten null Aufgabenpunkte und werden als Cheating markiert.
-- Die versteckten Kriterien werden dem trainierenden Notebook nicht mitgegeben.
-- Das ist derzeit SFT/LoRA-Fine-Tuning plus separate Bewertung, kein vollständiges Reinforcement-Learning mit GRPO/PPO.
+## Wichtige Grenzen
+- Das ist ein echtes trainierbares neuronales Skill-/Intent-Modell, aber **kein vollständiges Sprachmodell**. Es lernt, Nutzeranfragen besser zu klassifizieren und vorhandene Antwortfähigkeiten gezielter aufzurufen. Es schreibt nicht eigenständig neue, beliebig lange Antworten wie ein großes LLM.
+- Das Training läuft auf dem Gerät in einem Browser-Worker. Supabase speichert nur Zustand und Laufhistorie; es trainiert keine Modellgewichte auf dem Server.
+- iPadOS kann Browser-Tabs im Hintergrund anhalten. Darum pausiert die Engine automatisch, wenn die Seite in den Hintergrund wechselt. Lass die Seite im Vordergrund, solange trainiert werden soll.
+- Die Engine braucht für diese kleine MLP-Architektur keine GPU und verwendet keinen kostenpflichtigen API- oder GPU-Dienst.
+- Die Validierung prüft die Skill-Klassifikation auf zurückgehaltenen Aufgabenvarianten. Das ist kein Beweis, dass die generative Sprachqualität insgesamt besser geworden ist.
 
-## 0-Euro-Sicherheitsgrenze
-Es werden keine bezahlten GPU-Anbieter, Inference-APIs oder kostenpflichtigen Endpoints verwendet. Kaggle nennt für Notebook-Sessions bis zu 12 Stunden Laufzeit und ein GPU-Wochenkontingent von üblicherweise bis zu 30 Stunden (je nach Verfügbarkeit und Auslastung). Eine laufende Session kann enden; der letzte nach einer Epoche synchronisierte Adapter kann danach erneut geladen werden. Ein kompletter Lauf über Nacht ist daher nicht garantiert. Quelle: https://www.kaggle.com/docs/notebooks und https://www.kaggle.com/docs/efficient-gpu-usage
+## Daten & Datenschutz
+- Es werden synthetische deutschsprachige Aufgaben und aktive, kuratierte OS2-Antwortbeispiele verwendet.
+- Private Chatverläufe werden nicht als Trainingsdaten eingelesen.
+- Modellzustand und Trainingsläufe werden mit Row Level Security an die jeweilige angemeldete User-ID gebunden.
+- Keine Service-Role-Schlüssel im Browser.
 
-## Einmalige Kaggle-Secrets
-In Kaggle im Notebook unter **Add-ons → Secrets** zwei Secrets anlegen:
-- `SUPABASE_SERVICE_ROLE_KEY`: den Legacy `service_role`-Schlüssel aus Supabase Project Settings → API Keys. Niemals öffentlich teilen.
-- `HF_TOKEN`: Hugging Face User Access Token mit Schreibrecht für Model-Repositories. Niemals öffentlich teilen.
+## Start
+1. Im LiveOS-Chat im Verlauf-Menü **Training Engine** wählen oder die Trainingsseite direkt öffnen.
+2. Mit demselben LiveOS-Konto anmelden.
+3. Ein Ziel eintippen oder einen Themen-Chip auswählen.
+4. Dauer auswählen und **Training starten** drücken.
+5. Während der Laufzeit diese Seite im Vordergrund geöffnet lassen.
+6. Pause/Fortsetzen und Beenden verwenden; Checkpoints werden automatisch gespeichert.
 
-Die Supabase-Projekt-URL ist im Notebook bereits gesetzt: `https://twcacjwmahameglodljl.supabase.co`.
-
-## Start auf dem iPad
-1. Notebook-Datei vom GitHub-Raw-Link herunterladen:
-   https://raw.githubusercontent.com/urlaub-assistent/urlaub-assistent.github.io/main/liveos/training/os2_kaggle_training.ipynb
-2. In Kaggle **File → Import Notebook** öffnen und die heruntergeladene `.ipynb`-Datei auswählen.
-3. Settings → Accelerator → GPU einstellen und Internet aktivieren.
-4. Die beiden Secrets anlegen.
-5. Zellen der Reihe nach über **Run All** ausführen.
-
-Beim ersten Lauf wird ein privates HF-Repository `<dein-benutzername>/liveos-os2-lora` angelegt. Weitere Läufe laden den letzten Adapter und trainieren dessen Gewichte weiter.
-
-## Was ein erster Lauf leisten kann
-Der Ausgangsdatensatz wächst damit von wenigen Dutzend eigenen Beispielen auf mehrere Tausend allgemeine deutschsprachige Instruktions- und Gesprächsbeispiele. Das verbessert die Trainingsbasis deutlich, garantiert aber keine starke Allzweck-KI über Nacht. Qwen2.5-0.5B-Instruct hat nur rund 0,5 Milliarden Parameter; LoRA passt einen kleinen Adapter an, trainiert nicht das gesamte Grundmodell neu.
-
-## Wichtige Grenze
-Das Notebook erzeugt echte LoRA-Adaptergewichte. Das vorhandene LiveOS-Webfrontend hat noch kein Inference-Backend für diesen Adapter. Der erfolgreiche Trainingslauf allein macht OS2 also noch nicht automatisch im Live-Chat verfügbar.
+## Datenbankschema
+Das angewendete Schema ist in `sql/liveos_training_engine_schema.sql` dokumentiert.
