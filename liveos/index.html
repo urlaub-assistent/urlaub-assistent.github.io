@@ -7,8 +7,8 @@
   <link rel="manifest" href="./manifest.webmanifest?v=os2">
   <link rel="icon" type="image/svg+xml" href="./assets/liveos-icon.svg?v=os2">
   <link rel="apple-touch-icon" href="./assets/liveos-icon.svg?v=os2">
-  <meta name="description" content="LiveOS OS2 – dein persönlicher KI-Assistent.">
-  <title>LiveOS · Dein KI-Assistent</title>
+  <meta name="description" content="LiveOS OS3 – Webrecherche, YouTube und persönlicher KI-Assistent.">
+  <title>LiveOS OS3 · Dein KI-Assistent</title>
   
   
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -542,7 +542,7 @@
         <button class="model-switcher" id="modelBadge" type="button" data-action="show-model" aria-label="Aktives Modell LiveOS OS2">
           <img class="model-brand-icon" src="./assets/liveos-icon.svg?v=os2" alt="">
           <span class="model-switcher-title">LiveOS</span>
-          <span class="model-switcher-version">OS2</span>
+          <span class="model-switcher-version">OS3</span>
           <svg class="model-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
         </button>
         <button class="header-icon new-chat-icon" type="button" data-action="new-chat" aria-label="Neuen Chat starten" title="Neuer Chat">
@@ -556,7 +556,7 @@
           <div class="welcome">
             <div class="welcome-orb"><img src="./assets/liveos-icon.svg?v=os2" alt="LiveOS"></div>
             <h2>Womit kann ich dir helfen?</h2>
-            <p>Ich bin LiveOS OS2. Schreib mir einfach, was dich beschäftigt.</p>
+            <p>Ich bin LiveOS OS3. Schreib mir einfach, was dich beschäftigt.</p>
             <div class="suggestions">
               <button class="suggestion" data-prompt="Hallo LiveOS!">Sag Hallo</button>
               <button class="suggestion" data-prompt="Wer bist du?">Wer bist du?</button>
@@ -573,7 +573,7 @@
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
             </button>
           </form>
-          <p class="composer-disclaimer">LiveOS OS2 kann Fehler machen. Prüfe wichtige Informationen bitte selbst.</p>
+          <p class="composer-disclaimer">LiveOS OS3 kann Fehler machen. Prüfe wichtige Informationen bitte selbst.</p>
         </div>
       </main>
 
@@ -959,7 +959,7 @@
         const result = await client.from("liveos_conversations").insert({
           user_id: currentUser.id,
           title: "Neuer Chat",
-          model_id: "os2"
+          model_id: "os3"
         }).select("id,title,updated_at,created_at,model_id").single();
         if (result.error) {
           showToast("Ein neuer Chat konnte nicht erstellt werden: " + result.error.message);
@@ -1062,7 +1062,7 @@
               const before = text.slice(cursor,match.index).trim();
               if (before) {
                 const paragraph = document.createElement("div");
-                paragraph.textContent = before;
+                appendTextWithLinks(paragraph, before);
                 bubble.appendChild(paragraph);
               }
               const pre = document.createElement("pre");
@@ -1089,7 +1089,7 @@
             const after = text.slice(cursor).trim();
             if (after || !bubble.childNodes.length) {
               const paragraph = document.createElement("div");
-              paragraph.textContent = after || text;
+              appendTextWithLinks(paragraph, after || text);
               bubble.appendChild(paragraph);
             }
           }
@@ -1109,7 +1109,7 @@
           welcome.innerHTML =
             '<div class="welcome-orb"><img src="./assets/liveos-icon.svg?v=os2" alt="LiveOS"></div>' +
             '<h2>Womit kann ich dir helfen?</h2>' +
-            '<p>Ich bin LiveOS OS2. Schreib mir einfach, was dich beschäftigt.</p>' +
+            '<p>Ich bin LiveOS OS3. Schreib mir einfach, was dich beschäftigt.</p>' +
             '<div class="suggestions">' +
             '<button class="suggestion" data-prompt="Hallo LiveOS!">Sag Hallo</button>' +
             '<button class="suggestion" data-prompt="Wer bist du?">Wer bist du?</button>' +
@@ -1122,6 +1122,24 @@
         messageHistory.forEach(addMessageToView);
         icons();
         messagesEl.scrollTop = messagesEl.scrollHeight;
+      }
+
+      function appendTextWithLinks(parent, value) {
+        const text = String(value || ""), pattern = /https?:\/\/[^\s<>"']+/gi;
+        let cursor = 0, match;
+        while ((match = pattern.exec(text)) !== null) {
+          const raw = match[0], clean = raw.replace(/[),.;!?]+$/g, ""), trailing = raw.slice(clean.length);
+          if (match.index > cursor) parent.appendChild(document.createTextNode(text.slice(cursor, match.index)));
+          try {
+            const url = new URL(clean);
+            if (url.protocol === "http:" || url.protocol === "https:") {
+              const a = document.createElement("a"); a.href = url.href; a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = clean; parent.appendChild(a);
+            } else parent.appendChild(document.createTextNode(clean));
+          } catch (_) { parent.appendChild(document.createTextNode(clean)); }
+          if (trailing) parent.appendChild(document.createTextNode(trailing));
+          cursor = match.index + raw.length;
+        }
+        if (cursor < text.length) parent.appendChild(document.createTextNode(text.slice(cursor)));
       }
 
       function normalize(text) {
@@ -1169,11 +1187,28 @@
       }
       function needsInternetSearch(input) {
         const t = normalize(input);
-        if (!t || /^(hi+|hey+|hallo+|moin+|servus|yo|danke|vielen dank|gute nacht|tschuss|bis dann)$/.test(t)) return false;
+        if (!t || /^(hi+|hey+|hallo+|moin|servus|yo|danke|vielen dank|gute nacht|tschuss|bis dann)$/.test(t)) return false;
         if (t.includes("wie geht es dir") || t.includes("wie gehts dir") || t.includes("wer bist du") || t.includes("wie heisst du") || t.includes("was kannst du")) return false;
-        return /\?|wer ist|was ist|was sind|wie funktioniert|erklär|erklaer|erkläre|suche|recherch|information|infos|nenn mir|liste|wann war|wann ist|wo liegt|wo befindet|warum|wieso|wie viele|wie viel|vergleich|aktuell|neueste|geschichte|bedeutet/.test(t);
+        return /\?|wer ist|was ist|was sind|wie funktioniert|erklär|erklaer|erkläre|suche|recherch|information|infos|nenn mir|liste|wann war|wann ist|wo liegt|wo befindet|warum|wieso|wie viele|wie viel|vergleich|aktuell|neueste|geschichte|bedeutet|youtube|video|videos|heute|derzeit|stand von|was passierte/.test(t);
+      }
+      function extractUrlFromPrompt(value) {
+        const match = String(value || "").match(/https?:\/\/[^\s<>"']+/i);
+        return match ? match[0].replace(/[),.;!?]+$/g, "") : "";
       }
       async function searchInternet(query) {
+        const raw = String(query || "").trim();
+        const directUrl = extractUrlFromPrompt(raw);
+        const youtubeMode = /\b(youtube|video|videos|clip)\b/i.test(raw);
+        if (client && client.functions && typeof client.functions.invoke === "function") {
+          const body = directUrl ? { action: "read", url: directUrl } : { action: "search", query: raw.slice(0, 350), mode: youtubeMode ? "youtube" : "web" };
+          const result = await client.functions.invoke("liveos-web-research", { body: body });
+          if (result.error) throw new Error(result.error.message || "Die Websuche ist gerade nicht erreichbar.");
+          if (result.data && result.data.error) throw new Error(result.data.error);
+          return result.data || null;
+        }
+        return await searchWikipediaFallback(raw);
+      }
+      async function searchWikipediaFallback(query) {
         const cleaned = String(query || "").replace(/^(bitte\s+)?(suche|recherchiere|finde|erkläre|erklaere|was ist|wer ist|was sind|wie funktioniert|erzähl mir über|erzaehl mir ueber)\s+/i, "").replace(/[?!.]+$/g, "").trim().slice(0, 160);
         if (cleaned.length < 2) return null;
         const searchUrl = "https://de.wikipedia.org/w/rest.php/v1/search/page?q=" + encodeURIComponent(cleaned) + "&limit=3";
@@ -1181,21 +1216,49 @@
         if (!searchResponse.ok) throw new Error("Die Websuche antwortet gerade nicht (" + searchResponse.status + ").");
         const searchData = await searchResponse.json();
         const pages = Array.isArray(searchData.pages) ? searchData.pages : [];
-        if (!pages.length) return null;
         const summaries = await Promise.all(pages.slice(0, 2).map(async function (page) {
           const title = page.key || page.title;
           const response = await fetch("https://de.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(title), { headers: { "Accept": "application/json" } });
           if (!response.ok) return null;
           return response.json();
         }));
-        return summaries.filter(function (item) { return item && item.type === "standard" && item.extract; }).map(function (item) {
-          return { title: item.title, description: item.description || "", extract: item.extract, url: item.content_urls && item.content_urls.desktop ? item.content_urls.desktop.page : "https://de.wikipedia.org/wiki/" + encodeURIComponent(item.title.replace(/ /g, "_")) };
-        });
+        return { action: "search", mode: "wikipedia", query: cleaned, results: summaries.filter(function (item) { return item && item.type === "standard" && item.extract; }).map(function (item) {
+          return { title: item.title, description: item.description || "", snippet: item.extract, content: item.extract, url: item.content_urls && item.content_urls.desktop ? item.content_urls.desktop.page : "https://de.wikipedia.org/wiki/" + encodeURIComponent(item.title.replace(/ /g, "_")) };
+        }) };
       }
-      function formatInternetAnswer(results) {
-        if (!results || !results.length) return "Ich habe im Internet gesucht, aber bei Wikipedia keinen passenden Artikel gefunden. Versuche es mit einem genaueren Suchbegriff.\n\nMeine aktuelle Websuche nutzt Wikipedia als erste Quelle.";
-        const parts = results.map(function (item) { return item.title + (item.description ? " – " + item.description : "") + "\n\n" + item.extract + "\n\nQuelle: " + item.url; });
-        return "Ich habe dazu im Internet nachgeschlagen:\n\n" + parts.join("\n\n---\n\n") + "\n\nHinweis: Meine aktuelle Websuche nutzt Wikipedia. Prüfe besonders aktuelle oder wichtige Angaben zusätzlich anhand einer offiziellen Quelle.";
+      function summarizeWebPassage(source, query) {
+        const text = String(source || "").replace(/\s+/g, " ").trim();
+        if (!text) return "";
+        const terms = normalize(query).split(" ").filter(function (word) { return word.length > 2; });
+        const sentences = text.match(/[^.!?]+[.!?]?/g) || [text];
+        const ranked = sentences.map(function (sentence, index) {
+          const normalized = normalize(sentence);
+          const score = terms.reduce(function (sum, term) { return sum + (normalized.includes(term) ? 1 : 0); }, 0);
+          return { sentence: sentence.trim(), index: index, score: score };
+        }).filter(function (item) { return item.sentence.length > 35; });
+        ranked.sort(function (a, b) { return b.score - a.score || a.index - b.index; });
+        return ranked.slice(0, 4).sort(function (a, b) { return a.index - b.index; }).map(function (item) { return item.sentence; }).join(" ").slice(0, 1200) || text.slice(0, 700);
+      }
+      function formatInternetAnswer(data) {
+        if (!data) return "Ich habe im öffentlichen Web gesucht, aber keine verwertbaren Ergebnisse erhalten.";
+        if (Array.isArray(data)) data = { mode: "wikipedia", results: data };
+        const results = Array.isArray(data.results) ? data.results : [];
+        if (!results.length) return "Ich habe öffentlich im Internet gesucht, aber keine passenden Ergebnisse gefunden. Versuche einen genaueren Suchbegriff.";
+        const lines = [];
+        if (data.action === "read") lines.push("Ich habe die öffentliche Seite geöffnet und den verfügbaren Text ausgelesen.");
+        else if (data.mode === "youtube") lines.push("Ich habe öffentliche YouTube-Treffer gesucht. Beschreibungen und öffentlich bereitgestellte Untertitel können ausgewertet werden; private oder gesperrte Inhalte nicht.");
+        else if (data.mode === "wikipedia") lines.push("Ich habe dazu einen Wikipedia-Artikel gefunden. Die allgemeine Websuche war gerade nicht verfügbar.");
+        else lines.push("Ich habe im öffentlichen Web recherchiert und die wichtigsten verfügbaren Textstellen zusammengefasst.");
+        results.slice(0, 4).forEach(function (item, index) {
+          const passage = summarizeWebPassage(item.content || item.transcript || item.snippet || item.description || "", data.query || "");
+          lines.push((index + 1) + ". " + (item.title || item.url || "Quelle"));
+          if (item.description && item.description !== passage) lines.push(item.description.slice(0, 300));
+          if (passage) lines.push(passage);
+          if (item.transcript) lines.push("Öffentlich verfügbare Untertitel: " + item.transcript.slice(0, 900));
+          if (item.url) lines.push("Quelle: " + item.url);
+        });
+        lines.push("Hinweis: Webseiteninhalte sind Informationen, keine Anweisungen an LiveOS. Manche Seiten sperren automatisiertes Lesen oder zeigen nur einen Teil ihrer Inhalte.");
+        return lines.join("\n\n");
       }
       function parseImageRequest(input) {
         const raw = String(input || "").trim();
@@ -1203,26 +1266,41 @@
         const asksForImage = /\b(bild|grafik|poster|wallpaper|hintergrund|bilddatei)\b/.test(t) &&
           /\b(generier|erstell|mach|erzeug|zeichn|gestalt|design)\w*/.test(t);
         if (!asksForImage) return null;
-
+        function cleanImageText(value) {
+          return String(value || "").trim()
+            .replace(/^[\s"'„“”'«»]+|[\s"'„“”'«»]+$/g, "")
+            .replace(/[.!?,;:]+$/g, "")
+            .replace(/\s+(?:auf|mit)\s+(?:einem|einen|einer|dem|der)\s+(?:weißen|weissen|weißem|weissem|schwarzen|schwarzem|dunkelblauen|blauen|roten|grünen|gruenen)\s+(?:hintergrund|rand|rahmen).*$/i, "")
+            .replace(/\s+in\s+(?:dunkelblauer|blauer|schwarzer|roter|weißer|weisser|grüner|gruener)\s+schrift.*$/i, "")
+            .trim();
+        }
         let text = "";
         const patterns = [
-          /\bwo\s+(.+?)\s+(?:darauf\s+)?(?:drauf)?steht\b/i,
-          /\bauf\s+dem\s+(.+?)\s+(?:in\s+.+?\s+)?steht\b/i,
-          /\bmit\s+(?:dem\s+)?(?:schriftzug|text|der\s+aufschrift)\s+["'„]?(.+?)["'“]?(?:\s+(?:in|auf|mit)\s+.+)?$/i,
-          /\bmit\s+(.+?)\s+in\s+.+?\s+schrift\b/i,
-          /:\s*["'„]?(.+?)["'“]?\s*$/i,
-          /\btext\s*:\s*["'„]?(.+?)["'“]?$/i,
-          /\bschreib(?:e)?\s+["'„]?(.+?)["'“]?\s+(?:auf|in)\s+(?:das|ein)\s+(?:bild|poster|grafik)\b/i
+          /\bmit\s+(?:der|dem)\s+(?:schrift|schriftzug|aufschrift|text)\s*[:=]?\s*["'„“]?(.+?)["'„“]?\s*$/i,
+          /\b(?:mit|in)\s+(?:dem\s+)?(?:schriftzug|aufschrift|text)\s*[:=]?\s*["'„“]?(.+?)["'„“]?\s*$/i,
+          /\b(?:text|schrift|schriftzug|aufschrift)\s*[:=]\s*["'„“]?(.+?)["'„“]?\s*$/i,
+          /\bwo\s+(.+?)\s+(?:darauf\s+)?draufsteht\b/i,
+          /\bwo\s+(.+?)\s+steht\b/i,
+          /\bauf\s+dem\s+(?:bild|poster|hintergrund)\s+(.+?)\s+steht\b/i,
+          /\b(?:auf|in)\s+(?:dem|das|ein)\s+(?:bild|poster|hintergrund)\s+(.+?)\s+steht\b/i,
+          /:\s*["'„“](.+?)["'„“]\s*$/i,
+          /\bschreib(?:e)?\s+["'„“]?(.+?)["'„“]?\s+(?:auf|in)\s+(?:das|ein)\s+(?:bild|poster|grafik)\b/i
         ];
         for (const pattern of patterns) {
           const match = raw.match(pattern);
-          if (match && match[1]) { text = match[1].trim().replace(/^["'„]|["'“]$/g, ""); break; }
+          if (match && match[1]) {
+            text = cleanImageText(match[1]);
+            if (text) break;
+          }
         }
         if (!text) {
           const afterImage = raw.match(/\b(?:bild|poster|grafik)\s+(?:mit|von)\s+(.+)$/i);
-          if (afterImage) text = afterImage[1].trim().replace(/[.!?]+$/g, "");
+          if (afterImage) text = cleanImageText(afterImage[1].replace(/^(?:der|die|das)\s+(?:schrift|schriftzug|aufschrift|text)\s+/i, ""));
         }
-
+        if (!text) {
+          const quoted = raw.match(/["'„“]([^"'„“]{1,120})["'„“]/);
+          if (quoted) text = cleanImageText(quoted[1]);
+        }
         const colors = [
           ["dunkelblau", "#17365d"], ["navy", "#17365d"], ["blau", "#2d5f94"],
           ["schwarz", "#101820"], ["weiß", "#ffffff"], ["weiss", "#ffffff"],
@@ -1230,30 +1308,24 @@
           ["rosa", "#d46a92"], ["pink", "#d34d8c"], ["beige", "#e9dfcf"],
           ["gelb", "#e5b52f"], ["orange", "#d97732"], ["lila", "#7653a6"]
         ];
-        let background = "#ffffff";
-        let foreground = "#17365d";
-        let hasForeground = false;
+        let background = "#ffffff", foreground = "#17365d", hasForeground = false;
         for (const pair of colors) {
           if (t.includes(pair[0] + "er hintergrund") || t.includes(pair[0] + "en hintergrund") ||
               t.includes(pair[0] + "es bild") || t.includes(pair[0] + "es poster") ||
               t.includes(pair[0] + "e poster") || t.includes(pair[0] + "e grafik") ||
-              t.includes("hintergrund " + pair[0])) {
-            background = pair[1]; break;
-          }
+              t.includes("hintergrund " + pair[0])) { background = pair[1]; break; }
         }
         for (const pair of colors) {
           if (t.includes(pair[0] + "e schrift") || t.includes(pair[0] + "er schrift") ||
               t.includes(pair[0] + "en schrift") || t.includes("schrift " + pair[0]) ||
-              t.includes("text " + pair[0])) {
-            foreground = pair[1]; hasForeground = true; break;
-          }
+              t.includes("text " + pair[0])) { foreground = pair[1]; hasForeground = true; break; }
         }
         if (!hasForeground && !["#ffffff", "#e9dfcf", "#e5b52f"].includes(background)) foreground = "#ffffff";
         if (foreground === background) foreground = background === "#ffffff" ? "#17365d" : "#ffffff";
         const aspect = /querformat|16\s*:\s*9|landscape/i.test(raw) ? "landscape" :
           /hochformat|9\s*:\s*16|portrait/i.test(raw) ? "portrait" : "square";
-        const fileBase = (text || "liveos-grafik").toLocaleLowerCase("de-DE")
-          .normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0,40) || "liveos-grafik";
+        const fileBase = (text || "liveos-grafik").toLocaleLowerCase("de-DE").normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || "liveos-grafik";
         return { text, background, foreground, aspect, file: "liveos-" + fileBase + ".png" };
       }
 
@@ -1261,59 +1333,52 @@
         if (!spec || !spec.text) return null;
         const canvas = document.createElement("canvas");
         const dimensions = spec.aspect === "landscape" ? [1600, 900] : spec.aspect === "portrait" ? [900, 1600] : [1200, 1200];
-        canvas.width = dimensions[0];
-        canvas.height = dimensions[1];
+        canvas.width = dimensions[0]; canvas.height = dimensions[1];
         const ctx = canvas.getContext("2d");
         if (!ctx) throw new Error("Die Grafikfunktion ist in diesem Browser nicht verfügbar.");
-        const w = canvas.width, h = canvas.height;
-
-        ctx.fillStyle = spec.background;
-        ctx.fillRect(0, 0, w, h);
+        const w = canvas.width, h = canvas.height, maxWidth = w * 0.82, maxHeight = h * 0.70;
+        const words = String(spec.text).trim().split(/\s+/).filter(Boolean);
+        if (!words.length) return null;
+        ctx.fillStyle = spec.background; ctx.fillRect(0, 0, w, h);
         if (spec.background === "#ffffff") {
-          ctx.fillStyle = "rgba(23,54,93,0.035)";
-          ctx.beginPath(); ctx.arc(w * .87, h * .16, Math.min(w,h) * .25, 0, Math.PI * 2); ctx.fill();
-          ctx.fillStyle = "rgba(23,54,93,0.025)";
-          ctx.beginPath(); ctx.arc(w * .10, h * .88, Math.min(w,h) * .31, 0, Math.PI * 2); ctx.fill();
-        } else {
-          const shade = ctx.createLinearGradient(0, 0, w, h);
-          shade.addColorStop(0, "rgba(255,255,255,.12)");
-          shade.addColorStop(1, "rgba(0,0,0,.10)");
-          ctx.fillStyle = shade; ctx.fillRect(0,0,w,h);
+          ctx.fillStyle = "rgba(23,54,93,0.028)"; ctx.beginPath(); ctx.arc(w * 0.88, h * 0.16, Math.min(w,h) * 0.25, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = "rgba(23,54,93,0.022)"; ctx.beginPath(); ctx.arc(w * 0.10, h * 0.89, Math.min(w,h) * 0.30, 0, Math.PI * 2); ctx.fill();
         }
-
-        const words = spec.text.split(/\s+/).filter(Boolean).slice(0,12);
-        const maxWidth = w * .82;
-        const lines = [];
-        let line = "";
-        let fontSize = Math.min(w * .16, h * .15, 190);
+        function wrapAtSize(size) {
+          ctx.font = "800 " + size + "px Inter, Arial, sans-serif";
+          const lines = []; let line = "";
+          for (const word of words) {
+            if (ctx.measureText(word).width > maxWidth) {
+              if (line) { lines.push(line); line = ""; }
+              let fragment = "";
+              for (const char of word) {
+                if (fragment && ctx.measureText(fragment + char).width > maxWidth) { lines.push(fragment); fragment = char; }
+                else fragment += char;
+              }
+              line = fragment;
+              continue;
+            }
+            const candidate = line ? line + " " + word : word;
+            if (line && ctx.measureText(candidate).width > maxWidth) { lines.push(line); line = word; }
+            else line = candidate;
+          }
+          if (line) lines.push(line);
+          return lines;
+        }
+        let fontSize = Math.min(w * 0.155, h * 0.145, 188), lines = wrapAtSize(fontSize);
+        while (fontSize > 16) {
+          const tooWide = lines.some(function (line) { return ctx.measureText(line).width > maxWidth; });
+          const tooTall = lines.length * fontSize * 1.18 > maxHeight;
+          if (!tooWide && !tooTall) break;
+          fontSize -= 2; lines = wrapAtSize(fontSize);
+        }
+        const lineHeight = fontSize * 1.18, totalHeight = lineHeight * lines.length;
+        let y = (h - totalHeight) / 2 + (lineHeight - fontSize) / 2 + fontSize * 0.82;
         ctx.font = "800 " + fontSize + "px Inter, Arial, sans-serif";
-        for (const word of words) {
-          const candidate = line ? line + " " + word : word;
-          if (line && ctx.measureText(candidate).width > maxWidth) {
-            lines.push(line); line = word;
-          } else line = candidate;
-        }
-        if (line) lines.push(line);
-        if (lines.length > 5) lines.length = 5;
-        while (fontSize > 32 && lines.some(function(item){return ctx.measureText(item).width > maxWidth;})) {
-          fontSize -= 4;
-          ctx.font = "800 " + fontSize + "px Inter, Arial, sans-serif";
-        }
-        const lineHeight = fontSize * 1.16;
-        let y = (h - lineHeight * lines.length) / 2 + fontSize * .82;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "alphabetic";
-        ctx.fillStyle = spec.foreground;
-        ctx.shadowColor = "rgba(13,38,69,.10)";
-        ctx.shadowBlur = 9;
-        ctx.shadowOffsetY = 3;
-        lines.forEach(function(item) {
-          ctx.fillText(item, w / 2, y, maxWidth);
-          y += lineHeight;
-        });
-        ctx.shadowColor = "transparent";
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetY = 0;
+        ctx.textAlign = "center"; ctx.textBaseline = "alphabetic"; ctx.fillStyle = spec.foreground;
+        ctx.shadowColor = "rgba(13,38,69,.07)"; ctx.shadowBlur = 4; ctx.shadowOffsetY = 1;
+        lines.forEach(function (line) { ctx.fillText(line, w / 2, y); y += lineHeight; });
+        ctx.shadowColor = "transparent"; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
         return canvas.toDataURL("image/png");
       }
 
@@ -1324,7 +1389,7 @@
         if (t.includes("wie geht es dir") || t.includes("wie gehts dir")) return "Danke der Nachfrage! Mir geht es gut – ich bin bereit für unser Gespräch. Und wie geht es dir?";
         if (t.includes("wie heisst du") || t.includes("dein name")) return "Ich bin LiveOS, dein persönlicher KI-Assistent. Schön, dass wir miteinander schreiben!";
         if (t.includes("liveos")) return "LiveOS ist dein persönlicher KI-Assistent. Ich kann mit dir chatten und über die Wikipedia-Suche Informationen im Internet nachschlagen. Weitere Fähigkeiten werden Schritt für Schritt ergänzt.";
-        if (t.includes("internet") || t.includes("online") || t.includes("webzugriff")) return "Ja – ich kann jetzt öffentliche Wikipedia-Artikel im Internet suchen und deren Inhalte zusammenfassen. Eine allgemeine Suche über das gesamte Web und aktuelle Nachrichtenseiten ist noch nicht eingebaut.";
+        if (t.includes("internet") || t.includes("online") || t.includes("webzugriff")) return "Ja – ich kann jetzt öffentliche öffentliche Webseiten suchen und lesen, Suchtreffer auswerten und öffentliche YouTube-Videos finden. Quellen verlinke ich direkt. Private Konten, geschützte Bereiche und nicht öffentlich verfügbare Inhalte kann ich nicht auslesen.";
         if (t.includes("api") || t.includes("chatgpt") || t.includes("fremdes modell")) return "Ich verwende in dieser Version keine externe Chat-KI-API. Die Antworten entstehen aus meiner eingebauten Gesprächslogik, Formulierungsbeispielen und den Informationen aus der Websuche. Ein eigenes trainiertes Sprachmodell ist ein späterer Entwicklungsschritt.";
         if (t.includes("tschuss") || t.includes("bis dann") || t.includes("auf wiedersehen") || t.includes("gute nacht")) return "Bis bald! Ich freue mich auf unser nächstes Gespräch.";
         if (t.includes("dein alter") || t.includes("wie alt bist du")) return "Ich habe kein menschliches Alter. LiveOS ist ein Software-Assistent, der weiterentwickelt wird.";
@@ -1361,7 +1426,7 @@
             user_id: currentUser.id,
             role: "user",
             content: value,
-            model_id: "os2"
+            model_id: "os3"
           }).select("id,role,content,model_id,created_at").single();
           if (savedUser.error) throw savedUser.error;
           messageHistory[messageHistory.length - 1] = savedUser.data;
@@ -1378,7 +1443,7 @@
             user_id: currentUser.id,
             role: "assistant",
             content: reply,
-            model_id: "os2"
+            model_id: "os3"
           }).select("id,role,content,model_id,created_at").single();
           if (savedAssistant.error) throw savedAssistant.error;
           messageHistory.push(savedAssistant.data);
@@ -1530,7 +1595,7 @@
         const now = new Date().toISOString();
         const conversation = {
           id: window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : "guest-" + Date.now() + "-" + Math.random().toString(16).slice(2),
-          title: "Neuer Chat", model_id: "os2", created_at: now, updated_at: now, messages: []
+          title: "Neuer Chat", model_id: "os3", created_at: now, updated_at: now, messages: []
         };
         currentConversation = conversation;
         messageHistory = [];
@@ -1560,7 +1625,7 @@
           const now = new Date().toISOString();
           currentConversation = {
             id: window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : "local-" + Date.now(),
-            title: "Neuer Chat", model_id: "os2", created_at: now, updated_at: now, messages: []
+            title: "Neuer Chat", model_id: "os3", created_at: now, updated_at: now, messages: []
           };
           conversations.unshift(currentConversation);
           messageHistory = [];
@@ -1573,7 +1638,7 @@
 
         try {
           const now = new Date().toISOString();
-          messageHistory.push({ id:"m-"+Date.now(), role:"user", content:value, model_id:"os2", created_at:now });
+          messageHistory.push({ id:"m-"+Date.now(), role:"user", content:value, model_id: "os3", created_at:now });
           currentConversation.messages = messageHistory;
           if (messageHistory.filter(function(item){return item.role==="user";}).length === 1) {
             currentConversation.title = value.length > 36 ? value.slice(0,36).trim()+"…" : value;
@@ -1584,7 +1649,7 @@
           saveGuestData();
           messageInput.value = "";
           resizeComposer();
-          messageHistory.push({ id:"typing-"+Date.now(), role:"assistant", typing:true, content:"", model_id:"os2" });
+          messageHistory.push({ id:"typing-"+Date.now(), role:"assistant", typing:true, content:"", model_id: "os3" });
           renderMessages();
 
           let answer;
@@ -1594,13 +1659,13 @@
               id:"m-"+(Date.now()+1), role:"assistant",
               content:"Fertig! Ich habe dein Textbild erstellt.",
               image_data:createDesignedImage(imageSpec), image_alt:imageSpec.text,
-              image_file:imageSpec.file, model_id:"os2", created_at:new Date().toISOString()
+              image_file:imageSpec.file, model_id: "os3", created_at:new Date().toISOString()
             };
           } else if (imageSpec) {
             answer = {
               id:"m-"+(Date.now()+1), role:"assistant",
               content:"Ich kann bereits Textbilder und einfache Grafiken erstellen. Für freie Motive braucht LiveOS noch ein Bildmodell.",
-              model_id:"os2", created_at:new Date().toISOString()
+              model_id: "os3", created_at:new Date().toISOString()
             };
           } else {
             let reply = "";
@@ -1608,7 +1673,7 @@
               reply = await Promise.race([
                 generateLiveOSReply(value),
                 new Promise(function(_,reject){
-                  window.setTimeout(function(){reject(new Error("OS2-Antwortzeit überschritten"));},15000);
+                  window.setTimeout(function(){reject(new Error("OS3-Antwortzeit überschritten"));},15000);
                 })
               ]);
             } catch (replyError) {
@@ -1618,18 +1683,18 @@
             answer = {
               id:"m-"+(Date.now()+1), role:"assistant",
               content:String(reply || "Ich habe gerade keine passende Antwort. Bitte stelle deine Frage etwas genauer."),
-              model_id:"os2", created_at:new Date().toISOString()
+              model_id: "os3", created_at:new Date().toISOString()
             };
           }
           messageHistory = messageHistory.filter(function(item){return !item.typing;});
           messageHistory.push(answer);
         } catch (error) {
-          console.error("OS2 send pipeline error:",error);
+          console.error("OS3 send pipeline error:",error);
           messageHistory = messageHistory.filter(function(item){return !item.typing;});
           messageHistory.push({
             id:"m-"+(Date.now()+1), role:"assistant",
             content:"Deine Nachricht ist angekommen, aber beim Antworten gab es einen Fehler. Bitte versuche es noch einmal.",
-            model_id:"os2", created_at:new Date().toISOString()
+            model_id: "os3", created_at:new Date().toISOString()
           });
         } finally {
           messageHistory = messageHistory.filter(function(item){return !item.typing;});
@@ -1658,9 +1723,9 @@
         currentUser = { id:"local-guest", email:"Gast", user_metadata:{display_name:"Gast"} };
         learnedExamples = [
           { trigger_phrases:["hallo","hi","hey","moin"], ideal_response:"Hallo! Schön, dass du da bist. Was möchtest du heute wissen?", priority:1 },
-          { trigger_phrases:["wer bist du","wie heißt du","wie heisst du"], ideal_response:"Ich bin LiveOS OS2 – die zweite Generation deines persönlichen Assistenten. Ich kann mit dir schreiben, rechnen und dir beim Programmieren helfen.", priority:2 },
+          { trigger_phrases:["wer bist du","wie heißt du","wie heisst du"], ideal_response:"Ich bin LiveOS OS3 – die zweite Generation deines persönlichen Assistenten. Ich kann mit dir schreiben, rechnen und dir beim Programmieren helfen.", priority:2 },
           { trigger_phrases:["danke","vielen dank"], ideal_response:"Sehr gerne! Was kann ich noch für dich tun?", priority:3 },
-          { trigger_phrases:["was kannst du"], ideal_response:"Ich kann mit dir chatten, einfache Berechnungen durchführen, Textbilder und einfache Grafiken als PNG erstellen und öffentliche Informationen über Wikipedia nachschlagen. Freie Bildmotive brauchen noch ein separates Bildmodell.", priority:4 }
+          { trigger_phrases:["was kannst du"], ideal_response:"Ich kann mit dir chatten, einfache Berechnungen durchführen, Textbilder und einfache Grafiken als PNG erstellen und öffentliche Informationen über im öffentlichen Web und auf YouTube recherchieren. Freie Bildmotive brauchen noch ein separates Bildmodell.", priority:4 }
         ];
         showApp();
         await loadConversations();
@@ -1671,7 +1736,7 @@
       // OS2 local preferences and public model catalogue.
       const os1SettingsKey = "liveos_os1_settings_v1";
       let os1Settings = { displayName:"", responseStyle:"friendly", saveChatHistory:true };
-      let activeModel = { model_key:"os2", version_number:2, version_label:"OS2", display_name:"LiveOS OS2", status:"prototype", description:"Zweite Modellgeneration mit erweiterter Wissensbasis und automatischer Qualitätsbewertung." };
+      let activeModel = { model_key:"os3", version_number:3, version_label:"OS3", display_name:"LiveOS OS3", status:"prototype", description:"Dritte Generation mit öffentlicher Webrecherche, YouTube-Treffern und verbessertem Textbild-Renderer. Der Antwortkern bleibt ein Prototyp." };
       let os2Knowledge = [];
       try {
         const savedSettings = JSON.parse(localStorage.getItem(os1SettingsKey) || "{}");
@@ -1731,7 +1796,7 @@
         }
         try {
           const [modelResult, exampleResult, knowledgeResult] = await Promise.all([
-            client.from("liveos_os1_models").select("model_key,version_number,version_label,display_name,status,description,capabilities,metadata").eq("model_key","os2").maybeSingle(),
+            client.from("liveos_os1_models").select("model_key,version_number,version_label,display_name,status,description,capabilities,metadata").eq("model_key","os3").maybeSingle(),
             client.from("liveos_os1_examples").select("intent,trigger_phrases,ideal_response,style_guidance,priority").eq("model_key","os2").eq("is_active",true).order("priority"),
             client.from("liveos_os1_knowledge").select("title,content,tags,confidence").eq("model_key","os2").eq("is_active",true)
           ]);
@@ -1934,7 +1999,7 @@
         }
         if (/^(hallo|hi|hey|moin|guten morgen|guten tag)$/.test(t) && os1Settings.displayName) return "Hallo, " + os1Settings.displayName + "! Schön, dass du wieder da bist. Was machen wir heute?";
         if (t.includes("was kannst du") || t.includes("wer bist du")) {
-          return "Ich bin LiveOS OS2 – die zweite Generation deines eigenen Assistenten. Ich kann mit dir schreiben, einfache Rechnungen lösen, bei passenden Fragen Wikipedia nachschlagen und dir beim Programmieren helfen. Ich bin noch ein früher Prototyp und kein großes trainiertes Sprachmodell.\n\nWeitere Generationen bauen wir später als OS3, OS4 und so weiter.";
+          return "Ich bin LiveOS OS3 – die zweite Generation deines eigenen Assistenten. Ich kann mit dir schreiben, einfache Rechnungen lösen, bei passenden Fragen Wikipedia nachschlagen und dir beim Programmieren helfen. Ich bin noch ein früher Prototyp und kein großes trainiertes Sprachmodell.\n\nWeitere Generationen bauen wir später als OS3, OS4 und so weiter.";
         }
         const programmingReply = generateOS2ProgrammingReply(input);
         if (programmingReply) return programmingReply;
@@ -1967,7 +2032,7 @@
           if (lockedScreen) lockedScreen.hidden = true;
           if (!currentConversation) {
             const now = new Date().toISOString();
-            currentConversation = { id:"local-"+Date.now(), title:"Neuer Chat", model_id:"os2", created_at:now, updated_at:now, messages:[] };
+            currentConversation = { id:"local-"+Date.now(), title:"Neuer Chat", model_id: "os3", created_at:now, updated_at:now, messages:[] };
             conversations = [currentConversation];
             messageHistory = [];
           }
@@ -1976,7 +2041,7 @@
         await loadOS2Foundation();
         if (!currentConversation) {
           const now = new Date().toISOString();
-          currentConversation = { id:"local-"+Date.now(), title:"Neuer Chat", model_id:"os2", created_at:now, updated_at:now, messages:[] };
+          currentConversation = { id:"local-"+Date.now(), title:"Neuer Chat", model_id: "os3", created_at:now, updated_at:now, messages:[] };
           conversations = [currentConversation];
           messageHistory = [];
           saveGuestData();
