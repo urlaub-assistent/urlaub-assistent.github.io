@@ -225,10 +225,10 @@ async function loadCloud(){
   if(!state.user)return;
   try{
     const result=await client.from("liveos_training_engine_states")
-      .select("model_state,metrics,focus,updated_at")
+      .select("model_key,model_state,metrics,focus,updated_at")
       .eq("user_id",state.user.id).maybeSingle();
     if(result.error)throw result.error;
-    if(result.data){
+    if(result.data && result.data.model_key===Core.MODEL_KEY){
       const cloudDate=Date.parse(result.data.updated_at||"");
       const localDate=Date.parse((state.modelState&&state.modelState.savedAt)||"");
       if(!state.modelState||cloudDate>localDate){
