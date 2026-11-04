@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#10243f">
-<meta name="description" content="LiveOS Training Engine – trainiere die Fähigkeiten von OS2 direkt auf deinem Gerät.">
+<meta name="description" content="LiveOS OS3 Training Engine – verbessere den gemeinsamen SkillNet-Router.">
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="../assets/liveos-icon.svg">
 <title>LiveOS · Training Engine</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="./skillnet-core.js?v=3"></script>
+<script src="./skillnet-core.js?v=4"></script>
 <style>
 :root{color-scheme:light;--navy:#10243f;--navy2:#17365d;--navy3:#244c78;--text:#152944;--muted:#718198;--line:#e1e8f0;--surface:#fff;--soft:#f5f8fc;--green:#168b64;--red:#b54848;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 *{box-sizing:border-box}
@@ -78,20 +78,20 @@ input:focus,select:focus{border-color:#587ba6;box-shadow:0 0 0 3px #315c8e16}
   <header class="top">
     <div class="brand">
       <div class="logo"><img src="../assets/liveos-icon.svg" alt="LiveOS"></div>
-      <div><div class="kicker">LIVEOS · OS2</div><h1>Training Engine</h1><p>Die gemeinsame SkillNet-Basis von LiveOS Schritt für Schritt verbessern</p></div>
+      <div><div class="kicker">LIVEOS · OS3</div><h1>Training Engine</h1><p>Die gemeinsame SkillNet-Basis von LiveOS Schritt für Schritt verbessern</p></div>
     </div>
     <div class="top-actions"><span class="pill" id="accountPill">Verbindung wird geprüft</span><a class="iconlink" href="../index.html" aria-label="Zurück zum Chat">‹</a></div>
   </header>
 
   <section class="intro">
     <span class="eyebrow">Eigene Lernmaschine</span>
-    <h2>OS2 wird mit jedem Lauf ein Stück besser.</h2>
-    <p>Du gibst ein Thema in normaler Sprache ein. Die Engine erzeugt dazu passende Übungsformulierungen aus ihrem eingebauten Aufgabenbaukasten, ergänzt freigegebene LiveOS-Beispiele, trainiert ein kleines neuronales SkillNet direkt auf diesem Gerät und prüft es an getrennten Testvarianten. Keine Prompt-Sammlungen oder externen Trainingsdienste nötig.</p>
+    <h2>Der gemeinsame OS3-SkillNet-Kern lernt mit jedem geprüften Trainingslauf.</h2>
+    <p>Du gibst ein Thema in normaler Sprache ein. Die Engine erzeugt passende Übungsformulierungen, gleicht die Klassen aus, trainiert das gemeinsame SkillNet lokal und prüft jeden Fortschritt an getrennten Testaufgaben. Gute Checkpoints werden gespeichert; bei Überanpassung springt sie zum besten geprüften Stand zurück. Keine externen Trainingsdienste nötig.</p>
   </section>
 
   <section class="card login" id="loginCard" hidden>
     <h3>Bei LiveOS anmelden</h3>
-    <p class="muted">Die Trainingsstände werden deinem LiveOS-Konto zugeordnet. Nutze denselben Zugang wie in deinem LiveOS-Chat.</p>
+    <p class="muted">Ein gemeinsamer Checkpoint wird deinem LiveOS-Konto zugeordnet. Auf allen Geräten mit demselben Konto trainierst und verwendest du denselben Modellstand.</p>
     <form id="loginForm">
       <div class="field"><label for="email">E-Mail</label><input id="email" type="email" autocomplete="username" required></div>
       <div class="field"><label for="password">Passwort</label><input id="password" type="password" autocomplete="current-password" required></div>
@@ -105,7 +105,7 @@ input:focus,select:focus{border-color:#587ba6;box-shadow:0 0 0 3px #315c8e16}
     <div class="grid">
       <section class="card">
         <h3>Trainingsziel</h3>
-        <p class="muted">Schreibe einfach, worin OS2 besser werden soll. Die Engine wählt passende Aufgaben automatisch aus und trainiert daneben weiter die übrigen Grundfähigkeiten.</p>
+        <p class="muted">Schreibe einfach, worin OS3 besser werden soll. Die Engine wählt passende Aufgaben automatisch aus und trainiert daneben weiter die übrigen Grundfähigkeiten.</p>
         <div class="field">
           <label for="focusInput">Worauf soll OS2 trainieren?</label>
           <input id="focusInput" type="text" maxlength="120" value="Allgemeine Fähigkeiten" placeholder="z. B. Python programmieren, logisches Denken, Gespräche auf Deutsch">
@@ -143,12 +143,12 @@ input:focus,select:focus{border-color:#587ba6;box-shadow:0 0 0 3px #315c8e16}
 
       <section class="card">
         <h3>Live-Trainingsstatus</h3>
-        <p class="muted" id="focusStatus">Allgemeine Fähigkeiten · CPU-Lernkern</p>
+        <p class="muted" id="focusStatus">Allgemeine Fähigkeiten · OS3 SkillNet</p>
         <div class="metrics">
           <div class="metric"><span>Trainingsschritte</span><strong id="steps">0</strong><small>Mini-Batches</small></div>
           <div class="metric"><span>Verarbeitete Aufgaben</span><strong id="examples">0</strong><small>automatisch erzeugt</small></div>
-          <div class="metric"><span>Validierungsquote</span><strong id="accuracy">0 %</strong><small>getrennte Testaufgaben</small></div>
-          <div class="metric"><span>Ø Belohnung</span><strong id="reward">0</strong><small>von 100 Punkten</small></div>
+          <div class="metric"><span>Ausgewogene Validierung</span><strong id="accuracy">0 %</strong><small>Durchschnitt über alle Kompetenzklassen</small></div>
+          <div class="metric"><span>Ø Belohnung</span><strong id="reward">0</strong><small>richtige Zuordnungen · max. 100</small></div>
         </div>
         <div class="progress"><span id="progressBar"></span></div>
         <canvas class="chart" id="chart" width="800" height="220" aria-label="Verlauf der Validierungsgenauigkeit"></canvas>
@@ -181,11 +181,12 @@ const client=window.supabase&&window.supabase.createClient
 const $=id=>document.getElementById(id);
 const state={
   user:null,session:null,worker:null,runId:null,running:false,paused:false,
-  modelState:null,metrics:{steps:0,examplesSeen:0,validationAccuracy:0,avgReward:0,bestAccuracy:0},
+  modelState:null,metrics:{steps:0,examplesSeen:0,validationAccuracy:0,balancedAccuracy:0,validationLoss:0,avgReward:0,bestAccuracy:0,recoveryCount:0},
   history:[],chart:[],focus:"Allgemeine Fähigkeiten",duration:3600,
   lastCloudSave:0,lastLocalSave:0,startedAt:0,activeElapsed:0,resumePending:false,
   workerReady:false,curatedExamples:[]
 };
+let trainingRealtimeChannel=null;
 function setStatus(text,live){
   $("statusText").textContent=text;
   $("statusDot").classList.toggle("live",!!live);
@@ -194,8 +195,11 @@ function pretty(n){return new Intl.NumberFormat("de-DE").format(Math.max(0,Numbe
 function percent(n){return (Math.max(0,Math.min(1,Number(n)||0))*100).toFixed(1).replace(".",",")+" %";}
 function loadLocal(){
   try{
-    const raw=localStorage.getItem(Core.STORAGE_KEY);
-    state.modelState=raw?JSON.parse(raw):null;
+    let raw=localStorage.getItem(Core.STORAGE_KEY);
+    if(!raw && Array.isArray(Core.LEGACY_STORAGE_KEYS)){
+      for(const legacyKey of Core.LEGACY_STORAGE_KEYS){raw=localStorage.getItem(legacyKey);if(raw)break;}
+    }
+    state.modelState=raw?Core.serialize(Core.createModel(JSON.parse(raw))):null;
     state.focus=localStorage.getItem("liveos_training_focus_v1")||state.focus;
     state.activeElapsed=Number(localStorage.getItem("liveos_training_elapsed_v1")||0);
     const savedDuration=localStorage.getItem("liveos_training_duration_v1");
@@ -228,11 +232,14 @@ async function loadCloud(){
       .select("model_key,model_state,metrics,focus,updated_at")
       .eq("user_id",state.user.id).maybeSingle();
     if(result.error)throw result.error;
-    if(result.data && result.data.model_key===Core.MODEL_KEY){
-      const cloudDate=Date.parse(result.data.updated_at||"");
-      const localDate=Date.parse((state.modelState&&state.modelState.savedAt)||"");
+    const compatible=result.data && result.data.model_state &&
+      (result.data.model_key===Core.MODEL_KEY || (Core.LEGACY_MODEL_KEYS||[]).includes(result.data.model_key));
+    if(compatible){
+      const migrated=Core.serialize(Core.createModel(result.data.model_state));
+      const cloudDate=Date.parse(result.data.updated_at||"")||0;
+      const localDate=Date.parse((state.modelState&&state.modelState.savedAt)||"")||0;
       if(!state.modelState||cloudDate>localDate){
-        state.modelState=result.data.model_state;
+        state.modelState=migrated;
         state.metrics={...state.metrics,...(result.data.metrics||{})};
         state.focus=result.data.focus||state.focus;
         $("focusInput").value=state.focus;
@@ -259,9 +266,45 @@ async function saveCloud(force){
     setStatus("Lokal gesichert · Cloud-Sync wird erneut versucht",state.running);
   }
 }
+async function connectTrainingRealtime(){
+  if(!state.user||!client||typeof client.channel!=="function")return;
+  try{
+    if(trainingRealtimeChannel){
+      await client.removeChannel(trainingRealtimeChannel);
+      trainingRealtimeChannel=null;
+    }
+    const userId=state.user.id;
+    trainingRealtimeChannel=client.channel("liveos-training-"+userId)
+      .on("postgres_changes",{
+        event:"*",schema:"public",table:"liveos_training_engine_states",
+        filter:"user_id=eq."+userId
+      },payload=>{
+        const row=payload.new||{};
+        const compatible=row.model_key===Core.MODEL_KEY||(Core.LEGACY_MODEL_KEYS||[]).includes(row.model_key);
+        if(!compatible||!row.model_state||state.running)return;
+        const incoming=Core.serialize(Core.createModel(row.model_state));
+        incoming.savedAt=row.updated_at||incoming.savedAt;
+        const localDate=Date.parse((state.modelState&&state.modelState.savedAt)||"")||0;
+        const remoteDate=Date.parse(row.updated_at||"")||0;
+        if(remoteDate>localDate){
+          state.modelState=incoming;
+          state.metrics={...state.metrics,...(row.metrics||{})};
+          state.focus=row.focus||state.focus;
+          saveLocal(incoming);
+          renderMetrics();
+          setStatus("Neuer LiveOS-Trainingsstand von einem anderen Gerät synchronisiert",false);
+        }
+      })
+      .subscribe(status=>{
+        if(status==="SUBSCRIBED")console.info("LiveOS SkillNet Realtime verbunden.");
+      });
+  }catch(error){console.warn("LiveOS Realtime-Sync nicht verfügbar:",error.message);}
+}
+
 async function loadHistory(){
   if(!state.user)return;
   try{
+    await connectTrainingRealtime();
     const result=await client.from("liveos_training_engine_runs")
       .select("id,focus,status,metrics,started_at,finished_at")
       .eq("user_id",state.user.id).order("started_at",{ascending:false}).limit(6);
@@ -287,10 +330,10 @@ function renderMetrics(){
   const m=state.metrics;
   $("steps").textContent=pretty(m.steps);
   $("examples").textContent=pretty(m.examplesSeen);
-  $("accuracy").textContent=percent(m.validationAccuracy);
+  $("accuracy").textContent=percent(Number.isFinite(m.balancedAccuracy)?m.balancedAccuracy:m.validationAccuracy);
   $("reward").textContent=pretty(m.avgReward);
   $("bestAccuracy").textContent=percent(m.bestAccuracy);
-  $("focusStatus").textContent=(state.focus||"Allgemeine Fähigkeiten")+" · neuronales SkillNet auf diesem Gerät";
+  $("focusStatus").textContent=(state.focus||"Allgemeine Fähigkeiten")+" · gemeinsames OS3 SkillNet · lokales Training, Cloud-Sync";
   const elapsed=state.activeElapsed+(state.running&&state.startedAt?Date.now()-state.startedAt:0);
   const progress=state.duration>0
     ?Math.min(100,(elapsed/Math.max(1,state.duration*1000))*100)
@@ -328,9 +371,9 @@ function updateFocusHint(){
     safety:"Sicherheit und Zuverlässigkeit"
   };
   if(result.custom){
-    hint.textContent="Dieses Thema ist noch keinem eigenen Kompetenzbereich zugeordnet. OS2 trainiert deshalb die allgemeinen Grundfähigkeiten.";
+    hint.textContent="Dieses Thema ist noch keinem eigenen Kompetenzbereich zugeordnet. OS3 trainiert deshalb den allgemeinen Fähigkeitsmix weiter.";
   }else{
-    hint.textContent="Erkanntes Trainingsfeld: "+(names[result.key]||"Allgemeine Fähigkeiten")+". Andere Grundfähigkeiten werden ebenfalls weitertrainiert.";
+    hint.textContent="Erkanntes Trainingsfeld: "+(names[result.key]||"Allgemeine Fähigkeiten")+". Andere Grundfähigkeiten werden ebenfalls weitertrainiert, damit das Modell nicht nur ein einziges Thema lernt.";
   }
 }
 function updateButtons(){
@@ -363,13 +406,13 @@ async function updateRunRecord(status){
 }
 function ensureWorker(){
   if(state.worker)return;
-  state.worker=new Worker("./engine.worker.js?v=3");
+  state.worker=new Worker("./engine.worker.js?v=4");
   state.worker.onmessage=async function(event){
     const m=event.data||{};
     if(m.type==="ready"){
       state.workerReady=true;
-      $("focusStatus").textContent="Aufgabensatz: "+pretty(m.trainCount)+" Training · "+pretty(m.validationCount)+" Validierung";
-      state.metrics.steps=m.steps||0;state.metrics.examplesSeen=m.examplesSeen||0;
+      $("focusStatus").textContent="OS3-Aufgabensatz: "+pretty(m.trainCount)+" Training · "+pretty(m.validationCount)+" Validierung";
+      state.metrics.steps=m.steps||0;state.metrics.examplesSeen=m.examplesSeen||0;state.metrics={...state.metrics,...(m.metrics||{})};
       state.modelState=m.checkpoint||state.modelState;
       if(m.checkpoint)saveLocal(m.checkpoint);
       setStatus("Bereit · eigener Trainingskern geladen",false);
@@ -400,6 +443,7 @@ function ensureWorker(){
       else await saveCloud(false);
       if(state.runId&&state.running)await updateRunRecord("running");
     }
+    if(m.type==="recovery"){setStatus(m.message+" · Lernrate wird angepasst.",false);}
     if(m.type==="error"){setStatus(m.message,false);state.running=false;updateButtons();}
   };
   state.worker.onerror=function(e){
@@ -502,6 +546,7 @@ async function bootAuthenticated(){
   $("accountPill").textContent=state.user.email||"Angemeldet";
   loadLocal();
   await loadCloud();
+  await connectTrainingRealtime();
   $("focusInput").value=state.focus;
   $("duration").value=String(state.duration);
   renderMetrics();updateButtons();
@@ -533,6 +578,7 @@ async function finishTraining(){
   await loadHistory();
 }
 async function bootLocalGuest(){
+  if(trainingRealtimeChannel){try{await client.removeChannel(trainingRealtimeChannel);}catch(_){}trainingRealtimeChannel=null;}
   state.user=null;state.session=null;state.runId=null;
   $("loginCard").hidden=true;$("engineApp").hidden=false;
   $("accountPill").textContent="Nur dieses Gerät · Gastmodus";
