@@ -1,4 +1,4 @@
-importScripts("./skillnet-core.js?v=2");
+importScripts("./skillnet-core.js?v=3");
 "use strict";
 const Core=self.LiveOSSkillNet;
 let model=null,dataset=null,focusLabels=null,random=null;
@@ -51,7 +51,7 @@ function loop(){
   while(running&&batches<3&&performance.now()-start<45){
     const batch=[];
     for(let i=0;i<24;i++)batch.push(pickTrainingItem());
-    const learningRate=Math.max(0.006,0.035/(1+model.steps/3500));
+    const learningRate=Math.max(0.025,0.07/(1+model.steps/5000));
     const result=Core.trainBatch(model,batch,learningRate);
     lastLoss=result.loss;
     lastAccuracy=result.accuracy;
