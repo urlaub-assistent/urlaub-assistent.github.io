@@ -38,6 +38,7 @@ function sendCheckpoint(force){
         time:Date.now()
       },
       checkpoint:Core.serialize(model),
+      finalCheckpoint:!!force,
       sample:dataset.validation[Math.floor(random()*dataset.validation.length)]?.text||""
     });
     lastMetricsAt=now;
