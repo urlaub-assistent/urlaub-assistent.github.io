@@ -305,7 +305,7 @@
         "Teile "+subject+" in überprüfbare Teilschritte",
         "Vergleiche zwei Lösungswege für "+subject,
         "Finde mögliche Widersprüche bei "+subject,
-        "Prüfe, welche Annahmen für "+subject fehlen"
+        "Prüfe, welche Annahmen für "+subject+" fehlen"
       ]);
     }else if(/gespraech|kommunikation|deutsch|schreiben|sprache|empath/.test(t)){
       add("conversation",[
