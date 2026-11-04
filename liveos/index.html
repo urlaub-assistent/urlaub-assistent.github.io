@@ -1743,6 +1743,28 @@
           }
           if (!exampleResult.error && Array.isArray(exampleResult.data) && exampleResult.data.length) learnedExamples = exampleResult.data;
           if (!knowledgeResult.error && Array.isArray(knowledgeResult.data)) os2Knowledge = knowledgeResult.data;
+
+          // Sync the user's trained OS2 SkillNet checkpoint from Supabase to this device.
+          if (currentUser && window.LiveOSSkillNet) {
+            const trainedResult = await client.from("liveos_training_engine_states")
+              .select("model_state,updated_at")
+              .eq("user_id", currentUser.id)
+              .maybeSingle();
+            if (!trainedResult.error && trainedResult.data && trainedResult.data.model_state) {
+              let localModel = null;
+              try {
+                localModel = JSON.parse(localStorage.getItem(window.LiveOSSkillNet.STORAGE_KEY) || "null");
+              } catch (_) {}
+              const localTime = Date.parse((localModel && localModel.savedAt) || "") || 0;
+              const cloudTime = Date.parse(trainedResult.data.updated_at || "") || 0;
+              if (!localModel || cloudTime >= localTime) {
+                localStorage.setItem(
+                  window.LiveOSSkillNet.STORAGE_KEY,
+                  JSON.stringify(trainedResult.data.model_state)
+                );
+              }
+            }
+          }
         } catch (error) {
           console.warn("OS2 catalogue could not be loaded; local fallback remains active.", error);
         }
