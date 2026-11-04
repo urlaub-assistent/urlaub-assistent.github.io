@@ -176,7 +176,8 @@ const state={
   user:null,session:null,worker:null,runId:null,running:false,paused:false,
   modelState:null,metrics:{steps:0,examplesSeen:0,validationAccuracy:0,avgReward:0,bestAccuracy:0},
   history:[],chart:[],focus:"Allgemeine Fähigkeiten",duration:3600,
-  lastCloudSave:0,lastLocalSave:0,startedAt:0,workerReady:false,curatedExamples:[]
+  lastCloudSave:0,lastLocalSave:0,startedAt:0,activeElapsed:0,resumePending:false,
+  workerReady:false,curatedExamples:[]
 };
 function setStatus(text,live){
   $("statusText").textContent=text;
@@ -189,6 +190,9 @@ function loadLocal(){
     const raw=localStorage.getItem(Core.STORAGE_KEY);
     state.modelState=raw?JSON.parse(raw):null;
     state.focus=localStorage.getItem("liveos_training_focus_v1")||state.focus;
+    state.activeElapsed=Number(localStorage.getItem("liveos_training_elapsed_v1")||0);
+    state.duration=Number(localStorage.getItem("liveos_training_duration_v1")||state.duration);
+    state.resumePending=localStorage.getItem("liveos_training_resume_v1")==="true";
     const metrics=JSON.parse(localStorage.getItem("liveos_training_metrics_v1")||"{}");
     state.metrics={...state.metrics,...metrics};
     state.chart=JSON.parse(localStorage.getItem("liveos_training_chart_v1")||"[]");
@@ -203,6 +207,9 @@ function saveLocal(checkpoint){
     }
     localStorage.setItem("liveos_training_metrics_v1",JSON.stringify(state.metrics));
     localStorage.setItem("liveos_training_chart_v1",JSON.stringify(state.chart.slice(-80)));
+    localStorage.setItem("liveos_training_elapsed_v1",String(state.activeElapsed||0));
+    localStorage.setItem("liveos_training_duration_v1",String(state.duration||0));
+    localStorage.setItem("liveos_training_resume_v1",state.resumePending?"true":"false");
     state.lastLocalSave=Date.now();
   }catch(e){setStatus("Speicher voll – bitte freien Gerätespeicher prüfen.",false);}
 }
@@ -276,8 +283,9 @@ function renderMetrics(){
   $("reward").textContent=pretty(m.avgReward);
   $("bestAccuracy").textContent=percent(m.bestAccuracy);
   $("focusStatus").textContent=(state.focus||"Allgemeine Fähigkeiten")+" · neuronales SkillNet auf diesem Gerät";
-  const progress=state.running&&state.duration>0
-    ?Math.min(100,((Date.now()-state.startedAt)/Math.max(1,state.duration*1000))*100)
+  const elapsed=state.activeElapsed+(state.running&&state.startedAt?Date.now()-state.startedAt:0);
+  const progress=state.duration>0
+    ?Math.min(100,(elapsed/Math.max(1,state.duration*1000))*100)
     :Math.min(100,Number(m.validationAccuracy||0)*100);
   $("progressBar").style.width=progress+"%";
   drawChart();
@@ -403,8 +411,11 @@ async function startTraining(){
     await prepareEngine();
     try{state.runId=await startRunRecord();}
     catch(cloudError){state.runId=null;console.warn("Run wird zunächst lokal geführt:",cloudError.message);}
+    if(!state.resumePending)state.activeElapsed=0;
+    state.resumePending=false;
     state.startedAt=Date.now();
     state.running=true;state.paused=false;
+    saveLocal();
     requestWakeLock();
     state.worker.postMessage({type:"start"});
     updateButtons();
@@ -419,19 +430,25 @@ async function startTraining(){
 async function pauseTraining(){
   if(!state.worker)return;
   if(state.paused){
+    state.startedAt=Date.now();
+    state.resumePending=false;
     state.worker.postMessage({type:"start"});
-    state.running=true;state.paused=false;requestWakeLock();
+    state.running=true;state.paused=false;requestWakeLock();saveLocal();
     updateButtons();setStatus("Training läuft weiter",true);
     return;
   }
   state.worker.postMessage({type:"pause"});
-  state.running=false;state.paused=true;
+  state.activeElapsed+=state.startedAt?Date.now()-state.startedAt:0;
+  state.startedAt=0;
+  state.running=false;state.paused=true;state.resumePending=true;
   saveLocal();await saveCloud(true);await updateRunRecord("paused");
   updateButtons();
 }
 async function stopTraining(){
   if(!state.worker)return;
   state.worker.postMessage({type:"stop"});
+  state.activeElapsed+=state.startedAt?Date.now()-state.startedAt:0;
+  state.startedAt=0;state.resumePending=false;
   state.running=false;state.paused=false;
   saveLocal();await saveCloud(true);await updateRunRecord("stopped");
   state.runId=null;
@@ -458,12 +475,17 @@ async function bootAuthenticated(){
   await loadHistory();
   $("deviceInfo").textContent="Gerät: "+(navigator.userAgent.includes("iPad")?"iPad":navigator.userAgent.includes("iPhone")?"iPhone":navigator.userAgent.includes("Mac")?"Mac":"Browser")+" · "+(navigator.hardwareConcurrency||"—")+" CPU-Kerne · Training läuft in einem separaten JavaScript-Worker.";
   const existing=JSON.parse(localStorage.getItem("liveos_training_autoresume_v1")||"false");
-  if(existing)setStatus("Checkpoint gefunden · Drücke Start, um fortzusetzen",false);
+  if(state.resumePending){
+    $("duration").value=String(state.duration);
+    setStatus("Checkpoint gefunden · Drücke Start, um fortzusetzen",false);
+  }
   else setStatus("Bereit · Drücke Start, um den ersten Trainingslauf zu beginnen",false);
 }
 async function finishTraining(){
   if(!state.worker)return;
   state.worker.postMessage({type:"stop"});
+  state.activeElapsed+=state.startedAt?Date.now()-state.startedAt:0;
+  state.startedAt=0;state.resumePending=false;
   state.running=false;state.paused=false;
   saveLocal();
   await saveCloud(true);
@@ -495,7 +517,8 @@ async function init(){
 document.addEventListener("visibilitychange",function(){
   if(document.visibilityState==="hidden"&&state.running){
     state.worker.postMessage({type:"pause"});
-    state.running=false;state.paused=true;
+    state.activeElapsed+=state.startedAt?Date.now()-state.startedAt:0;
+    state.startedAt=0;state.running=false;state.paused=true;state.resumePending=true;
     saveLocal();saveCloud(true);updateRunRecord("paused");
     setStatus("Automatisch pausiert · Browser im Hintergrund",false);
     updateButtons();
@@ -504,7 +527,7 @@ document.addEventListener("visibilitychange",function(){
 window.addEventListener("beforeunload",function(){saveLocal();});
 setInterval(function(){
   if(state.modelState&&state.user&&Date.now()-state.lastCloudSave>120000)saveCloud(false);
-  if(state.running&&state.duration>0&&state.startedAt&&Date.now()-state.startedAt>=state.duration*1000)finishTraining();
+  if(state.running&&state.duration>0&&state.activeElapsed+(state.startedAt?Date.now()-state.startedAt:0)>=state.duration*1000)finishTraining();
   if(state.running)renderMetrics();
 },5000);
 init();
