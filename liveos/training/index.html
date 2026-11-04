@@ -191,7 +191,8 @@ function loadLocal(){
     state.modelState=raw?JSON.parse(raw):null;
     state.focus=localStorage.getItem("liveos_training_focus_v1")||state.focus;
     state.activeElapsed=Number(localStorage.getItem("liveos_training_elapsed_v1")||0);
-    state.duration=Number(localStorage.getItem("liveos_training_duration_v1")||state.duration);
+    const savedDuration=localStorage.getItem("liveos_training_duration_v1");
+    if(savedDuration!==null)state.duration=Number(savedDuration);
     state.resumePending=localStorage.getItem("liveos_training_resume_v1")==="true";
     const metrics=JSON.parse(localStorage.getItem("liveos_training_metrics_v1")||"{}");
     state.metrics={...state.metrics,...metrics};
@@ -342,6 +343,8 @@ function ensureWorker(){
       state.workerReady=true;
       $("focusStatus").textContent="Aufgabensatz: "+pretty(m.trainCount)+" Training · "+pretty(m.validationCount)+" Validierung";
       state.metrics.steps=m.steps||0;state.metrics.examplesSeen=m.examplesSeen||0;
+      state.modelState=m.checkpoint||state.modelState;
+      if(m.checkpoint)saveLocal(m.checkpoint);
       setStatus("Bereit · eigener Trainingskern geladen",false);
       updateButtons();
     }
